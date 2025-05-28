@@ -1,0 +1,19 @@
+application:
+  actions: src/actions
+  runtimeManifest:
+    packages:
+      agency_to_brand:
+        license: Apache-2.0
+        actions:
+          asset-event-handler:
+            function: src/actions/asset-event-handler/index.js
+            web: "yes"
+            runtime: nodejs:20
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: false
+              final: true
+extensions:
+  dx/excshell/1:
+    $include: src/dx-excshell-1/ext.config.yaml
