@@ -2,13 +2,13 @@ application:
   actions: src/actions
   runtimeManifest:
     packages:
-      agency_to_brand:
+      test-debugger:
         license: Apache-2.0
         actions:
           asset-event-handler:
-            function: src/actions/asset-event-handler/index.js
-            web: "yes"
-            runtime: nodejs:20
+            function: src/actions/asset-event-handler/index.ts
+            web: 'yes'
+            runtime: nodejs:18
             inputs:
               LOG_LEVEL: debug
             annotations:
