@@ -1,4 +1,4 @@
-# a2b Agency Application 
+# a2b Brand Application 
 
 Welcome to my Adobe I/O Application!
 
@@ -39,13 +39,10 @@ You can generate this file using the command `aio app use`.
 ```
 
 ### `app.config.yaml`
-benge app project in TMD dev org: a2b-27200-benge 
-title: agency to brand
+benge app project in TMD dev org: 27200-brand2agency-stage
+title: brand to agency
 
 endpoints 
-https://27200-a2b-benge.adobeioruntime.net/api/v1/web/test-debugger/asset-event-handler
-https://27200-a2b-benge.adobeioruntime.net/api/v1/web/a2b-agency/new-brand-registration
-https://27200-a2b-benge.adobeioruntime.net/api/v1/web/a2b-agency/get-brands
 
 ## Exc Shell project structure 
 src/
