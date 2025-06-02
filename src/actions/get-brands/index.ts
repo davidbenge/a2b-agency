@@ -27,7 +27,8 @@ export async function main(params: any): Promise<any> {
     return {
       statusCode: 200,
       body: {
-        brands: brands
+        "message": `${brands.length} brands fetched successfully`,
+        "data": brands
       }
     }
   } catch (error) {

@@ -47,3 +47,29 @@ https://27200-a2b-benge.adobeioruntime.net/api/v1/web/test-debugger/asset-event-
 https://27200-a2b-benge.adobeioruntime.net/api/v1/web/a2b-agency/new-brand-registration
 https://27200-a2b-benge.adobeioruntime.net/api/v1/web/a2b-agency/get-brands
 
+## Exc Shell project structure 
+src/
+├── assets/
+│   ├── images/         # Static images and icons
+│   └── styles/         # Global styles, CSS modules
+│       └── index.css
+├── components/
+│   ├── common/         # Reusable components (buttons, inputs, etc.)
+│   └── layout/         # Layout components (header, footer, sidebar)
+├── contexts/           # React Context providers
+├── hooks/              # Custom React hooks
+├── services/           # API calls and external services
+├── types/
+│   ├── interfaces/     # TypeScript interfaces
+│   │   └── ViewPropsBase.ts
+│   └── enums/         # TypeScript enums
+├── utils/
+│   ├── constants/     # Constants and configuration
+│   │   └── config.json
+│   └── helpers/       # Helper functions
+│       └── utils.js
+├── index.js           # Main application entry
+└── exc-runtime.js     # Runtime configuration
+
+## Unified Shell API
+https://github.com/AdobeDocs/exc-app
