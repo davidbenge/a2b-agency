@@ -20,6 +20,9 @@ application:
             runtime: nodejs:20
             inputs:
               LOG_LEVEL: debug
+              ORG_ID: $ORG_ID
+              SERVICE_API_KEY: $SERVICE_API_KEY
+              AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID: $AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID
             annotations:
               require-adobe-auth: false
               final: true

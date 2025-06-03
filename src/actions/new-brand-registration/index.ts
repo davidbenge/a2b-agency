@@ -38,6 +38,24 @@ export async function main(params: any): Promise<any> {
     const brandManager = new BrandManager(params.LOG_LEVEL);
     const savedBrand = await brandManager.saveBrand(brand);
 
+    // We dont want to block the brand registration if the event fails to send.
+    try {
+      const { CloudEvent } = require('cloudevents')
+      // Create cloud event for the given payload
+      const eventCode = 'com.adobe.a2b.registration.received';
+      const cloudEvent = new CloudEvent(params.AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID, eventCode, savedBrand.toJSON());
+      
+      const eventSdk = require('@adobe/aio-lib-events');
+      const eventClient = await eventSdk.init(params.ORG_ID, params.SERVICE_API_KEY)
+      //const eventClient = await eventSdk.init(params.ORG_ID, params.SERVICE_API_KEY, '<valid auth token>', '<options>')
+      // not sure why it wants a valid auth token, but it does. We may have to build one and cache it in the state store.
+      // We should be able to build one off the service account if needed 
+      const eventSendResult = await eventClient.publishEvent(cloudEvent)
+      logger.debug('Event sent', eventSendResult);
+    } catch (error) {
+      logger.error('Error sending event', error);
+    }
+
     return {
       statusCode: 200,
       body: {

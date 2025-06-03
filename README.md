@@ -70,3 +70,22 @@ src/
 
 ## Unified Shell API
 https://github.com/AdobeDocs/exc-app
+
+## Register events
+`aio event provider create`
+"label": "Brand Registration"
+
+Events to create
+`aio event eventmetadata create <id>`
+"label": "Brand Registration Received"
+"code" : "com.adobe.a2b.registration.received"
+"description": "this contains an echo of event that was recieved from remote brand"
+
+"label": "Brand Registration Enabled"
+"code" : "com.adobe.a2b.registration.enabled"
+"description" : "when an admin approves a brand registration this event is thrown"
+
+"label": "Brand Registration Disabled"
+"code" : "com.adobe.a2b.registration.disabled"
+"description" : "when an admin disableds a brand registration this event is thrown"
+
