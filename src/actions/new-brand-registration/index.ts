@@ -5,11 +5,14 @@
  */
 import { errorResponse, checkMissingRequestInputs } from "../utils/common";
 import * as aioLogger from "@adobe/aio-lib-core-logging";
-import { Brand } from "../Brand";
+import { Brand } from "../classes/Brand";
 import { BRAND_STATE_PREFIX } from "../constants";
-import { BrandManager } from "../BrandManager";
+import { BrandManager } from "../classes/BrandManager";
 import * as randomstring from 'randomstring';
 import { v4 as uuidv4 } from 'uuid';
+import { getServer2ServerToken } from "../utils/adobeAuthUtils";
+import { IoCustomEventManager } from "../classes/IoCustomEventManager";
+import { NewBrandRegistrationEvent } from "../classes/io_events/NewBrandRegistrationEvent";
 
 export async function main(params: any): Promise<any> {
   const logger = aioLogger("new-brand-registration", { level: params.LOG_LEVEL || "info" });
@@ -39,23 +42,42 @@ export async function main(params: any): Promise<any> {
     const savedBrand = await brandManager.saveBrand(brand);
 
     // We dont want to block the brand registration if the event fails to send.
+    //TODO: We should make a manager or util to make this all much simpler
     try {
-      const { CloudEvent } = require('cloudevents')
+      logger.debug('new-brand-registration starting cloud event construction');
+      const ioCustomEventManager = new IoCustomEventManager(params.LOG_LEVEL, params);
+      await ioCustomEventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand));
+      //const { CloudEvent } = require('cloudevents')
+      //const eventSdk = require('@adobe/aio-lib-events');
       // Create cloud event for the given payload
-      const eventCode = 'com.adobe.a2b.registration.received';
-      const cloudEvent = new CloudEvent(params.AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID, eventCode, savedBrand.toJSON());
+      //const eventCode = 'com.adobe.a2b.registration.received';
+      //const eventData = { 
+      //  source: `urn:uuid:${params.AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID}`, 
+      //  type: eventCode, 
+      //  datacontenttype: "application/json",
+      //  data: savedBrand.toJSON(),
+      //  id:  uuidv4()
+      //};
+      //const cloudEvent = new CloudEvent(eventData);
+      //logger.debug('new-brand-registration cloudEvent',cloudEvent);
+
+      //let scopesCleaned = JSON.parse(params.S2S_SCOPES);
+      //scopesCleaned = scopesCleaned.join(',');
+      //const token = await getServer2ServerToken(params.SERVICE_API_KEY, params.S2S_CLIENT_SECRET, params.ORG_ID,scopesCleaned,logger);
       
-      const eventSdk = require('@adobe/aio-lib-events');
-      const eventClient = await eventSdk.init(params.ORG_ID, params.SERVICE_API_KEY)
-      //const eventClient = await eventSdk.init(params.ORG_ID, params.SERVICE_API_KEY, '<valid auth token>', '<options>')
-      // not sure why it wants a valid auth token, but it does. We may have to build one and cache it in the state store.
-      // We should be able to build one off the service account if needed 
-      const eventSendResult = await eventClient.publishEvent(cloudEvent)
-      logger.debug('Event sent', eventSendResult);
+      //const eventClient = await eventSdk.init(params.ORG_ID, params.SERVICE_API_KEY,token);
+      //logger.debug('eventClient', eventClient);
+
+      //const eventSendResult = await eventClient.publishEvent(cloudEvent);
+      //if(eventSendResult === 'OK'){  
+      //  logger.debug('Event sent', eventSendResult);
+      //}else{
+      //  logger.error('Error sending event', eventSendResult);
+      //}
     } catch (error) {
       logger.error('Error sending event', error);
     }
-
+    
     return {
       statusCode: 200,
       body: {

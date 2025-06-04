@@ -6,7 +6,7 @@
  * 
  */
 
-import { AssetSynchEventHandler } from '../event_handlers/AemAssetSynchHandler';
+import { AssetSynchEventHandler } from '../classes/event_handlers/AemAssetSynchHandler';
 
 export async function main(params: any): Promise<any> {
   let config = {

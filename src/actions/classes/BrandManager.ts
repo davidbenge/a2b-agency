@@ -1,6 +1,6 @@
 import * as aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "./Brand";
-import { BRAND_STATE_PREFIX, BRAND_FILE_STORE_DIR } from "./constants";
+import { BRAND_STATE_PREFIX, BRAND_FILE_STORE_DIR } from "../constants";
 
 export class BrandManager {
     private logger: any;

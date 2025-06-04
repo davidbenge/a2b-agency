@@ -10,7 +10,7 @@
  */
 
 import * as stateLib from "@adobe/aio-lib-state";
-import { IoEventHandler } from '../utils/IoEventHandler';
+import { IoEventHandler } from '../IoEventHandler';
 
 export class AssetSynchEventHandler extends IoEventHandler {
   /*******

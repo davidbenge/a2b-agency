@@ -1,4 +1,4 @@
-import { Brand } from '../../../../actions/Brand';
+import { Brand } from '../../../../actions/classes/Brand';
 
 /**
  * API configuration and endpoints

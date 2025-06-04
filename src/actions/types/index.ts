@@ -1,3 +1,5 @@
+import { CloudEvent } from "cloudevents";
+
 export interface IIoEventHandler {
     logger: any;
     handleEvent(event: any): Promise<any>;
@@ -12,4 +14,15 @@ export interface IBrand {
     createdAt: Date;
     updatedAt: Date;
     enabledAt: Date;
+}
+
+export interface IIoEvent {
+    source: string;
+    type: string;
+    datacontenttype: string;
+    data: any;
+    id: string;
+    validate(): boolean;
+    toJSON(): any;
+    toCloudEvent(): CloudEvent;
 }

@@ -4,8 +4,8 @@
  */
 import { errorResponse, checkMissingRequestInputs } from "../utils/common";
 import * as aioLogger from "@adobe/aio-lib-core-logging";
-import { Brand } from "../Brand";
-import { BrandManager } from "../BrandManager";
+import { Brand } from "../classes/Brand";
+import { BrandManager } from "../classes/BrandManager";
 
 export async function main(params: any): Promise<any> {
   const logger = aioLogger("get-brands", { level: params.LOG_LEVEL || "info" });

@@ -1,5 +1,5 @@
 import { IIoEventHandler } from '../types';
-import { errorResponse, checkMissingRequestInputs } from "./common";
+import { errorResponse, checkMissingRequestInputs } from "../utils/common";
 import * as aioLogger from "@adobe/aio-lib-core-logging";
 
 export class IoEventHandler implements IIoEventHandler {

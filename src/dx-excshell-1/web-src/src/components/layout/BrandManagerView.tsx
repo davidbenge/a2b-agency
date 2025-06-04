@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { apiService } from '../../services/api';
 import { ViewPropsBase } from '../../types/ViewPropsBase';
-import { Brand } from '../../../../../actions/Brand';
+import { Brand } from '../../../../../actions/classes/Brand';
 import { TableView, TableHeader, TableBody, Column, Row, Cell, View, Text, Heading, Button, Flex } from '@adobe/react-spectrum';
 
 const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps }) => {

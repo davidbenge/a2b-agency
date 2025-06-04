@@ -23,6 +23,8 @@ application:
               ORG_ID: $ORG_ID
               SERVICE_API_KEY: $SERVICE_API_KEY
               AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID: $AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID
+              S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
+              S2S_SCOPES: $S2S_SCOPES
             annotations:
               require-adobe-auth: false
               final: true
