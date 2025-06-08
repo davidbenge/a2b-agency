@@ -10,6 +10,7 @@ export abstract class IoEvent implements IIoEvent {
 
     constructor() {
         // Abstract class constructor
+        this.datacontenttype = 'application/json';
     }
 
     validate(): boolean {
@@ -27,7 +28,7 @@ export abstract class IoEvent implements IIoEvent {
             source: this.source,
             type: this.type,
             datacontenttype: this.datacontenttype,
-            data: this.data,
+            data: this.data.toJSON(),
             id: this.id
         };
     }

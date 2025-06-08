@@ -76,11 +76,10 @@ export class IoCustomEventManager {
         // initialize the event client
         //This class provides methods to call your Adobe I/O Events APIs. Before calling any method initialize the instance by calling the init method on it with valid values for organizationId, apiKey, accessToken and optional http options such as timeout and max number of retries
         const eventClient = await eventSdk.init(this.orgId, this.serviceApiKey, token);
-        const providerMetadata = await eventClient.getProviderMetadata();
-        this.logger.debug('IoCustomEventManager:publishEventToAdobeEventHub providerMetadata', providerMetadata);
         this.logger.debug('IoCustomEventManager:publishEventToAdobeEventHub eventClient', eventClient);
 
         const cloudEventToSend = event.toCloudEvent();
+        this.logger.debug('IoCustomEventManager:publishEventToAdobeEventHub cloudEvent to publish toJSON',event.toJSON());
         this.logger.debug('IoCustomEventManager:publishEventToAdobeEventHub cloudEvent to publish',cloudEventToSend);
         const eventSendResult = await eventClient.publishEvent(cloudEventToSend);
 
