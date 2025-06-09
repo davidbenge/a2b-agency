@@ -10,7 +10,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
 
     useEffect(() => {
         const apiBaseUrl = `https://${viewProps.aioRuntimeNamespace}.adobeioruntime.net/api/v1/web/${viewProps.aioAppName}`;
-        apiService.initialize(apiBaseUrl, viewProps.imsToken);
+        apiService.initialize(apiBaseUrl, viewProps.imsToken, viewProps.imsOrg);
         
         const fetchBrands = async () => {
             try {

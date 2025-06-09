@@ -20,9 +20,16 @@ export class AssetSynchEventHandler extends IoEventHandler {
    * @returns Promise<any>
    *******/
   async handleEvent(event: any): Promise<any> {
-    this.logger.info("Asset Synch Event Handler called");
+    this.logger.info("Asset Synch Event Handler called",event);
 
     // todo:// look to see if we need to handle the event 
+    if(event.type === 'aem.assets.asset.deleted'){
+      this.logger.info("Asset deleted event",event);
+    }else if(event.type === 'aem.assets.asset.metadata_updated'){
+      this.logger.info("Asset metadata updated event",event);
+    }else{
+      this.logger.info("Asset event not handled",event);
+    }
 
     return {
       statusCode: 200,

@@ -28,6 +28,7 @@ export class ApiService {
     private static instance: ApiService;
     private baseUrl: string;
     private imsToken: string | null = null;
+    private imsOrgId: string | null = null;
 
     private constructor() {
         this.baseUrl = '';
@@ -45,9 +46,10 @@ export class ApiService {
      * @param baseUrl - The base URL from ViewPropsBase
      * @param imsToken - The IMS token from ViewPropsBase
      */
-    public initialize(baseUrl: string, imsToken: string): void {
+    public initialize(baseUrl: string, imsToken: string, imsOrgId: string): void {
         this.baseUrl = baseUrl;
         this.imsToken = imsToken;
+        this.imsOrgId = imsOrgId;
     }
 
     /**
@@ -56,6 +58,7 @@ export class ApiService {
     public clear(): void {
         this.imsToken = null;
         this.baseUrl = '';
+        this.imsOrgId = null;
     }
 
     /**
@@ -91,6 +94,7 @@ export class ApiService {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-gw-ims-org-id': `${this.imsOrgId}`,
                     'Authorization': `Bearer ${this.imsToken}`
                 },
                 body: body ? JSON.stringify(body) : undefined

@@ -5,14 +5,14 @@ application:
       a2b-agency:
         license: Apache-2.0
         actions:
-          asset-event-handler:
-            function: src/actions/asset-event-handler/index.ts
+          assetsynch-event-handler:
+            function: src/actions/assetsynch-event-handler/index.ts
             web: 'yes'
             runtime: nodejs:20
             inputs:
               LOG_LEVEL: debug
             annotations:
-              require-adobe-auth: false
+              require-adobe-auth: true
               final: true
           new-brand-registration:
             function: src/actions/new-brand-registration/index.ts

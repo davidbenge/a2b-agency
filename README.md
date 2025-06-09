@@ -75,7 +75,7 @@ https://github.com/AdobeDocs/exc-app
 `aio event provider create`
 "label": "Brand Registration"
 
-Events to create
+### Events to create
 `aio event eventmetadata create <id>`
 "label": "Brand Registration Received"
 "code" : "com.adobe.a2b.registration.received"
@@ -88,4 +88,40 @@ Events to create
 "label": "Brand Registration Disabled"
 "code" : "com.adobe.a2b.registration.disabled"
 "description" : "when an admin disableds a brand registration this event is thrown"
+
+Update your .env with the provider id returned by `aio event provider create`
+`AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=fefcd900-fake-fake-fake-1b9ff1c5d0ac`
+
+## Asset Synch Events
+`aio event provider create`
+"label": "A2B Asset Synch"
+
+### Events to create
+`aio event eventmetadata create <provider id>`
+"label": "New Asset Published"
+"code" : "com.adobe.a2b.assetsynch.new"
+"description": "Asset that has never been synched before is coming over for the first time"
+todo: event body
+
+`aio event eventmetadata create <provider id>`
+"label": "Asset Updated"
+"code" : "com.adobe.a2b.assetsynch.update"
+"description": "Asset that has been synched before has changed"
+todo: event body
+
+`aio event eventmetadata create <provider id>`
+"label": "Asset "
+"code" : "com.adobe.a2b.assetsynch.delete"
+"description": "Asset that has been synched before has been deleted"
+todo: event body
+
+These events will be published to the BRAND and also echo'ed localy for secondary in house systems use
+
+### Asset Synch Setup
+Using the AEM Assets Author API subscribe `https://your_adobe_developer_project.adobeioruntime.net/api/v1/web/a2b-agency/assetsynch-event-handler` to the following events. This is done in the Adobe Developer Console. [See setup documentation](https://experienceleague.adobe.com/en/docs/experience-manager-learn/cloud-service/aem-apis/openapis/setup)
+Asset deleted event - aem.assets.asset.deleted
+Asset metadata updated event - aem.assets.asset.metadata_updated
+
+
+
 
