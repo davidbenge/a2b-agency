@@ -16,22 +16,23 @@ export class IoCustomEventManager {
     /*******
      * constructor - constructor for the IoCustomEventManager
      * 
+     * @param providerId: string
      * @param logLevel: string
      * @param params: any from action
      *******/
-    constructor(logLevel: string, params: any) {
+    constructor(providerId: string,logLevel: string, params: any) {
         this.logger = aioLogger("IoCustomEventManager", { level: logLevel || "info" });
         this.logger.debug('IoCustomEventManager constructor');
 
         //check that the params object has the data we need
-        if(params.AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID && params.SERVICE_API_KEY && params.S2S_CLIENT_SECRET && params.S2S_SCOPES && params.ORG_ID){
+        if(params.S2S_API_KEY && params.S2S_CLIENT_SECRET && params.S2S_SCOPES && params.ORG_ID){
             this.logger.debug('IoCustomEventManager constructor params', params);
         }else{
             this.logger.error('IoCustomEventManager constructor params missing', params);
-            throw new Error('IoCustomEventManager constructor params missing. We need AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID, SERVICE_API_KEY, S2S_CLIENT_SECRET, S2S_SCOPES, and ORG_ID');
+            throw new Error('IoCustomEventManager constructor params missing. We need S2S_API_KEY, S2S_CLIENT_SECRET, S2S_SCOPES, and ORG_ID');
         }
-        this.providerId = params.AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID;
-        this.serviceApiKey = params.SERVICE_API_KEY;
+        this.providerId = providerId;
+        this.serviceApiKey = params.S2S_API_KEY;
         this.s2sClientSecret = params.S2S_CLIENT_SECRET;
         let scopesCleaned = JSON.parse(params.S2S_SCOPES);
         this.s2sScopes = scopesCleaned.join(',');

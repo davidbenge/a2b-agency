@@ -11,6 +11,15 @@ application:
             runtime: nodejs:20
             inputs:
               LOG_LEVEL: debug
+              ORG_ID: $ORG_ID
+              API_KEY: $SERVICE_API_KEY
+              AIO_AGENCY_EVENTS_AEM_ASSET_SYNCH_PROVIDER_ID: $AIO_AGENCY_EVENTS_AEM_ASSET_SYNCH_PROVIDER_ID
+              AUTH_CLIENT_SECRET: $S2S_CLIENT_SECRET
+              AUTH_SCOPES: $S2S_SCOPES
+              AEM_AUTH_TYPE: server2server
+              S2S_API_KEY: $SERVICE_API_KEY
+              S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
+              S2S_SCOPES: $S2S_SCOPES
             annotations:
               require-adobe-auth: true
               final: true
@@ -21,7 +30,7 @@ application:
             inputs:
               LOG_LEVEL: debug
               ORG_ID: $ORG_ID
-              SERVICE_API_KEY: $SERVICE_API_KEY
+              S2S_API_KEY: $SERVICE_API_KEY
               AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID: $AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID
               S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
               S2S_SCOPES: $S2S_SCOPES

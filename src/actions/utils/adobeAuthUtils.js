@@ -68,6 +68,8 @@ async function getServer2ServerToken(clientId,clientSecret,orgId,scopes,logger){
   urlencoded.append('grant_type', 'client_credentials');
   urlencoded.append('scope', scopes);
 
+  logger.debug("getServer2ServerToken urlencoded",urlencoded.toString());
+
   const callConfig = {
     method: "POST",
     headers: {
@@ -83,8 +85,8 @@ async function getServer2ServerToken(clientId,clientSecret,orgId,scopes,logger){
   const callResult = await fetch("https://ims-na1.adobelogin.com/ims/token/v3", callConfig);
 
   if (!callResult.ok) {
-    logger.error('adobeAuthUtils getServer2ServerToken callResult:', callResult);
-    throw new Error('adobeAuthUtils getServer2ServerTokencallResult:', callResult);
+    logger.error('adobeAuthUtils getServer2ServerToken NOT GOOD callResult:', callResult.body);
+    throw new Error('adobeAuthUtils error getServer2ServerTokencallResult:', callResult.body);
   }else{
     const data = await callResult.json();
     logger.debug('adobeAuthUtils getServer2ServerToken Response:', data);

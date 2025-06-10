@@ -3,13 +3,13 @@
 */
 
 /* This file exposes some common CSC related utilities for your actions */
-const { getBearerToken } = require('./utils')
+const { getBearerToken } = require('./common')
 const { Core, State, Files } = require('@adobe/aio-sdk')
 const openwhisk = require("openwhisk")
 const fetch = require('node-fetch')
 const FormData = require('form-data')
 const axios = require('axios')
-const { getJwtToken } = require('./adobeAuthUtils')
+const { getJwtToken, getServer2ServerToken } = require('./adobeAuthUtils')
 
 /***
  * Get aem service account token
@@ -29,47 +29,41 @@ async function getAemServiceAccountToken(params,logger){
 
   logger.debug("getAemServiceAccountToken passed state key")
   //get from store if it exists
-  if(typeof stateAuth === 'undefined' || typeof stateAuth.value === 'undefined' || stateAuth.value === null){
-    let metaScopes = params.AEM_SERVICE_TECH_ACCOUNT_META_SCOPES
-    if (metaScopes.constructor !== Array) {
-      metaScopes = metaScopes.split(',')
-    }
-    const invokeParams = {
-      "client_id":`${params.AEM_SERVICE_TECH_ACCOUNT_CLIENT_ID}`,
-      "technical_account_id":`${params.AEM_SERVICE_TECH_ACCOUNT_ID}`,
-      "org_id":`${params.AEM_SERVICE_TECH_ACCOUNT_ORG_ID}`,
-      "client_secret":`${params.AEM_SERVICE_TECH_ACCOUNT_CLIENT_SECRET}`,
-      "private_key":`${params.AEM_SERVICE_TECH_ACCOUNT_PRIVATE_KEY}`,
-      "meta_scopes":metaScopes
-    }
+  let metaScopes = params.AEM_AUTH_SCOPES
+  if (metaScopes.constructor !== Array) {
+    metaScopes = metaScopes.split(',')
+  }
+  const invokeParams = {
+    "client_id":`${params.AEM_AUTH_CLIENT_ID}`,
+    "technical_account_id":`${params.AEM_AUTH_TECH_ACCOUNT_ID}`,
+    "org_id":`${params.ORG_ID}`,
+    "client_secret":`${params.AEM_AUTH_CLIENT_SECRET}`,
+    "private_key":`${params.AEM_AUTH_PRIVATE_KEY}`,
+    "meta_scopes":metaScopes
+  }
 
-    logger.debug("getting auth for jwt util")
+  logger.debug("getting auth for jwt util")
 
-    // example of calling the other get-auth app builder action to get the jwt token
-    /*
-    let owInvokeResult = await ow.actions.invoke({
-      name: 'dx-excshell-1/get-auth', // the name of the action to invoke
-      blocking: true, // this is the flag that instructs to execute the worker asynchronous
-      result: true,
-      params: invokeParams
-      });
-    invokeResult = owInvokeResult.body
-    */
-    
-    let invokeResult = await getJwtToken(invokeParams,params,logger)
-    logger.debug("getJwtToken: " + JSON.stringify(invokeResult))
+  // example of calling the other get-auth app builder action to get the jwt token
+  /*
+  let owInvokeResult = await ow.actions.invoke({
+    name: 'dx-excshell-1/get-auth', // the name of the action to invoke
+    blocking: true, // this is the flag that instructs to execute the worker asynchronous
+    result: true,
+    params: invokeParams
+    });
+  invokeResult = owInvokeResult.body
+  */
+  
+  let invokeResult = await getJwtToken(invokeParams,params,logger)
+  logger.debug("getJwtToken: " + JSON.stringify(invokeResult))
 
-    if(typeof invokeResult !== 'undefined' && typeof invokeResult.access_token !== 'undefined'){
-      // if not reqeust a new one and put it in the store
-      aemAuthToken = invokeResult.access_token
-      await state.put('aem-auth-key', aemAuthToken, { ttl: 79200 }) // -1 for max expiry (365 days), defaults to 86400 (24 hours) 79200 is 22 hours
-    }else{
-      logger.error("Failed to get AEM auth token")
-    }
+  if(typeof invokeResult !== 'undefined' && typeof invokeResult.access_token !== 'undefined'){
+    // if not reqeust a new one and put it in the store
+    aemAuthToken = invokeResult.access_token
+    //await state.put('aem-auth-key', aemAuthToken, { ttl: 79200 }) // -1 for max expiry (365 days), defaults to 86400 (24 hours) 79200 is 22 hours
   }else{
-    logger.debug("getAemServiceAccountToken found a GOOD state key")
-    //logger.debug("getAemServiceAccountToken state key value: " + stateAuth.value)
-    aemAuthToken = stateAuth.value
+    logger.error("Failed to get AEM auth token")
   }
 
   return aemAuthToken
@@ -88,7 +82,9 @@ async function getAemServiceAccountToken(params,logger){
 async function getAemAssetData(aemHost,aemAssetPath,params,logger){
   // fetch content from external api endpoint
   const fetchUrl = aemHost + aemAssetPath + '.3.json'
-  const aemAuthToken = await getAemAuth(params,logger)
+  logger.debug("getAemAssetData fetchUrl",fetchUrl);
+  const aemAuthToken = await getAemAuth(params,logger);
+  logger.debug("getAemAssetData aemAuthToken",aemAuthToken);
 
   const res = await fetch(fetchUrl, {
     method: 'get',
@@ -372,13 +368,39 @@ async function addMetadataToAemAsset(aemHost,aemAssetPath,tagPath,tagValue,param
  * Get AEM auth from right place
  */
 async function getAemAuth(params,logger){
-  if(params.AEM_USE_PASSED_AUTH === 'true'){
+  if(params.AEM_AUTH_TYPE === 'server2server' || params.AEM_AUTH_TYPE === 'jwt'){
+    //AEM auth key from cache 
+    let aemAuthToken
+    const state = await State.init()
+    const stateAuth = await state.get('aem-auth-key')
+
+    if(typeof stateAuth === 'undefined' || typeof stateAuth.value === 'undefined' || stateAuth.value === null){
+      if(params.AEM_AUTH_TYPE === 'jwt'){
+        //jwt type auth
+        logger.debug("getAemAuth get jwt token")
+        aemAuthToken = await getAemServiceAccountToken(params,logger)
+      }else{
+        //server2server type auth
+        logger.debug("getAemAuth getServer2ServerToken",params)
+        let scopesCleaned = JSON.parse(params.AUTH_SCOPES);
+        let scopes = scopesCleaned.join(',');
+        const orgs = params.ORG_ID;
+        const clientId = params.API_KEY;
+        const clientSecret = params.AUTH_CLIENT_SECRET;
+        aemAuthToken = await getServer2ServerToken(clientId,clientSecret,orgs,scopes,logger);
+      }
+
+      await state.put('aem-auth-key', aemAuthToken)
+    }else{
+      logger.debug("getAemServiceAccountToken found a GOOD state key")
+      //logger.debug("getAemServiceAccountToken state key value: " + stateAuth.value)
+      aemAuthToken = stateAuth.value
+    }
+    return aemAuthToken
+  }else{
+    //user type auth
     logger.debug("getAemAuth getBearerToken")
     return getBearerToken(params)
-  }else{
-    logger.debug("getAemAuth getAemServiceAccountToken")
-    let aemAuthToken = await getAemServiceAccountToken(params,logger)
-    return aemAuthToken
   }
 }
 
