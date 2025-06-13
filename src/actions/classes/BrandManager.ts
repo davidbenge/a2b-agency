@@ -16,7 +16,12 @@ export class BrandManager {
         if (!this.stateStore) {
             this.logger.debug('Storage lib imported');
             const stateLib = require('@adobe/aio-lib-state');
-            this.stateStore = await stateLib.init();
+            try {
+                this.stateStore = await stateLib.init();
+            } catch (error) {
+                this.logger.error(`Error initializing state store: ${error}`);
+                throw new Error(`Error initializing state store: ${error}`);
+            }
         }
         return this.stateStore;
     }
@@ -24,8 +29,13 @@ export class BrandManager {
    async getFileStore(): Promise<any> {
         if (!this.fileStore) {
             this.logger.debug('File store not initialized');
-            const filesLib = require('@adobe/aio-lib-files')
-            this.fileStore = await filesLib.init();
+            const filesLib = require('@adobe/aio-lib-files');
+            try {
+                this.fileStore = await filesLib.init();
+            } catch (error) {
+                this.logger.error(`Error initializing file store: ${error}`);
+                throw new Error(`Error initializing file store: ${error}`);
+            }
         }
         return this.fileStore;
     }
@@ -108,14 +118,31 @@ export class BrandManager {
         const brandList = [];
         const brands = await fileStore.list(`${BRAND_FILE_STORE_DIR}/`);
         this.logger.debug(`Found ${brands.length} brands in file store at path ${BRAND_FILE_STORE_DIR}/`);
+
         for (const fileData of brands) {
             this.logger.debug(`Reading brand from file store`,fileData);
-            const buffer = await fileStore.read(fileData.name);
-            this.logger.debug(`Brand found in file store ${fileData.name}: ${buffer.toString()}`);
-            const brandJson = JSON.parse(buffer.toString());
-            this.logger.debug(`Brand JSON`,brandJson);
-            const brand = Brand.fromJSON(brandJson);
-            brandList.push(brand);
+            var buffer: any;
+            try {
+                buffer = await fileStore.read(fileData.name);
+                this.logger.debug(`Brand found in file store ${fileData.name}: ${buffer.toString()}`);
+            } catch (error) {
+                this.logger.warn(`Error reading brand from file store ${fileData.name}: ${error}`);
+            }
+
+            var brandJson: any;
+            try{
+                brandJson = JSON.parse(buffer.toString());
+                this.logger.debug(`Brand JSON imported from file store ${fileData.name}`,brandJson);
+            } catch (error) {
+                this.logger.warn(`Error parsing brand from file store ${fileData.name}: ${error}`);
+            }
+
+            try {
+                const brand = Brand.fromJSON(brandJson);
+                brandList.push(brand);
+            } catch (error) {
+                this.logger.warn(`Error parsing brand from file store ${fileData.name}: ${error}`);
+            }
         }
         return brandList;
     }

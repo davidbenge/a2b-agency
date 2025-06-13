@@ -4,8 +4,9 @@
   "private": true,
   "dependencies": {
     "@adobe/aio-lib-events": "^4.0.1",
+    "@adobe/aio-lib-files": "^4.1.2",
     "@adobe/aio-lib-state": "^5.1.0",
-    "@adobe/aio-sdk": "^2.3.1",
+    "@adobe/aio-sdk": "^6.0.0",
     "@adobe/exc-app": "^1.3.0",
     "@adobe/generator-app-excshell": "^2.0.0",
     "@adobe/jwt-auth": "^2.0.0",

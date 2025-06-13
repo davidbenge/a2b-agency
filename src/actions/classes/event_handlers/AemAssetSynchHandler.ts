@@ -27,13 +27,13 @@ export class AssetSynchEventHandler extends IoEventHandler {
   async handleEvent(event: any): Promise<any> {
     this.logger.info("Asset Synch Event Handler called",event);
     const ioCustomEventManager = new IoCustomEventManager(event.AIO_AGENCY_EVENTS_AEM_ASSET_SYNCH_PROVIDER_ID,event.LOG_LEVEL, event);
-  
+
     // todo:// look to see if we need to handle the event 
     if(event.type === 'aem.assets.asset.deleted'){
       this.logger.info("Asset deleted event",event);
 
       // Publish the event to the Adobe Event Hub
-      await ioCustomEventManager.publishEvent(new AssetSynchDeleteEvent({}));
+      //await ioCustomEventManager.publishEvent(new AssetSynchDeleteEvent({}));
     }else if(event.type === 'aem.assets.asset.metadata_updated'){
       this.logger.info("Asset metadata updated event",event);
 
@@ -48,11 +48,19 @@ export class AssetSynchEventHandler extends IoEventHandler {
       const aemAssetData = await getAemAssetData(aemHost,aemAssetPath,event,this.logger);
       this.logger.info("AssetSynchEventHandler aemAssetData from aemCscUtils getAemAssetData",aemAssetData);
 
+      let eventData = {
+        "asset_id":aemAssetData["jcr:uuid"],
+        "asset_path":aemAssetData["jcr:content"]["cq:parentPath"],
+        "metadate":aemAssetData["jcr:content"].metadata
+      };
       // has the asset been synched before?
-      await ioCustomEventManager.publishEvent(new AssetSynchNewEvent({}));
+      const assetSynchEventNew = new AssetSynchNewEvent(eventData);
+      this.logger.info("AssetSynchEventHandler assetSynchEventNew",assetSynchEventNew);
+      await ioCustomEventManager.publishEvent(assetSynchEventNew);
 
       // Publish the event to the Adobe Event Hub
-      await ioCustomEventManager.publishEvent(new AssetSynchUpdateEvent({}));
+      const assetSynchEventUpdate = new AssetSynchUpdateEvent(eventData);
+      await ioCustomEventManager.publishEvent(assetSynchEventUpdate);
     }else{
       this.logger.info("Asset event not handled",event);
     }

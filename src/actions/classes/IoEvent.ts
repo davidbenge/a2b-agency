@@ -24,13 +24,22 @@ export abstract class IoEvent implements IIoEvent {
     }
 
     toJSON(): any {
-        return {
+        var returnJson = {
             source: this.source,
             type: this.type,
             datacontenttype: this.datacontenttype,
-            data: this.data.toJSON(),
-            id: this.id
+            id: this.id,
+            data: {}
         };
+
+        // if the data is an object and has a toJSON function, use it
+        if (typeof this.data.toJSON === 'function') {
+            returnJson.data = this.data.toJSON();
+        }else{
+            returnJson.data = this.data;
+        }
+        
+        return returnJson;
     }
 
     setSource(sourceProviderId: string): void {
