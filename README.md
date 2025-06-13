@@ -4,7 +4,6 @@ The Agency to Brand solution is an active proof of concept being developed using
 This POC establishes a repeatable pattern that can be shared with agencies and partners to build their own Agency-to-Brand extension using Adobe App Builder and distributing on Adobe Exchange.
 
 [Brand To Agency](https://github.com/davidbenge/a2b-brand)   
-
 [Adobe](https://github.com/davidbenge/a2b-adobe)   
 
 
