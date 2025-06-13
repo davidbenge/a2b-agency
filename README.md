@@ -1,6 +1,9 @@
 # a2b Brand Application 
 
-Welcome to my Adobe I/O Application!
+The Agency to Brand solution is an active proof of concept being developed using Adobe App Builder. It’s designed to connect asset workflows between agencies and brand-owned AEM environments in a secure and auditable way—without requiring direct access to the brand’s systems.
+This POC establishes a repeatable pattern that can be shared with agencies and partners to build their own Agency-to-Brand extension using Adobe App Builder and distributing on Adobe Exchange.
+
+[Brand To Agency](https://github.com/davidbenge/a2b-brand))
 
 ## Prerequisites
 
