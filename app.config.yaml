@@ -21,7 +21,7 @@ application:
               AEM_AUTH_PRIVATE_KEY: $AEM_AUTH_PRIVATE_KEY
               AEM_AUTH_TYPE: $AEM_AUTH_TYPE
               AUTH_SCOPES: $S2S_SCOPES
-              S2S_API_KEY: $SERVICE_API_KEY
+              S2S_CLIENT_ID: $SERVICE_API_KEY
               S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
               S2S_SCOPES: $S2S_SCOPES
             annotations:
@@ -36,6 +36,7 @@ application:
               ORG_ID: $ORG_ID
               S2S_API_KEY: $SERVICE_API_KEY
               AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID: $AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID
+              S2S_CLIENT_ID: $SERVICE_API_KEY
               S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
               S2S_SCOPES: $S2S_SCOPES
             annotations:

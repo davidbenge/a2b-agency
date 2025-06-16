@@ -19,10 +19,18 @@ export interface IBrand {
 export interface IIoEvent {
     source: string;
     type: string;
+    brandId: string;
     datacontenttype: string;
     data: any;
     id: string;
     validate(): boolean;
     toJSON(): any;
     toCloudEvent(): CloudEvent;
+}
+
+export interface IS2SAuthenticationCredentials {
+    clientId: string;
+    clientSecret: string;
+    scopes: string;
+    orgId: string;
 }

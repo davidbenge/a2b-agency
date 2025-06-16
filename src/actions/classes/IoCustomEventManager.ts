@@ -1,42 +1,39 @@
 import * as aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "./Brand";
 import { BRAND_FILE_STORE_DIR } from "../constants";
-import { IIoEvent } from "../types";
+import { IIoEvent, IS2SAuthenticationCredentials } from "../types";
 import { v4 as uuidv4 } from 'uuid';
 import { getServer2ServerToken } from "../utils/adobeAuthUtils";
 
 export class IoCustomEventManager {
     private logger: any;
-    private providerId: string;
-    private serviceApiKey: string;
-    private s2sClientSecret: string;
-    private s2sScopes: string;
-    private orgId: string;
-
+    private s2sAuthenticationCredentials: IS2SAuthenticationCredentials;
+    private registrationProviderId: string; 
+    private assetSynchProviderId: string;
+    
     /*******
      * constructor - constructor for the IoCustomEventManager
      * 
-     * @param providerId: string
      * @param logLevel: string
-     * @param params: any from action
+     * @param s2sAuthenticationCredentials: IS2SAuthenticationCredentials from action
      *******/
-    constructor(providerId: string,logLevel: string, params: any) {
+    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials) {
         this.logger = aioLogger("IoCustomEventManager", { level: logLevel || "info" });
         this.logger.debug('IoCustomEventManager constructor');
 
         //check that the params object has the data we need
-        if(params.S2S_API_KEY && params.S2S_CLIENT_SECRET && params.S2S_SCOPES && params.ORG_ID){
-            this.logger.debug('IoCustomEventManager constructor params', params);
+        if(s2sAuthenticationCredentials.clientId && s2sAuthenticationCredentials.clientSecret && s2sAuthenticationCredentials.scopes && s2sAuthenticationCredentials.orgId){
+            this.logger.debug('IoCustomEventManager constructor params', s2sAuthenticationCredentials);
+            this.s2sAuthenticationCredentials = s2sAuthenticationCredentials;
         }else{
-            this.logger.error('IoCustomEventManager constructor params missing', params);
+            this.logger.error('IoCustomEventManager constructor params missing', s2sAuthenticationCredentials);
             throw new Error('IoCustomEventManager constructor params missing. We need S2S_API_KEY, S2S_CLIENT_SECRET, S2S_SCOPES, and ORG_ID');
         }
-        this.providerId = providerId;
-        this.serviceApiKey = params.S2S_API_KEY;
-        this.s2sClientSecret = params.S2S_CLIENT_SECRET;
-        let scopesCleaned = JSON.parse(params.S2S_SCOPES);
-        this.s2sScopes = scopesCleaned.join(',');
-        this.orgId = params.ORG_ID;
+
+        this.registrationProviderId = process.env.AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID;
+        this.assetSynchProviderId = process.env.AIO_AGENCY_EVENTS_AEM_ASSET_SYNCH_PROVIDER_ID;
+        this.logger.debug('IoCustomEventManager constructor registrationProviderId', this.registrationProviderId);
+        this.logger.debug('IoCustomEventManager constructor assetSynchProviderId', this.assetSynchProviderId);
     }
 
     /*******
@@ -47,9 +44,26 @@ export class IoCustomEventManager {
      *******/
     async publishEvent(event: IIoEvent): Promise<void> {
         this.logger.debug('IoCustomEventManager:publishEvent starting');
+        let providerId = "";
+
+        // based on the event type lets pull the provider id
+        switch(event.type) {
+            case "com.adobe.a2b.registration.enabled":
+            case "com.adobe.a2b.registration.disabled":
+            case "com.adobe.a2b.registration.received":
+                providerId = this.registrationProviderId;
+                break;
+            case "com.adobe.a2b.assetsynch.new":
+            case "com.adobe.a2b.assetsynch.updated":
+            case "com.adobe.a2b.assetsynch.deleted":
+                providerId = this.assetSynchProviderId;
+                break;
+            default:
+                this.logger.error('IoCustomEventManager:publishEvent: Event type not supported', event);
+        }
 
         event.id = uuidv4(); // set the id
-        event.source = `urn:uuid:${this.providerId}`; // set the source
+        event.source = `urn:uuid:${providerId}`; // set the source
         
         if(event.validate()){
             this.logger.debug('Event is valid', event);
@@ -72,11 +86,17 @@ export class IoCustomEventManager {
         const eventSdk = require('@adobe/aio-lib-events');
 
         // get the token
-        const token = await this.getServer2ServerToken();
+        let token = "";
+        try{
+            token = await getServer2ServerToken(this.s2sAuthenticationCredentials, this.logger);
+        }catch(error){
+            this.logger.error('IoCustomEventManager:publishEventToAdobeEventHub: Error getting server2server token', error);
+            throw new Error('Error getting server2server token');
+        }
 
         // initialize the event client
         //This class provides methods to call your Adobe I/O Events APIs. Before calling any method initialize the instance by calling the init method on it with valid values for organizationId, apiKey, accessToken and optional http options such as timeout and max number of retries
-        const eventClient = await eventSdk.init(this.orgId, this.serviceApiKey, token);
+        const eventClient = await eventSdk.init(this.s2sAuthenticationCredentials.orgId, this.s2sAuthenticationCredentials.clientId, token);
         this.logger.debug('IoCustomEventManager:publishEventToAdobeEventHub eventClient', eventClient);
 
         const cloudEventToSend = event.toCloudEvent();
@@ -90,22 +110,5 @@ export class IoCustomEventManager {
             this.logger.error('IoCustomEventManager:publishEventToAdobeEventHub: Error sending event', eventSendResult);
             throw new Error('Error sending event');
         }
-    }
-
-    /*******
-     * getServer2ServerToken - get the server2server token
-     * 
-     * @returns Promise<string>
-     *******/
-    async getServer2ServerToken(): Promise<string> {
-        //TODO: put in some caching here
-        const token = await getServer2ServerToken(this.serviceApiKey, this.s2sClientSecret, this.orgId, this.s2sScopes, this.logger);
-        
-        if(!token){
-            this.logger.error('IoCustomEventManager Error getting server2server token');
-            throw new Error(' IoCustomEventManager: Error getting server2server token');
-        }
-        
-        return token;
     }
 }

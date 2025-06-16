@@ -18,6 +18,7 @@ export class BrandManager {
             const stateLib = require('@adobe/aio-lib-state');
             try {
                 this.stateStore = await stateLib.init();
+                this.logger.debug('State store initialized');
             } catch (error) {
                 this.logger.error(`Error initializing state store: ${error}`);
                 throw new Error(`Error initializing state store: ${error}`);
@@ -32,6 +33,7 @@ export class BrandManager {
             const filesLib = require('@adobe/aio-lib-files');
             try {
                 this.fileStore = await filesLib.init();
+                this.logger.debug('File store initialized');
             } catch (error) {
                 this.logger.error(`Error initializing file store: ${error}`);
                 throw new Error(`Error initializing file store: ${error}`);
@@ -82,6 +84,7 @@ export class BrandManager {
         const stateStore = await this.getStateStore();
         const stateStoreKey = `${BRAND_STATE_PREFIX}${brand.bid}`;
         this.logger.debug(`Saving brand ${brand.bid} to state store with key ${stateStoreKey}`);
+        
         await stateStore.put(stateStoreKey, brand.toJSONString());
         this.logger.debug(`Saved brand ${brand.bid} to state store`);
 

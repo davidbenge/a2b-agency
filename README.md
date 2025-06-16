@@ -294,6 +294,9 @@ These events will be published to the BRAND and also echoed locally for secondar
    - Check asset synchronization provider configuration
    - Review logs for detailed error messages
 
+## Rules
+1. all event are cloud events
+
 ## Contributing
 
 1. Ensure you have the required dependencies installed

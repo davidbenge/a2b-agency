@@ -26,7 +26,6 @@ export class AssetSynchEventHandler extends IoEventHandler {
    *******/
   async handleEvent(event: any): Promise<any> {
     this.logger.info("Asset Synch Event Handler called",event);
-    const ioCustomEventManager = new IoCustomEventManager(event.AIO_AGENCY_EVENTS_AEM_ASSET_SYNCH_PROVIDER_ID,event.LOG_LEVEL, event);
 
     // todo:// look to see if we need to handle the event 
     if(event.type === 'aem.assets.asset.deleted'){
@@ -48,19 +47,56 @@ export class AssetSynchEventHandler extends IoEventHandler {
       const aemAssetData = await getAemAssetData(aemHost,aemAssetPath,event,this.logger);
       this.logger.info("AssetSynchEventHandler aemAssetData from aemCscUtils getAemAssetData",aemAssetData);
 
-      let eventData = {
-        "asset_id":aemAssetData["jcr:uuid"],
-        "asset_path":aemAssetData["jcr:content"]["cq:parentPath"],
-        "metadate":aemAssetData["jcr:content"].metadata
-      };
-      // has the asset been synched before?
-      const assetSynchEventNew = new AssetSynchNewEvent(eventData);
-      this.logger.info("AssetSynchEventHandler assetSynchEventNew",assetSynchEventNew);
-      await ioCustomEventManager.publishEvent(assetSynchEventNew);
 
-      // Publish the event to the Adobe Event Hub
-      const assetSynchEventUpdate = new AssetSynchUpdateEvent(eventData);
-      await ioCustomEventManager.publishEvent(assetSynchEventUpdate);
+      // does the asset have a the metadata for the brand?
+      // a2b__synch_on_change
+      // a2d__customers
+      const metadata = aemAssetData["jcr:content"].metadata;
+      if(metadata){
+        if(metadata["a2b__synch_on_change"] && metadata["a2b__synch_on_change"] === "true" && metadata["a2d__customers"]){
+          // loop over brands and send an event for each brand
+          const customers = metadata["a2d__customers"];
+          const customersArray = customers.split(",");
+          for(const customer of customersArray){
+            // set the brand id
+            const brandId = customer;
+
+            let eventData = {
+              "brandId":brandId,
+              "asset_id":aemAssetData["jcr:uuid"],
+              "asset_path":aemAssetData["jcr:content"]["cq:parentPath"],
+              "metadate":aemAssetData["jcr:content"].metadata
+            };
+
+            // has the asset been synched before?
+            if(aemAssetData["jcr:content"].metadata["a2d__last_sync"]){
+              // update event
+              const assetSynchEventUpdate = new AssetSynchUpdateEvent(eventData);
+              this.logger.info("AssetSynchEventHandler assetSynchEventUpdate",assetSynchEventUpdate);
+              await this.eventManager.publishEvent(assetSynchEventUpdate);
+
+              // update the last sync date in AEM data
+              eventData.metadate["a2d__last_sync"] = new Date().toISOString();
+            }else{
+              // new event
+              const assetSynchEventNew = new AssetSynchNewEvent(eventData);
+              this.logger.info("AssetSynchEventHandler assetSynchEventNew",assetSynchEventNew);
+              await this.eventManager.publishEvent(assetSynchEventNew);
+
+               // update the last sync date in AEM data
+              eventData.metadate["a2d__last_sync"] = new Date().toISOString();
+            }
+
+            // TODO: delete handle 
+          }
+
+        }else{
+          this.logger.warn("AssetSynchEventHandler asset metadata not found",aemAssetPath);
+        }
+
+      }else{
+        this.logger.warn("AssetSynchEventHandler asset metadata not found",aemAssetPath);
+      }
     }else{
       this.logger.info("Asset event not handled",event);
     }

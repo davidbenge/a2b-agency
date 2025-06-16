@@ -59,28 +59,30 @@ async function getJwtToken(authOptions,logger){
 /***
  * Get a server to server token
  * 
- * @param {string} clientId - client id
- * @param {string} clientSecret - client secret
- * @param {string} orgId - org id
- * @param {string} scopes - scopes
+ * @param {object} s2sAuthenticationCredentials - s2s authentication credentials
+ * @param {string} s2sAuthenticationCredentials.clientId - client id
+ * @param {string} s2sAuthenticationCredentials.clientSecret - client secret
+ * @param {string} s2sAuthenticationCredentials.orgId - org id
+ * @param {string} s2sAuthenticationCredentials.scopes - scopes
  * @param {object} logger - logger object
  * 
  * return {object} callResult - call result
  */     
-async function getServer2ServerToken(clientId,clientSecret,orgId,scopes,logger){
+async function getServer2ServerToken(s2sAuthenticationCredentials,logger){
   const urlencoded = new URLSearchParams();
-  urlencoded.append('client_id', clientId);
-  urlencoded.append('client_secret', clientSecret);
+  urlencoded.append('client_id', s2sAuthenticationCredentials.clientId);
+  urlencoded.append('client_secret', s2sAuthenticationCredentials.clientSecret);
   urlencoded.append('grant_type', 'client_credentials');
-  urlencoded.append('scope', scopes);
+  urlencoded.append('scope', s2sAuthenticationCredentials.scopes);
 
   logger.debug("getServer2ServerToken urlencoded",urlencoded.toString());
-
+  logger.debug("getServer2ServerToken s2sAuthenticationCredentials",s2sAuthenticationCredentials);
+  
   const callConfig = {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      "x-gw-ims-org-id": orgId,
+      "x-gw-ims-org-id": s2sAuthenticationCredentials.orgId,
     },
     body: urlencoded.toString()
   };
