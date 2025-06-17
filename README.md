@@ -6,7 +6,6 @@ This POC establishes a repeatable pattern that can be shared with agencies and p
 [Brand To Agency](https://github.com/davidbenge/a2b-brand)   
 [Adobe](https://github.com/davidbenge/a2b-adobe)   
 
-
 ## Prerequisites
 
 - Node.js = 20
@@ -299,8 +298,8 @@ These events will be published to the BRAND and also echoed locally for secondar
 
 ## Contributing
 
-1. Ensure you have the required dependencies installed
+1. Make a branch or fork
 2. Follow the coding standards (ESLint configuration is provided)
-3. Write tests for new features
+3. Code
 4. Submit a pull request
 
