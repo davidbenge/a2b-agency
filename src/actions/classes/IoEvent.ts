@@ -7,7 +7,6 @@ export abstract class IoEvent implements IIoEvent {
     datacontenttype: string;
     data: any;
     id: string;
-    brandId: string;
 
     constructor() {
         // Abstract class constructor
@@ -36,10 +35,8 @@ export abstract class IoEvent implements IIoEvent {
         // if the data is an object and has a toJSON function, use it
         if (typeof this.data.toJSON === 'function') {
             returnJson.data = this.data.toJSON();
-            returnJson.data.brandId = this.brandId;
         }else{
             returnJson.data = this.data;
-            returnJson.data.brandId = this.brandId;
         }
         
         return returnJson;
@@ -54,7 +51,4 @@ export abstract class IoEvent implements IIoEvent {
         return cloudEvent;
     }
 
-    setBrandId(brandId: string): void {
-        this.brandId = brandId;
-    }
 } 

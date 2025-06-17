@@ -19,7 +19,6 @@ export interface IBrand {
 export interface IIoEvent {
     source: string;
     type: string;
-    brandId: string;
     datacontenttype: string;
     data: any;
     id: string;

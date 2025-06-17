@@ -43,6 +43,7 @@ export class EventManager {
             throw new Error('EventManager:publishEvent: event is not valid');
         }
 
+        // send the event to IO
         try{
             await this.ioCustomEventManager.publishEvent(event);
         }catch(error){
@@ -61,6 +62,7 @@ export class EventManager {
             if(brand.endPointUrl){
                 // route the event to the correct receivers. send the event to the correct receivers with the auth in the header
                 try {
+                    this.logger.error(`Sending event to brand at ${brand.endPointUrl}`);
                     const response = await fetch(brand.endPointUrl, {
                         method: 'POST',
                         body: JSON.stringify(event),
@@ -68,6 +70,7 @@ export class EventManager {
                             'Content-Type': 'application/json'
                         }
                     });
+                    this.logger.error(`Sent event to brand at ${brand.endPointUrl}`, response);
                 } catch (error) {
                     this.logger.error('EventManager:publishEvent: error sending event to brand', error);
                 }

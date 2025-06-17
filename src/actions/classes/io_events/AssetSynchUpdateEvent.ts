@@ -11,7 +11,8 @@ export class AssetSynchUpdateEvent extends IoEvent {
         return (
             this.data.asset_id !== undefined &&
             this.data.asset_path !== undefined &&
-            this.data.metadate !== undefined
+            this.data.metadate !== undefined &&
+            this.data.brandId !== undefined
         );
     }
 } 
