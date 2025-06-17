@@ -294,12 +294,12 @@ These events will be published to the BRAND and also echoed locally for secondar
    - Review logs for detailed error messages
 
 ## Rules
-1. all event are cloud events
+1. all event are cloud events see (cloud events)[https://github.com/cloudevents/spec]
 
 ## Contributing
 
 1. Make a branch or fork
 2. Follow the coding standards (ESLint configuration is provided)
-3. Code
+3. Write tests for new features that are actions. UI is nice to have but not wired
 4. Submit a pull request
 
