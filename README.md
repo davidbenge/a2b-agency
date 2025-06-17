@@ -295,7 +295,7 @@ These events will be published to the BRAND and also echoed locally for secondar
    - Review logs for detailed error messages
 
 ## Rules
-1. all event are cloud events
+1. all event are cloud events see (cloud events)[https://github.com/cloudevents/spec] 
 
 ## Contributing
 
@@ -303,4 +303,3 @@ These events will be published to the BRAND and also echoed locally for secondar
 2. Follow the coding standards (ESLint configuration is provided)
 3. Write tests for new features
 4. Submit a pull request
-
