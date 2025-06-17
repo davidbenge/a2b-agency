@@ -1,7 +1,7 @@
 import { IBrand } from '../types';
 
 export class Brand implements IBrand {
-    bid: string;
+    brandId: string;
     secret: string;
     name: string;
     endPointUrl: string;
@@ -11,7 +11,7 @@ export class Brand implements IBrand {
     enabledAt: Date;
 
     constructor(params: Partial<IBrand> = {}) {
-        this.bid = params.bid || '';
+        this.brandId = params.brandId || '';
         this.secret = params.secret || '';
         this.name = params.name || '';
         this.endPointUrl = params.endPointUrl || '';
@@ -33,7 +33,7 @@ export class Brand implements IBrand {
         }
 
         const missingProps: string[] = [];
-        if (!json.bid) missingProps.push('bid');
+        if (!json.brandId) missingProps.push('brandId');
         if (!json.secret) missingProps.push('secret');
         if (!json.name) missingProps.push('name');
         if (!json.endPointUrl) missingProps.push('endPointUrl');
@@ -43,7 +43,7 @@ export class Brand implements IBrand {
         }
 
         return new Brand({
-            bid: json.bid,
+            brandId: json.brandId,
             secret: json.secret,
             name: json.name,
             endPointUrl: json.endPointUrl,
@@ -60,7 +60,7 @@ export class Brand implements IBrand {
      */
     toJSON(): IBrand {
         return {
-            bid: this.bid,
+            brandId: this.brandId,
             secret: this.secret,
             name: this.name,
             endPointUrl: this.endPointUrl,
@@ -85,7 +85,7 @@ export class Brand implements IBrand {
      */
     isValid(): boolean {
         return Boolean(
-            this.bid &&
+            this.brandId &&
             this.secret &&
             this.name &&
             this.endPointUrl

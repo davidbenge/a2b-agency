@@ -27,8 +27,7 @@ export async function main(params: any): Promise<any> {
     //log the params
     const logger = aioLogger("assetsynch-event-handler", { level: params.LOG_LEVEL || "info" });
 
-    //const config = { env: 'prod' }; // Simulated injected config
-    const aemSynchHandler = new AssetSynchEventHandler(config);
+    const aemSynchHandler = new AssetSynchEventHandler(params);
 
     // we will stack more inline when we have many things that need evaluation
     await aemSynchHandler.handleEvent(params);

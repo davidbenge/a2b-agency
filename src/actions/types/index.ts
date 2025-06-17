@@ -6,7 +6,7 @@ export interface IIoEventHandler {
 }
 
 export interface IBrand {
-    bid: string;
+    brandId: string;
     secret: string;
     name: string;
     endPointUrl: string;

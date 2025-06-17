@@ -16,7 +16,6 @@ export abstract class IoEvent implements IIoEvent {
 
     validate(): boolean {
         return (
-            this.data.bid !== undefined &&
             this.data.brandId !== undefined &&
             this.data.secret !== undefined &&
             this.data.name !== undefined &&

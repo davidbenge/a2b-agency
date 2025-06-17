@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { apiService } from '../../services/api';
 import { ViewPropsBase } from '../../types/ViewPropsBase';
 import { Brand } from '../../../../../actions/classes/Brand';
-import { TableView, TableHeader, TableBody, Column, Row, Cell, View, Text, Heading, Button, Flex } from '@adobe/react-spectrum';
+import { TableView, TableHeader, TableBody, Column, Row, Cell, View, Text, Heading, Button, Flex, ProgressCircle } from '@adobe/react-spectrum';
 
 const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps }) => {
     const [brands, setBrands] = useState<Brand[]>([]);
     const [loading, setLoading] = useState(true);
+    const [deletingBrands, setDeletingBrands] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         const apiBaseUrl = `https://${viewProps.aioRuntimeNamespace}.adobeioruntime.net/api/v1/web/${viewProps.aioAppName}`;
@@ -49,9 +50,30 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
     };
 
     const handleDelete = async (brandId: string) => {
-        //TODO: Implement delete functionality
         console.log('Delete brand:', brandId);
+        
+        // Add brand to deleting set
+        setDeletingBrands(prev => new Set(prev).add(brandId));
+        
+        try {
+            const response = await apiService.deleteBrand(brandId);
+            console.log('Delete brand response:', response);
+            // Create a new array without the deleted brand
+            const updatedBrands = brands.filter(brand => brand.brandId !== brandId);
+            setBrands(updatedBrands);
+        } catch (error) {
+            console.error('Error deleting brand:', error);
+        } finally {
+            // Remove brand from deleting set
+            setDeletingBrands(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(brandId);
+                return newSet;
+            });
+        }
     };
+
+    const isDeleting = (brandId: string) => deletingBrands.has(brandId);
 
     return (
         <View padding="size-200">
@@ -59,7 +81,10 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             <Text>Welcome, {viewProps.imsProfile.email}</Text>
             
             {loading ? (
-                <Text>Loading brands...</Text>
+                <Flex alignItems="center" gap="size-100">
+                    <ProgressCircle aria-label="Loading brands..." size="S" />
+                    <Text>Loading brands...</Text>
+                </Flex>
             ) : (
                 <TableView
                     aria-label="Brands table"
@@ -77,23 +102,32 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                     </TableHeader>
                     <TableBody>
                         {brands.map((brand) => (
-                            <Row key={brand.bid}>
+                            <Row key={brand.brandId}>
                                 <Cell>{brand.name}</Cell>
                                 <Cell>{brand.endPointUrl}</Cell>
                                 <Cell>{brand.enabled ? 'Enabled' : 'Disabled'}</Cell>
                                 <Cell>
-                                    <Flex gap="size-100">
-                                        <Button 
-                                            variant="primary" 
+                                    <Flex gap="size-100" justifyContent="center">
+                                        <Button
+                                            variant="primary"
                                             onPress={() => handleEdit(brand)}
+                                            isDisabled={isDeleting(brand.brandId)}
                                         >
                                             Edit
                                         </Button>
-                                        <Button 
-                                            variant="negative" 
-                                            onPress={() => handleDelete(brand.bid)}
+                                        <Button
+                                            variant="negative"
+                                            onPress={() => handleDelete(brand.brandId)}
+                                            isDisabled={isDeleting(brand.brandId)}
                                         >
-                                            Delete
+                                            {isDeleting(brand.brandId) ? (
+                                                <Flex alignItems="center" gap="size-100">
+                                                    <ProgressCircle size="XS" />
+                                                    Deleting...
+                                                </Flex>
+                                            ) : (
+                                                'Delete'
+                                            )}
                                         </Button>
                                     </Flex>
                                 </Cell>

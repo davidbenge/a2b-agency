@@ -9,15 +9,18 @@
  *
  */
 
-import * as stateLib from "@adobe/aio-lib-state";
 import { IoEventHandler } from '../IoEventHandler';
-import { IoCustomEventManager } from "../IoCustomEventManager";
 import { AssetSynchDeleteEvent } from "../io_events/AssetSynchDeleteEvent";
 import { AssetSynchUpdateEvent } from "../io_events/AssetSynchUpdateEvent";
 import { AssetSynchNewEvent } from "../io_events/AssetSynchNewEvent";
 import { getAemAssetData } from "../../utils/aemCscUtils";
 
 export class AssetSynchEventHandler extends IoEventHandler {
+
+  constructor(params: any) {
+    super(params);
+  }
+
   /*******
    * handleEvent - handle the event and see if the asset needs to be processed
    * 
@@ -46,17 +49,49 @@ export class AssetSynchEventHandler extends IoEventHandler {
       const aemAssetPath = event.data.repositoryMetadata["repo:path"];
       const aemAssetData = await getAemAssetData(aemHost,aemAssetPath,event,this.logger);
       this.logger.info("AssetSynchEventHandler aemAssetData from aemCscUtils getAemAssetData",aemAssetData);
-
+      this.logger.info("AssetSynchEventHandler aemAssetData from aemCscUtils getAemAssetData TYPE",(typeof aemAssetData));
 
       // does the asset have a the metadata for the brand?
       // a2b__synch_on_change
       // a2d__customers
-      const metadata = aemAssetData["jcr:content"].metadata;
-      if(metadata){
-        if(metadata["a2b__synch_on_change"] && metadata["a2b__synch_on_change"] === "true" && metadata["a2d__customers"]){
+      if(aemAssetData["jcr:content"] && aemAssetData["jcr:content"].metadata){
+        const metadata = aemAssetData["jcr:content"].metadata;
+        this.logger.info("AssetSynchEventHandler metadata",metadata);
+
+        this.logger.info("AssetSynchEventHandler metadata a2b__synch_on_change",metadata["a2b__synch_on_change"]);
+        this.logger.info("AssetSynchEventHandler metadata a2b__synch_on_change TYPE",(typeof metadata["a2b__synch_on_change"]));
+        this.logger.info("AssetSynchEventHandler metadata a2d__customers",metadata["a2d__customers"]);
+        this.logger.info("AssetSynchEventHandler metadata a2d__customers TYPE",(typeof metadata["a2d__customers"]));
+
+        if(metadata["a2b__synch_on_change"] && 
+           (metadata["a2b__synch_on_change"] === true || metadata["a2b__synch_on_change"] === "true") && 
+           metadata["a2d__customers"]){
           // loop over brands and send an event for each brand
           const customers = metadata["a2d__customers"];
-          const customersArray = customers.split(",");
+          // Handle customers as either an array, object, or string
+          let customersArray: string[] = [];
+          
+          if (Array.isArray(customers)) {
+            // If it's already an array, use it directly
+            customersArray = customers.map(customer => String(customer));
+          } else if (typeof customers === 'object' && customers !== null) {
+            // If it's an object, extract values (assuming it's an object with customer IDs as keys or values)
+            customersArray = Object.values(customers).map(customer => String(customer));
+          } else if (typeof customers === 'string') {
+            // If it's a string, split by comma
+            customersArray = customers.split(",").map(customer => customer.trim());
+          } else {
+            this.logger.warn("AssetSynchEventHandler customers is not in expected format", customers);
+            return {
+              statusCode: 400,
+              body: {
+                message: 'Invalid customers format',
+              }
+            };
+          }
+          
+          this.logger.info("AssetSynchEventHandler customersArray", customersArray);
+          
           for(const customer of customersArray){
             // set the brand id
             const brandId = customer;
@@ -75,7 +110,9 @@ export class AssetSynchEventHandler extends IoEventHandler {
               this.logger.info("AssetSynchEventHandler assetSynchEventUpdate",assetSynchEventUpdate);
               await this.eventManager.publishEvent(assetSynchEventUpdate);
 
-              // update the last sync date in AEM data
+              //todo: get presigned url for the asset
+
+              //todo: update the last sync date in AEM data
               eventData.metadate["a2d__last_sync"] = new Date().toISOString();
             }else{
               // new event
@@ -83,7 +120,9 @@ export class AssetSynchEventHandler extends IoEventHandler {
               this.logger.info("AssetSynchEventHandler assetSynchEventNew",assetSynchEventNew);
               await this.eventManager.publishEvent(assetSynchEventNew);
 
-               // update the last sync date in AEM data
+               //todo: get presigned url for the asset
+
+               // update todo: the last sync date in AEM data
               eventData.metadate["a2d__last_sync"] = new Date().toISOString();
             }
 
@@ -91,11 +130,11 @@ export class AssetSynchEventHandler extends IoEventHandler {
           }
 
         }else{
-          this.logger.warn("AssetSynchEventHandler asset metadata not found",aemAssetPath);
+          this.logger.warn("AssetSynchEventHandler asset metadata a2b__ properties not found",aemAssetPath);
         }
 
       }else{
-        this.logger.warn("AssetSynchEventHandler asset metadata not found",aemAssetPath);
+        this.logger.warn("AssetSynchEventHandler asset metadata property not found",aemAssetPath);
       }
     }else{
       this.logger.info("Asset event not handled",event);

@@ -6,6 +6,5 @@ export class NewBrandRegistrationEvent extends IoEvent {
         super();
         this.type = 'com.adobe.a2b.registration.received';
         this.data = brand;
-        this.data.brandId = brand.bid;
     }
 } 

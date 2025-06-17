@@ -27,12 +27,12 @@ export async function main(params: any): Promise<any> {
       return errorResponse(400, errorMessage, logger)
     }
 
-    params.bid = uuidv4();
+    params.brandId = uuidv4();
     params.secret = randomstring.generate(32);
-    params.enabled = false;
+    params.enabled = true;
     params.createdAt = new Date();
     params.updatedAt = new Date();
-    params.enabledAt = null;
+    params.enabledAt = new Date();
 
     let savedBrand: Brand;
     try{
@@ -67,8 +67,8 @@ export async function main(params: any): Promise<any> {
     return {
       statusCode: 200,
       body: {
-        message: `Brand registration processed successfully for brand id ${savedBrand.bid}`,
-        brand: savedBrand
+        message: `Brand registration processed successfully for brand id ${savedBrand.brandId}`,
+        data: savedBrand
       }
     }
   } catch (error) {

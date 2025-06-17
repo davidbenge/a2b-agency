@@ -38,18 +38,44 @@ export class EventManager {
         this.logger.debug('EventManager:publishEvent: event', event);
 
         // TODO: all events are echoed on IO
-        await this.ioCustomEventManager.publishEvent(event);
+        if(!event.validate()){
+            this.logger.error('EventManager:publishEvent: event is not valid', event);
+            throw new Error('EventManager:publishEvent: event is not valid');
+        }
+
+        try{
+            await this.ioCustomEventManager.publishEvent(event);
+        }catch(error){
+            this.logger.error('EventManager:publishEvent: error publishing event', error);
+            throw new Error('EventManager:publishEvent: error publishing event');
+        }
        
         // TODO: check and see if event needs to go to brand if so send it. some day that will be in the Brand config
         // get brand data 
-        //const brandId = event.brandId;
-        //const brand = await this.brandManager.getBrand(brandId);
-        ///this.logger.debug('EventManager:publishEvent: brand', brand);
+        //this.logger.debug('EventManager:publishEvent: brandId pre getting the brand data for event call backs', event.data.brandId);
+        const brand = await this.brandManager.getBrand(event.data.brandId); // this is dumb on Reg events but lets fetch it anyway
+        this.logger.debug('EventManager:publishEvent: brand from get from brand manager', brand);
 
-        // TODO: if external get the Brand it needs to be sent to and the end point url and auth. use brand manager
-        // TODO: route the event to the correct receivers. send the event to the correct receivers with the auth in the header
-
-        //await this.ioCustomEventManager.publishEvent(event);
+        // if external get the Brand it needs to be sent to and the end point url and auth. use brand manager
+        if(brand.enabled){
+            if(brand.endPointUrl){
+                // route the event to the correct receivers. send the event to the correct receivers with the auth in the header
+                try {
+                    const response = await fetch(brand.endPointUrl, {
+                        method: 'POST',
+                        body: JSON.stringify(event),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                } catch (error) {
+                    this.logger.error('EventManager:publishEvent: error sending event to brand', error);
+                }
+            }else{
+                this.logger.error('EventManager:publishEvent: brand is enabled but does not have an end point url', brand);
+                throw new Error('EventManager:publishEvent: brand is enabled but does not have an end point url');
+            }
+        }
     }
 
     /***
