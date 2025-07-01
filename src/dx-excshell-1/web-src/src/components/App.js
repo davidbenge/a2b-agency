@@ -15,6 +15,10 @@ function App (props) {
   console.log('runtime object:', props.runtime)
   console.log('viewProps object:', props.viewProps)
 
+  // Safe access to viewProps and ims with fallbacks
+  const safeViewProps = props.viewProps || {};
+  const safeIms = safeViewProps.ims || {};
+
   // use exc runtime event handlers
   // respond to configuration change events (e.g. user switches org)
   props.runtime.on('configuration', (props) => {
@@ -48,7 +52,12 @@ function App (props) {
             <View gridArea='content' padding='size-200'>
               <Routes>
                 <Route path='/' element={<Home />} />
+<<<<<<< HEAD
                 <Route path='/brand_manager' element={<BrandManagerView viewProps={props.viewProps} />}/>
+=======
+                <Route path='/brand_manager' element={<BrandManagerView viewProps={safeViewProps} />}/>
+                <Route path='/actions' element={<ActionsForm runtime={props.runtime} ims={safeIms} />}/>
+>>>>>>> da8b6ad (feat: brand manager demo mode with local mock data and UI components)
                 <Route path='/about' element={<About />}/>
               </Routes>
             </View>
