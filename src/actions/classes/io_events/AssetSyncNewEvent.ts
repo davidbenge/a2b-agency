@@ -1,9 +1,9 @@
 import { IoEvent } from '../IoEvent';
 
-export class AssetSynchDeleteEvent extends IoEvent {
+export class AssetSyncNewEvent extends IoEvent {
     constructor(assetData: any) {
         super();
-        this.type = 'com.adobe.a2b.assetsynch.delete';
+        this.type = 'com.adobe.a2b.assetsync.new';
         this.data = assetData;
     }
 

@@ -1,8 +1,8 @@
 /**
- * assetsynch-event-handler
+ * assetsync-event-handler
  *
  * we use this to handle the asset events that are sent to the action and then we will
- * determine if the asset needs to be processed.  If it does we will then call the asset-synch-event-handler and others
+ * determine if the asset needs to be processed.  If it does we will then call the asset-sync-event-handler and others
  * 
  */
 
@@ -10,11 +10,11 @@ import * as aioLogger from "@adobe/aio-lib-core-logging";
 import { checkMissingRequestInputs, errorResponse } from '../utils/common';
 import { EventManager } from '../classes/EventManager';
 import { getAemAssetData } from '../utils/aemCscUtils';
-import { AssetSynchUpdateEvent } from '../classes/io_events/AssetSynchUpdateEvent';
-import { AssetSynchNewEvent } from '../classes/io_events/AssetSynchNewEvent';
+import { AssetSyncUpdateEvent } from '../classes/io_events/AssetSyncUpdateEvent';
+import { AssetSyncNewEvent } from '../classes/io_events/AssetSyncNewEvent';
 
 export async function main(params: any): Promise<any> {
-  const ACTION_NAME = 'agency:assetsynch-event-handler';
+  const ACTION_NAME = 'agency:assetsync-event-handler';
   const logger = aioLogger(ACTION_NAME, { level: params.LOG_LEVEL || "info" });
   let eventManager:EventManager;
 
@@ -47,14 +47,14 @@ export async function main(params: any): Promise<any> {
   }
 
   try {
-    logger.info(`${ACTION_NAME}:Asset Synch Event Handler called`);
+    logger.info(`${ACTION_NAME}:Asset Sync Event Handler called`);
 
     // todo:// look to see if we need to handle the event 
     if(params.type === 'aem.assets.asset.deleted'){
       logger.info(`${ACTION_NAME}:Asset deleted event`,params);
 
       // Publish the event to the Adobe Event Hub
-      //await ioCustomEventManager.publishEvent(new AssetSynchDeleteEvent({}));
+      //await ioCustomEventManager.publishEvent(new AssetSyncDeleteEvent({}));
     }else if(params.type === 'aem.assets.asset.metadata_updated'){
       logger.info(`${ACTION_NAME}:Asset metadata updated event`,params);
 
@@ -71,14 +71,14 @@ export async function main(params: any): Promise<any> {
       logger.info(`${ACTION_NAME}: aemAssetData from aemCscUtils getAemAssetData TYPE`,(typeof aemAssetData));
 
       // does the asset have a the metadata for the brand?
-      // a2b__synch_on_change
+      // a2b__sync_on_change
       // a2d__customers
       if(aemAssetData["jcr:content"] && aemAssetData["jcr:content"].metadata){
         const metadata = aemAssetData["jcr:content"].metadata;
         logger.info(`${ACTION_NAME}: metadata`,metadata);
 
-        if(metadata["a2b__synch_on_change"] && 
-           (metadata["a2b__synch_on_change"] === true || metadata["a2b__synch_on_change"] === "true") && 
+                if(metadata["a2b__sync_on_change"] &&
+        (metadata["a2b__sync_on_change"] === true || metadata["a2b__sync_on_change"] === "true") && 
            metadata["a2d__customers"]){
           // loop over brands and send an event for each brand
           const customers = metadata["a2d__customers"];
@@ -95,7 +95,7 @@ export async function main(params: any): Promise<any> {
             // If it's a string, split by comma
             customersArray = customers.split(",").map(customer => customer.trim());
           } else {
-            logger.warn("AssetSynchEventHandler customers is not in expected format", customers);
+            logger.warn("AssetSyncEventHandler customers is not in expected format", customers);
             return {
               statusCode: 400,
               body: {
@@ -116,13 +116,13 @@ export async function main(params: any): Promise<any> {
               "metadate":aemAssetData["jcr:content"].metadata
             };
 
-            // has the asset been synched before?
+            // has the asset been synced before?
             if(aemAssetData["jcr:content"].metadata["a2d__last_sync"]){
               // update event
-              logger.info(`assetSynchEventUpdate`,eventData);
-              //const assetSynchEventUpdate = new AssetSynchUpdateEvent(eventData);
-              //logger.info(`${ACTION_NAME}: assetSynchEventUpdate`,assetSynchEventUpdate);
-              //await eventManager.publishEvent(assetSynchEventUpdate);
+                      logger.info(`assetSyncEventUpdate`,eventData);
+        //const assetSyncEventUpdate = new AssetSyncUpdateEvent(eventData);
+        //logger.info(`${ACTION_NAME}: assetSyncEventUpdate`,assetSyncEventUpdate);
+        //await eventManager.publishEvent(assetSyncEventUpdate);
 
               //todo: get presigned url for the asset
 
@@ -130,12 +130,12 @@ export async function main(params: any): Promise<any> {
               //eventData.metadate["a2d__last_sync"] = new Date().toISOString();
             }else{
               // new event  
-              logger.info(`assetSynchEventNew`,eventData);
-              const assetSynchEventNew = new AssetSynchNewEvent(eventData);
-              logger.info(`assetSynchEventNew event data is valid ${assetSynchEventNew.validate}`);
+              logger.info(`assetSyncEventNew`,eventData);
+              const assetSyncEventNew = new AssetSyncNewEvent(eventData);
+              logger.info(`assetSyncEventNew event data is valid ${assetSyncEventNew.validate}`);
               
-              await eventManager.publishEvent(assetSynchEventNew);
-              logger.info(`assetSynchEventNew complete`);
+              await eventManager.publishEvent(assetSyncEventNew);
+              logger.info(`assetSyncEventNew complete`);
 
                //todo: get presigned url for the asset
 

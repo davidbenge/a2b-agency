@@ -64,7 +64,7 @@ AIO_RUNTIME_NAMESPACE=
 
 # Adobe I/O Events
 AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=
-AIO_AGENCY_EVENTS_AEM_ASSET_SYNCH_PROVIDER_ID=
+AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID=
 
 # AEM Authentication
 AEM_AUTH_CLIENT_SECRET=
@@ -96,7 +96,7 @@ title: brand to agency
 .
 ├── src/                          # Source code
 │   ├── actions/                  # Adobe I/O Runtime actions
-│   │   ├── assetsynch-event-handler/  # Asset sync event handling
+│   │   ├── assetsync-event-handler/  # Asset sync event handling
 │   │   ├── get-brands/          # Brand retrieval functionality
 │   │   ├── new-brand-registration/    # Brand registration handling
 │   │   ├── classes/             # Shared classes
@@ -120,7 +120,7 @@ The application exposes the following endpoints:
 
 - `GET /api/v1/web/a2b-agency/get-brands` - Retrieve list of brands
 - `POST /api/v1/web/a2b-agency/new-brand-registration` - Register a new brand
-- `POST /api/v1/web/a2b-agency/assetsynch-event-handler` - Handle asset synchronization events
+- `POST /api/v1/web/a2b-agency/assetsync-event-handler` - Handle asset sync events
 
 ## Unified Shell API
 
@@ -134,7 +134,7 @@ For more information, visit the [Unified Shell API documentation](https://github
 ```bash
 aio event provider create
 ```
-Label: "Brand Registration"
+Label: "a2b Brand Registration Event Provider"
 
 2. Create event metadata:
 ```bash
@@ -143,8 +143,8 @@ aio event eventmetadata create <id>
 
 #### Event Types
 
-1. **Brand Registration Received**
-   - Label: "Brand Registration Received"
+1. **a2b Brand Registration Received**
+   - Label: "a2b Brand Registration Received"
    - Code: `com.adobe.a2b.registration.received`
    - Description: "This contains an echo of event that was received from remote brand"
 
@@ -172,8 +172,8 @@ aio event eventmetadata create <id>
 }
 ```
 
-2. **Brand Registration Enabled**
-   - Label: "Brand Registration Enabled"
+2. **a2b Brand Registration Enabled**
+   - Label: "a2b Brand Registration Enabled"
    - Code: `com.adobe.a2b.registration.enabled`
    - Description: "When an admin approves a brand registration this event is thrown"
 
@@ -201,8 +201,8 @@ aio event eventmetadata create <id>
 }
 ```
 
-3. **Brand Registration Disabled**
-   - Label: "Brand Registration Disabled"
+3. **a2b Brand Registration Disabled**
+   - Label: "a2b Brand Registration Disabled"
    - Code: `com.adobe.a2b.registration.disabled`
    - Description: "When an admin disables a brand registration this event is thrown"
 
@@ -234,42 +234,42 @@ aio event eventmetadata create <id>
 
 Update your `.env` with the provider id returned by `aio event provider create`:
 ```bash
-AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=fefcd900-fake-fake-fake-1b9ff1c5d0ac
+AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=5c3431a2-bd91-4eff-a356-26b747d0aad4
 ```
 
-## Asset Synchronization Events
+## Asset Sync Events
 
 ### Event Provider Setup
 
 ```bash
 aio event provider create
 ```
-Label: "A2B Asset Synch"
+Label: "a2b Asset Sync Event Provider"
 
 ### Event Types
 
 1. **New Asset Published**
-   - Label: "New Asset Published"
-   - Code: `com.adobe.a2b.assetsynch.new`
-   - Description: "Asset that has never been synched before is coming over for the first time"
+   - Label: "a2b New Asset Published"
+   - Code: `com.adobe.a2b.assetsync.new`
+- Description: "Asset that has never been synced before is coming over for the first time"
    - Event body: TODO
 
 2. **Asset Updated**
-   - Label: "Asset Updated"
-   - Code: `com.adobe.a2b.assetsynch.update`
-   - Description: "Asset that has been synched before has changed"
+   - Label: "a2b Asset Updated"
+   - Code: `com.adobe.a2b.assetsync.update`
+- Description: "Asset that has been synced before has changed"
    - Event body: TODO
 
 3. **Asset Deleted**
-   - Label: "Asset Deleted"
-   - Code: `com.adobe.a2b.assetsynch.delete`
-   - Description: "Asset that has been synched before has been deleted"
+   - Label: "a2b Asset Deleted"
+   - Code: `com.adobe.a2b.assetsync.delete`
+- Description: "Asset that has been synced before has been deleted"
    - Event body: TODO
 
-### Asset Synchronization Setup
+### Asset Sync Setup
 
 Using the AEM Assets Author API, subscribe to the following events at:
-`https://your_adobe_developer_project.adobeioruntime.net/api/v1/web/a2b-agency/assetsynch-event-handler`
+`https://your_adobe_developer_project.adobeioruntime.net/api/v1/web/a2b-agency/assetsync-event-handler`
 
 This is done in the Adobe Developer Console. [See setup documentation](https://experienceleague.adobe.com/en/docs/experience-manager-learn/cloud-service/aem-apis/openapis/setup)
 
@@ -288,9 +288,9 @@ These events will be published to the BRAND and also echoed locally for secondar
    - Verify Adobe I/O credentials are valid
    - Check AEM authentication configuration
 
-2. **Asset Synchronization Issues**
+2. **Asset Sync Issues**
    - Verify AEM event subscriptions
-   - Check asset synchronization provider configuration
+   - Check asset sync provider configuration
    - Review logs for detailed error messages
 
 ## Rules

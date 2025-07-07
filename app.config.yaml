@@ -5,22 +5,16 @@ application:
       a2b-agency:
         license: Apache-2.0
         actions:
-          assetsynch-event-handler:
-            function: src/actions/assetsynch-event-handler/index.ts
+          assetsync-event-handler:
+            function: src/actions/assetsync-event-handler/index.ts
             web: 'yes'
             runtime: nodejs:20
             inputs:
               LOG_LEVEL: debug
               ORG_ID: $ORG_ID
-              API_KEY: $SERVICE_API_KEY
-              AIO_AGENCY_EVENTS_AEM_ASSET_SYNCH_PROVIDER_ID: $AIO_AGENCY_EVENTS_AEM_ASSET_SYNCH_PROVIDER_ID
+              AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID: $AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID
               AEM_AUTH_CLIENT_SECRET: $AEM_AUTH_CLIENT_SECRET
               AEM_AUTH_SCOPES: $AEM_AUTH_SCOPES
-              AEM_AUTH_CLIENT_ID: $AEM_AUTH_CLIENT_ID
-              AEM_AUTH_TECH_ACCOUNT_ID: $AEM_AUTH_TECH_ACCOUNT_ID
-              AEM_AUTH_PRIVATE_KEY: $AEM_AUTH_PRIVATE_KEY
-              AEM_AUTH_TYPE: $AEM_AUTH_TYPE
-              AUTH_SCOPES: $S2S_SCOPES
               S2S_CLIENT_ID: $SERVICE_API_KEY
               S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
               S2S_SCOPES: $S2S_SCOPES
