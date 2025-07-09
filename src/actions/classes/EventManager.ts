@@ -14,8 +14,10 @@ export class EventManager {
     /****
      * @param logLevel - the log level to use
      * @param s2sAuthenticationCredentials - the s2s authentication credentials 
+     * @param registrationProviderId - the registration provider ID
+     * @param assetSyncProviderId - the asset sync provider ID
      */
-    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials) {
+    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, registrationProviderId: string, assetSyncProviderId: string) {
         this.logger = aioLogger("EventManager", { level: logLevel || "info" });
         if(s2sAuthenticationCredentials.clientId && s2sAuthenticationCredentials.clientSecret && s2sAuthenticationCredentials.scopes && s2sAuthenticationCredentials.orgId){
             this.s2sAuthenticationCredentials = s2sAuthenticationCredentials;
@@ -25,7 +27,9 @@ export class EventManager {
         }
 
         this.brandManager = new BrandManager(logLevel);
-        this.ioCustomEventManager = new IoCustomEventManager(logLevel, this.s2sAuthenticationCredentials);
+        this.logger.debug('EventManager:constructor: Creating IoCustomEventManager with registrationProviderId', registrationProviderId);
+        this.logger.debug('EventManager:constructor: Creating IoCustomEventManager with assetSyncProviderId', assetSyncProviderId);
+        this.ioCustomEventManager = new IoCustomEventManager(logLevel, this.s2sAuthenticationCredentials, registrationProviderId, assetSyncProviderId);
         this.logLevel = logLevel;
     }
 
@@ -106,5 +110,29 @@ export class EventManager {
         console.log("EventManager:getS2sAuthenticationCredentials: s2sAuthenticationCredentials", s2sAuthenticationCredentials);
 
         return s2sAuthenticationCredentials;
+    }
+
+    /***
+     * @param params - the parameters object from an action invoke
+     * 
+     * @returns the registration provider ID
+     */
+    static getRegistrationProviderId(params: any): string {
+        if(!params.AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID){
+            throw new Error('EventManager:getRegistrationProviderId: missing AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID parameter');
+        }
+        return params.AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID;
+    }
+
+    /***
+     * @param params - the parameters object from an action invoke
+     * 
+     * @returns the asset sync provider ID
+     */
+    static getAssetSyncProviderId(params: any): string {
+        if(!params.AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID){
+            throw new Error('EventManager:getAssetSyncProviderId: missing AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID parameter');
+        }
+        return params.AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID;
     }
 }

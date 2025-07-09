@@ -39,8 +39,10 @@ export async function main(params: any): Promise<any> {
   // Get credentials
   try{
     const currentS2sAuthenticationCredentials = EventManager.getS2sAuthenticationCredentials(params);
+    const registrationProviderId = EventManager.getRegistrationProviderId(params);
+    const assetSyncProviderId = EventManager.getAssetSyncProviderId(params);
     logger.debug(`${ACTION_NAME}: currentS2sAuthenticationCredentials`, currentS2sAuthenticationCredentials);  
-    eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials);
+    eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, registrationProviderId, assetSyncProviderId);
   }catch(error){
     logger.error(`${ACTION_NAME}: error getting credentials`, error);
     return errorResponse(500, `Error handling event`, logger)

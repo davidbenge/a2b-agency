@@ -17,7 +17,7 @@ export class IoCustomEventManager {
      * @param logLevel: string
      * @param s2sAuthenticationCredentials: IS2SAuthenticationCredentials from action
      *******/
-    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials) {
+    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, registrationProviderId: string, assetSyncProviderId: string) {
         this.logger = aioLogger("IoCustomEventManager", { level: logLevel || "info" });
         this.logger.debug('IoCustomEventManager constructor');
 
@@ -30,8 +30,8 @@ export class IoCustomEventManager {
             throw new Error('IoCustomEventManager constructor params missing. We need S2S_API_KEY, S2S_CLIENT_SECRET, S2S_SCOPES, and ORG_ID');
         }
 
-        this.registrationProviderId = process.env.AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID;
-        this.assetSyncProviderId = process.env.AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID;
+        this.registrationProviderId = registrationProviderId; // that has to come from action invocation and not process.env since its openwhisk specific
+        this.assetSyncProviderId = assetSyncProviderId; // that has to come from action invocation and not process.env since its openwhisk specific
         this.logger.debug('IoCustomEventManager constructor registrationProviderId', this.registrationProviderId);
         this.logger.debug('IoCustomEventManager constructor assetSyncProviderId', this.assetSyncProviderId);
     }
@@ -44,7 +44,7 @@ export class IoCustomEventManager {
      *******/
     async publishEvent(event: IIoEvent): Promise<void> {
         this.logger.debug('IoCustomEventManager:publishEvent starting');
-        let providerId = "";
+        let providerId = "not-set";
 
         // based on the event type lets pull the provider id
         switch(event.type) {
@@ -52,18 +52,22 @@ export class IoCustomEventManager {
             case "com.adobe.a2b.registration.disabled":
             case "com.adobe.a2b.registration.received":
                 providerId = this.registrationProviderId;
+                this.logger.debug('IoCustomEventManager:publishEvent: Using registration provider ID', providerId);
                 break;
-                    case "com.adobe.a2b.assetsync.new":
-        case "com.adobe.a2b.assetsync.updated":
-        case "com.adobe.a2b.assetsync.deleted":
-            providerId = this.assetSyncProviderId;
+            case "com.adobe.a2b.assetsync.new":
+            case "com.adobe.a2b.assetsync.updated":
+            case "com.adobe.a2b.assetsync.deleted":
+                providerId = this.assetSyncProviderId;
+                this.logger.debug('IoCustomEventManager:publishEvent: Using asset sync provider ID', providerId);
                 break;
             default:
                 this.logger.error('IoCustomEventManager:publishEvent: Event type not supported', event);
         }
 
+        this.logger.debug('IoCustomEventManager:publishEvent: Final provider ID', providerId);
         event.id = uuidv4(); // set the id
         event.source = `urn:uuid:${providerId}`; // set the source
+        this.logger.debug('IoCustomEventManager:publishEvent: Event source set to', event.source);
         
         if(event.validate()){
             this.logger.debug('Event is valid', event);
