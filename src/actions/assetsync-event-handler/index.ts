@@ -115,7 +115,7 @@ export async function main(params: any): Promise<any> {
               "brandId":brandId,
               "asset_id":aemAssetData["jcr:uuid"],
               "asset_path":aemAssetData["jcr:content"]["cq:parentPath"],
-              "metadate":aemAssetData["jcr:content"].metadata
+              "metadata":aemAssetData["jcr:content"].metadata
             };
 
             // has the asset been synced before?
