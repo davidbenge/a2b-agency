@@ -13,7 +13,11 @@ import {
     StatusLight,
     Divider,
     Content,
-    Header
+    Header,
+    Image,
+    Well,
+    DropZone,
+    FileTrigger
 } from '@adobe/react-spectrum';
 
 interface BrandFormProps {
@@ -34,17 +38,24 @@ const BrandForm: React.FC<BrandFormProps> = ({
     const [formData, setFormData] = useState<Partial<Brand>>({
         name: '',
         endPointUrl: '',
-        enabled: false
+        enabled: false,
+        logo: undefined
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [logoFile, setLogoFile] = useState<File | null>(null);
 
     useEffect(() => {
         if (brand) {
             setFormData({
                 name: brand.name,
                 endPointUrl: brand.endPointUrl,
-                enabled: brand.enabled
+                enabled: brand.enabled,
+                logo: brand.logo
             });
+            if (brand.logo) {
+                setLogoPreview(brand.logo);
+            }
         }
     }, [brand]);
 
@@ -72,6 +83,42 @@ const BrandForm: React.FC<BrandFormProps> = ({
         } catch {
             return false;
         }
+    };
+
+    const handleLogoUpload = (files: FileList | null) => {
+        const file = files?.[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                setErrors({ ...errors, logo: 'Please select a valid image file' });
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                setErrors({ ...errors, logo: 'Logo file size must be less than 5MB' });
+                return;
+            }
+
+            setLogoFile(file);
+            setErrors({ ...errors, logo: undefined });
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result as string;
+                setLogoPreview(result);
+                setFormData({ ...formData, logo: result });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeLogo = () => {
+        setLogoFile(null);
+        setLogoPreview(null);
+        setFormData({ ...formData, logo: undefined });
+        setErrors({ ...errors, logo: undefined });
     };
 
     const handleSubmit = async () => {
@@ -136,6 +183,58 @@ const BrandForm: React.FC<BrandFormProps> = ({
                         errorMessage={errors.endPointUrl}
                         placeholder="https://example.com/api"
                     />
+
+                    {/* Logo Upload Section */}
+                    <Well>
+                        <Heading level={4}>Brand Logo</Heading>
+                        <Text marginBottom="size-100">
+                            Upload a logo for your brand (PNG, JPG, GIF - max 5MB)
+                        </Text>
+                        
+                        {logoPreview && (
+                            <View marginBottom="size-200">
+                                <Image
+                                    src={logoPreview}
+                                    alt="Brand logo preview"
+                                    objectFit="contain"
+                                    width="size-1000"
+                                    height="size-1000"
+                                />
+                                {!isViewMode && (
+                                    <Button
+                                        variant="negative"
+                                        onPress={removeLogo}
+                                        marginTop="size-100"
+                                    >
+                                        Remove Logo
+                                    </Button>
+                                )}
+                            </View>
+                        )}
+                        
+                        {!logoPreview && !isViewMode && (
+                            <View>
+                                <DropZone
+                                    onDrop={handleLogoUpload}
+                                    accept="image/*"
+                                    maxSize={5 * 1024 * 1024} // 5MB
+                                >
+                                    <Text>Drag and drop your logo here, or</Text>
+                                    <FileTrigger
+                                        acceptedFileTypes={['image/*']}
+                                        onSelect={handleLogoUpload}
+                                    >
+                                        <Button variant="primary">Select File</Button>
+                                    </FileTrigger>
+                                </DropZone>
+                                {errors.logo && (
+                                    <StatusLight variant="negative" marginTop="size-100">
+                                        {errors.logo}
+                                    </StatusLight>
+                                )}
+                            </View>
+                        )}
+                    </Well>
 
                     {mode !== 'add' && (
                         <Switch

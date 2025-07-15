@@ -191,6 +191,156 @@ Using the AEM Assets Author API subscribe `https://your_adobe_developer_project.
 Asset deleted event - aem.assets.asset.deleted
 Asset metadata updated event - aem.assets.asset.metadata_updated
 
+## Brand Manager
+
+The Brand Manager is a comprehensive web application for managing brand registrations and configurations within the Adobe Experience Cloud Shell environment. It provides a modern, intuitive interface for brand administrators to register, view, edit, and manage brand information.
+
+### Features
+
+#### Core Brand Management
+- **Brand Registration**: Create new brand profiles with essential information
+- **Brand Listing**: View all registered brands in a sortable, filterable table
+- **Brand Editing**: Update existing brand information and settings
+- **Brand Details**: View comprehensive brand information including metadata
+- **Brand Deletion**: Remove brands from the system with confirmation
+
+#### Logo Management
+- **Logo Upload**: Modern drag-and-drop file upload using React Spectrum components
+- **File Validation**: Automatic validation of file type (images only) and size (max 5MB)
+- **Logo Preview**: Real-time preview of uploaded logos
+- **Logo Display**: Visual logo representation in brand listings and details
+- **Logo Removal**: Easy removal of existing logos
+
+#### User Experience
+- **Demo Mode**: Full functionality testing with mock data (no backend required)
+- **Responsive Design**: Optimized for various screen sizes and devices
+- **Search & Filter**: Advanced filtering by brand name, URL, and status
+- **Sorting**: Multi-column sorting for better data organization
+- **Status Indicators**: Visual status lights for enabled/disabled brands
+- **Loading States**: Proper loading indicators and error handling
+
+### Technical Architecture
+
+#### Frontend Components
+- **BrandManagerView**: Main component handling brand listing and management
+- **BrandForm**: Form component for brand creation, editing, and viewing
+- **React Spectrum**: Adobe's design system components for consistent UI/UX
+
+#### Data Model
+```typescript
+interface IBrand {
+    bid: string;           // Brand ID (unique identifier)
+    secret: string;        // Authentication secret
+    name: string;          // Brand name
+    endPointUrl: string;   // API endpoint URL
+    enabled: boolean;      // Brand status
+    logo?: string;         // Base64 encoded logo image
+    createdAt: Date;       // Creation timestamp
+    updatedAt: Date;       // Last update timestamp
+    enabledAt: Date;       // Enable timestamp
+}
+```
+
+#### Demo Mode
+The Brand Manager includes a comprehensive demo mode that allows:
+- **Local Testing**: Full functionality without backend dependencies
+- **Mock Data**: Pre-populated with sample brands and logos
+- **State Management**: In-memory data persistence during session
+- **CRUD Operations**: Complete create, read, update, delete functionality
+
+### Getting Started
+
+#### Prerequisites
+- Node.js and npm installed
+- Adobe App Builder CLI (`aio`) configured
+- Valid Adobe I/O Runtime credentials
+
+#### Local Development
+1. **Start the application**:
+   ```bash
+   cd src/dx-excshell-1
+   aio app run
+   ```
+
+2. **Access the Brand Manager**:
+   - Navigate to the Brand Manager section in the application
+   - Demo mode is automatically enabled in development
+
+3. **Test Logo Upload**:
+   - Create a new brand or edit an existing one
+   - Use the logo upload section to test file uploads
+   - Supported formats: PNG, JPG, GIF, SVG, WebP (max 5MB)
+
+#### Production Deployment
+1. **Deploy the application**:
+   ```bash
+   aio app deploy
+   ```
+
+2. **Configure environment variables**:
+   - Set `REACT_APP_ENABLE_DEMO_MODE=false` for production
+   - Configure backend API endpoints
+
+### API Integration
+
+The Brand Manager is designed to integrate with backend APIs for production use:
+
+#### Brand Operations
+- `GET /get-brands` - Retrieve all brands
+- `GET /get-brand/{bid}` - Retrieve specific brand
+- `POST /new-brand-registration` - Create new brand
+- `PUT /update-brand/{bid}` - Update existing brand
+- `DELETE /delete-brand/{bid}` - Delete brand
+
+#### Logo Storage
+- Logos are stored as Base64 encoded strings in the brand record
+- Production implementation should include:
+  - File storage service integration
+  - Image optimization and compression
+  - CDN integration for fast delivery
+  - Backup and recovery procedures
+
+### Customization
+
+#### Styling
+The application uses React Spectrum components for consistent styling:
+- Follow Adobe's design system guidelines
+- Customize theme colors and spacing as needed
+- Maintain accessibility standards
+
+#### Functionality
+- Extend the Brand model for additional fields
+- Add custom validation rules
+- Implement additional file upload features
+- Integrate with external services
+
+### Troubleshooting
+
+#### Common Issues
+1. **Logo upload fails**: Check file type and size limits
+2. **Demo mode not working**: Verify environment variables
+3. **Table not loading**: Check network connectivity and API endpoints
+4. **File validation errors**: Ensure files are valid image formats
+
+#### Debug Mode
+Enable debug logging by setting:
+```bash
+LOG_LEVEL=debug
+```
+
+### Contributing
+
+When contributing to the Brand Manager:
+1. Follow React Spectrum design patterns
+2. Maintain TypeScript type safety
+3. Include proper error handling
+4. Test in both demo and production modes
+5. Update documentation for new features
+
+---
+
+For more information about the Brand Manager implementation, see the technical documentation in the `docs/` directory.
+
 
 
 

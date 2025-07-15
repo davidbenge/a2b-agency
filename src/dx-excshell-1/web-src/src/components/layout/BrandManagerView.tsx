@@ -18,7 +18,8 @@ import {
     ProgressCircle,
     SearchField,
     ComboBox,
-    Item
+    Item,
+    Image
 } from '@adobe/react-spectrum';
 import Add from '@spectrum-icons/workflow/Add';
 import Edit from '@spectrum-icons/workflow/Edit';
@@ -41,6 +42,7 @@ const mockBrands: Brand[] = [
         name: 'Test Brand 1',
         endPointUrl: 'https://example1.com/api',
         enabled: true,
+        logo: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjMDA3Q0ZGIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QnJhbmQgMTwvdGV4dD4KPC9zdmc+',
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
         enabledAt: new Date('2024-01-01')
@@ -51,6 +53,7 @@ const mockBrands: Brand[] = [
         name: 'Test Brand 2',
         endPointUrl: 'https://example2.com/api',
         enabled: false,
+        logo: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRkY2QjAwIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QnJhbmQgMjwvdGV4dD4KPC9zdmc+',
         createdAt: new Date('2024-01-02'),
         updatedAt: new Date('2024-01-02'),
         enabledAt: null
@@ -318,6 +321,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         }}
                     >
                         <TableHeader>
+                            <Column key="logo">Logo</Column>
                             <Column key="name" allowsSorting>Name</Column>
                             <Column key="endPointUrl" allowsSorting>Endpoint URL</Column>
                             <Column key="enabled" allowsSorting>Status</Column>
@@ -327,6 +331,19 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         <TableBody>
                             {filteredAndSortedBrands.map((brand) => (
                                 <Row key={brand.bid}>
+                                    <Cell>
+                                        {brand.logo ? (
+                                            <Image 
+                                                src={brand.logo} 
+                                                alt={brand.name} 
+                                                width="size-400" 
+                                                height="size-400"
+                                                objectFit="contain"
+                                            />
+                                        ) : (
+                                            <Text>No Logo</Text>
+                                        )}
+                                    </Cell>
                                     <Cell>{brand.name}</Cell>
                                     <Cell>{brand.endPointUrl}</Cell>
                                     <Cell>
