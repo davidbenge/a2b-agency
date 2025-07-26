@@ -303,3 +303,35 @@ These events will be published to the BRAND and also echoed locally for secondar
 3. Write tests for new features that are actions. UI is nice to have but not wired
 4. Submit a pull request
 
+## First build
+1. git pull the repo local
+2. go to adobe developer console and setup a workspace in org Tech Marketing Development in the project "agency to brand" 
+3. inside your new project add the following services 
+   - Adobe Workfront and use a server to server credential
+   - I/O Mangement API
+4. For testing reasons add in Custom Event listeners for Brand Registration
+   - Test registration provider events is the name
+   - Add Event
+   - Select 3rd Party Custom Events
+   - Select a2b Brand Registration Event Provider
+   - Add event subscriptions for all the listed events
+5. For testing reasons add in Custom Event listeners for Asset Event Provider
+   - Test asset events provider events is the name
+   - Add Event
+   - Select 3rd Party Custom Events
+   - Select a2b Brand Registration Event Provider
+   - Add event subscriptions for all the listed events (a2b Asset Deleted, a2b Asset Updated, a2b New Asset Published)
+6. Navigate back to your new workspace home 
+7. in top right `download all` and pull the json file down that has all the workspace config
+8. install Node Version Manager nvm
+9. install Node version 22 `nvm install 22`
+10. set node 22 current `nvm use 22`
+11. alias 22 to default `nvm alias default 22`
+12. install aio cli `npm install -g @adobe/aio-cli`
+13. import the adobe developer console config to project `aio app use ~/Downloads/a2b-27200-benge.json` or simular command to your downloaded workspace config
+14. .env needs to be updated with values from _dot.env. Every thing in that file from `###### do not change the items in your .env above this.` down goes in your new .env that was created with the aio app use command
+15. Update any of the values needed from the values in your adobe developer console. see above in readme for help on vars 
+16. run the application with `aio app run -e application` or `npm run run:application`
+17. Stop the running application 
+18. verify actions were installed `aio rt actions list`
+19. you can now run the local web app if you would like to work on it `aio app run -e dx/excshell/1` or `npm run run:excshell`
