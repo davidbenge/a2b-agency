@@ -21,6 +21,15 @@ function SideBar () {
                 <NavLink
                     className={({ isActive }) => `SideNav-itemLink ${isActive ? 'is-selected' : ''}`}
                     aria-current="page"
+                    to="/rules_manager"
+                >
+                    Rules Manager
+                </NavLink>
+            </li>
+            <li className="SideNav-item">
+                <NavLink
+                    className={({ isActive }) => `SideNav-itemLink ${isActive ? 'is-selected' : ''}`}
+                    aria-current="page"
                     end
                     to="/"
                 >

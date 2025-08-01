@@ -3,6 +3,8 @@ import { IoCustomEventManager } from "../IoCustomEventManager";
 import { WorkfrontTaskCreatedEvent } from "../io_events/WorkfrontTaskCreatedEvent";
 import { WorkfrontTaskUpdatedEvent } from "../io_events/WorkfrontTaskUpdatedEvent";
 import { WorkfrontTaskCompletedEvent } from "../io_events/WorkfrontTaskCompletedEvent";
+import { extractAdobeProjectFromEvent } from "../../utils/adobeConsoleUtils";
+import { IAdobeProject } from "../../types/index";
 
 export class WorkfrontEventHandler extends IoEventHandler {
     /*******
@@ -13,6 +15,13 @@ export class WorkfrontEventHandler extends IoEventHandler {
      *******/
     async handleEvent(event: any): Promise<any> {
         this.logger.info("Workfront Event Handler called", event);
+        
+        // Extract Adobe Developer Console data from event if available
+        let adobeProject: IAdobeProject | undefined;
+        if (event.adobeProject) {
+            adobeProject = event.adobeProject;
+        }
+        
         const ioCustomEventManager = new IoCustomEventManager(
             event.AIO_AGENCY_EVENTS_WORKFRONT_PROVIDER_ID,
             event.LOG_LEVEL,
@@ -23,17 +32,17 @@ export class WorkfrontEventHandler extends IoEventHandler {
         switch (event.type) {
             case 'workfront.task.created':
                 this.logger.info("Workfront task created event", event);
-                await ioCustomEventManager.publishEvent(new WorkfrontTaskCreatedEvent(event.data));
+                await ioCustomEventManager.publishEvent(new WorkfrontTaskCreatedEvent(event.data, adobeProject));
                 break;
 
             case 'workfront.task.updated':
                 this.logger.info("Workfront task updated event", event);
-                await ioCustomEventManager.publishEvent(new WorkfrontTaskUpdatedEvent(event.data));
+                await ioCustomEventManager.publishEvent(new WorkfrontTaskUpdatedEvent(event.data, adobeProject));
                 break;
 
             case 'workfront.task.completed':
                 this.logger.info("Workfront task completed event", event);
-                await ioCustomEventManager.publishEvent(new WorkfrontTaskCompletedEvent(event.data));
+                await ioCustomEventManager.publishEvent(new WorkfrontTaskCompletedEvent(event.data, adobeProject));
                 break;
 
             default:

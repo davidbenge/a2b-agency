@@ -188,7 +188,7 @@ const BrandForm: React.FC<BrandFormProps> = ({
                     <Well>
                         <Heading level={4}>Brand Logo</Heading>
                         <Text marginBottom="size-100">
-                            Upload a logo for your brand (PNG, JPG, GIF - max 5MB)
+                            Upload a logo for this brand (PNG, JPG, GIF - max 5MB)
                         </Text>
                         
                         {logoPreview && (
@@ -219,7 +219,7 @@ const BrandForm: React.FC<BrandFormProps> = ({
                                     accept="image/*"
                                     maxSize={5 * 1024 * 1024} // 5MB
                                 >
-                                    <Text>Drag and drop your logo here, or</Text>
+                                    <Text>Drag and drop a logo here, or</Text>
                                     <FileTrigger
                                         acceptedFileTypes={['image/*']}
                                         onSelect={handleLogoUpload}

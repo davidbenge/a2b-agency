@@ -195,6 +195,20 @@ Asset metadata updated event - aem.assets.asset.metadata_updated
 
 The Brand Manager is a comprehensive web application for managing brand registrations and configurations within the Adobe Experience Cloud Shell environment. It provides a modern, intuitive interface for brand administrators to register, view, edit, and manage brand information.
 
+## Rules Manager
+
+The Rules Manager is a standalone feature that allows agencies to create and manage business rules, templates, and dependencies independently of brands. This enables agencies to build reusable rule sets that can be applied to multiple client brands.
+
+### Key Features
+- **Field Validation Rules**: Email format, phone number, and custom pattern validation
+- **Asset Validation Rules**: File size limits, format restrictions, and dimension checks
+- **Rule Templates**: Predefined rule sets that can be applied to multiple brands
+- **Rule Dependencies**: Control execution order and create logical validation flows
+- **Brand-Independent Management**: Create rules once and apply to multiple brands
+- **Responsive Design**: Modern UI with horizontal scrolling tables and intuitive forms
+
+For detailed documentation, see [Rules Manager Feature Guide](docs/RULES_MANAGER_FEATURE.md).
+
 ### Features
 
 #### Core Brand Management

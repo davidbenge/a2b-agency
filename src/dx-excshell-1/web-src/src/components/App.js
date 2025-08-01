@@ -11,6 +11,7 @@ import ActionsForm from './ActionsForm'
 import { Home } from './Home'
 import { About } from './About'
 import BrandManagerView from './layout/BrandManagerView'
+import RulesManagerView from './layout/RulesManagerView'
 
 function App (props) {
   console.log('runtime object:', props.runtime)
@@ -54,6 +55,7 @@ function App (props) {
               <Routes>
                 <Route path='/' element={<Home />} />
                 <Route path='/brand_manager' element={<BrandManagerView viewProps={safeViewProps} />}/>
+                <Route path='/rules_manager' element={<RulesManagerView viewProps={safeViewProps} />}/>
                 <Route path='/actions' element={<ActionsForm runtime={props.runtime} ims={safeIms} />}/>
                 <Route path='/about' element={<About />}/>
               </Routes>

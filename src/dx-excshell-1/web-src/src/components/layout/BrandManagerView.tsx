@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ViewPropsBase } from '../../types/ViewPropsBase';
 import { Brand } from '../../../../../actions/classes/Brand';
 import BrandForm from './BrandForm';
+
 import { 
     TableView, 
     TableHeader, 
@@ -25,6 +26,7 @@ import Add from '@spectrum-icons/workflow/Add';
 import Edit from '@spectrum-icons/workflow/Edit';
 import ViewDetail from '@spectrum-icons/workflow/ViewDetail';
 import Delete from '@spectrum-icons/workflow/Delete';
+import Settings from '@spectrum-icons/workflow/Settings';
 import { v4 as uuidv4 } from 'uuid';
 
 type ViewMode = 'list' | 'add' | 'edit' | 'view';
@@ -166,6 +168,8 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
         setError(null);
         setSuccess(null);
     };
+
+
 
     const handleDeleteBrand = (brandId: string) => {
         if (!confirm('Are you sure you want to delete this brand?')) {
@@ -366,6 +370,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                             >
                                                 <Edit />
                                             </Button>
+
                                             <Button 
                                                 variant="negative" 
                                                 onPress={() => handleDeleteBrand(brand.bid)}
@@ -395,7 +400,8 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
 
     return (
         <View>
-            {viewMode === 'list' ? renderListView() : renderFormView()}
+            {viewMode === 'list' && renderListView()}
+            {(viewMode === 'add' || viewMode === 'edit' || viewMode === 'view') && renderFormView()}
         </View>
     );
 };

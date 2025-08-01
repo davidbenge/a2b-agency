@@ -24,6 +24,7 @@ Successfully implemented comprehensive logo upload functionality for the Brand M
   - Added drag-and-drop functionality with visual feedback
   - Integrated file selection via button trigger
   - Added real-time logo preview with remove functionality
+  - **Updated UI Text**: Changed "your brand" to "this brand" for agency user context
 
 - **Enhanced Brand Manager View** (`src/dx-excshell-1/web-src/src/components/layout/BrandManagerView.tsx`)
   - Added logo column to brands table
