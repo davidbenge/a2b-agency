@@ -8,7 +8,7 @@ export class Brand implements IBrand {
     enabled: boolean;
     createdAt: Date;
     updatedAt: Date;
-    enabledAt: Date;
+    enabledAt: Date | null;
 
     constructor(params: Partial<IBrand> = {}) {
         this.brandId = params.brandId || '';
@@ -16,9 +16,9 @@ export class Brand implements IBrand {
         this.name = params.name || '';
         this.endPointUrl = params.endPointUrl || '';
         this.enabled = params.enabled || false;
-        this.createdAt = params.createdAt || new Date();
-        this.updatedAt = params.updatedAt || new Date();
-        this.enabledAt = params.enabledAt || null;
+        this.createdAt = params.createdAt ? new Date(params.createdAt) : new Date();
+        this.updatedAt = params.updatedAt ? new Date(params.updatedAt) : new Date();
+        this.enabledAt = params.enabledAt ? new Date(params.enabledAt) : null;
     }
 
     /**

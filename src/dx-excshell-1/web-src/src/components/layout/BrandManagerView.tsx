@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { ViewPropsBase } from '../../types/ViewPropsBase';
+// TODO: Refactor this component
+import { useCallback, useEffect, useState } from 'react';
+import { type ViewPropsBase } from '../../types/ViewPropsBase';
 import { Brand } from '../../../../../actions/classes/Brand';
 <<<<<<< HEAD
 import { TableView, TableHeader, TableBody, Column, Row, Cell, View, Text, Heading, Button, Flex, ProgressCircle } from '@adobe/react-spectrum';
@@ -32,9 +33,9 @@ import Add from '@spectrum-icons/workflow/Add';
 import Edit from '@spectrum-icons/workflow/Edit';
 import ViewDetail from '@spectrum-icons/workflow/ViewDetail';
 import Delete from '@spectrum-icons/workflow/Delete';
-import { v4 as uuidv4 } from 'uuid';
+import { apiService } from '../../services/api';
+import { ViewMode } from '../../types/enums';
 
-type ViewMode = 'list' | 'add' | 'edit' | 'view';
 
 // Feature flag for demo mode - can be controlled via environment variable
 const ENABLE_DEMO_MODE = process.env.REACT_APP_ENABLE_DEMO_MODE === 'true' || 
@@ -68,7 +69,7 @@ const mockBrands: Brand[] = [
 const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps }) => {
     const [brands, setBrands] = useState<Brand[]>(ENABLE_DEMO_MODE ? mockBrands : []);
     const [loading, setLoading] = useState(!ENABLE_DEMO_MODE);
-    const [viewMode, setViewMode] = useState<ViewMode>('list');
+    const [viewMode, setViewMode] = useState(ViewMode.LIST);
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
     const [formLoading, setFormLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -174,21 +175,21 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
 
     const handleAddBrand = () => {
         setSelectedBrand(null);
-        setViewMode('add');
+        setViewMode(ViewMode.ADD);
         setError(null);
         setSuccess(null);
     };
 
     const handleEditBrand = (brand: Brand) => {
         setSelectedBrand(brand);
-        setViewMode('edit');
+        setViewMode(ViewMode.EDIT);
         setError(null);
         setSuccess(null);
     };
 
     const handleViewBrand = (brand: Brand) => {
         setSelectedBrand(brand);
-        setViewMode('view');
+        setViewMode(ViewMode.VIEW);
         setError(null);
         setSuccess(null);
     };
@@ -211,6 +212,22 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
         setTimeout(() => setSuccess(null), 3000);
     };
 
+
+
+    const addNewBrand = useCallback(async (brandData: Partial<Brand>) => {
+        const response =  await apiService.createBrand(brandData)
+
+        if(response.statusCode === 200) {
+            const newBrandData = response.body.data            
+            setBrands([...brands,  new Brand(newBrandData)]);
+            setSuccess('Brand created successfully');
+        } else {
+            console.error('Error saving brand:', response.body.error);
+            setError('Error saving brand');
+        }
+        return response;
+    }, []);
+
     const handleFormSubmit = async (brandData: Partial<Brand>) => {
         try {
             setFormLoading(true);
@@ -218,19 +235,9 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
 
             if (ENABLE_DEMO_MODE) {
                 // Demo mode: local state management
-                if (viewMode === 'add') {
-                    const newBrand = new Brand({
-                        ...brandData,
-                        bid: uuidv4(),
-                        secret: 'mock-secret-' + Math.random().toString(36).substr(2, 9),
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                        enabledAt: brandData.enabled ? new Date() : null
-                    });
-                    
-                    setBrands([...brands, newBrand]);
-                    setSuccess('Brand created successfully');
-                } else if (viewMode === 'edit' && selectedBrand) {
+                if (viewMode === ViewMode.ADD) {
+                   await  addNewBrand(brandData)
+                } else if (viewMode === ViewMode.EDIT && selectedBrand) {
                     const updatedBrand = new Brand({
                         ...selectedBrand.toJSON(),
                         ...brandData,
@@ -249,7 +256,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                 setError('Save functionality not implemented in production mode');
             }
 
-            setViewMode('list');
+            setViewMode(ViewMode.LIST);
         } catch (error) {
             console.error('Error saving brand:', error);
             setError('Error saving brand');
@@ -351,7 +358,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             )}
 =======
     const handleCancel = () => {
-        setViewMode('list');
+        setViewMode(ViewMode.LIST);
         setSelectedBrand(null);
         setError(null);
         setSuccess(null);

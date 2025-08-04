@@ -2,7 +2,7 @@
 * <license header>
 */
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Provider, defaultTheme, Grid, View } from '@adobe/react-spectrum'
 import ErrorBoundary from 'react-error-boundary'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
@@ -10,6 +10,7 @@ import SideBar from './common/SideBar'
 import { Home } from './Home'
 import { About } from './About'
 import BrandManagerView from './layout/BrandManagerView'
+import { apiService } from '../services/api'
 
 function App (props) {
   console.log('runtime object:', props.runtime)
@@ -30,6 +31,11 @@ function App (props) {
   props.runtime.on('history', ({ type, path }) => {
     console.log('history change', { type, path })
   })
+
+  useEffect(() => {
+    // initialize the api service
+    apiService.initialize(safeViewProps.imsToken, safeViewProps.imsOrg);
+  }, [])
 
   return (
     <ErrorBoundary onError={onError} FallbackComponent={fallbackComponent}>
