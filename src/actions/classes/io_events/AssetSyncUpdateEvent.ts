@@ -1,9 +1,10 @@
+import { AEM_ASSET_SYNC_EVENT_CODE } from '../../constants';
 import { IoEvent } from '../IoEvent';
 
 export class AssetSyncUpdateEvent extends IoEvent {
     constructor(assetData: any) {
         super();
-        this.type = 'com.adobe.a2b.assetsync.update';
+        this.type = AEM_ASSET_SYNC_EVENT_CODE.UPDATE;
         this.data = assetData;
     }
 

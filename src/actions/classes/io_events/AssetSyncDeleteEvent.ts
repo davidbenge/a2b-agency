@@ -1,9 +1,10 @@
 import { IoEvent } from '../IoEvent';
+import { AEM_ASSET_SYNC_EVENT_CODE } from '../../constants';
 
 export class AssetSyncDeleteEvent extends IoEvent {
     constructor(assetData: any) {
         super();
-        this.type = 'com.adobe.a2b.assetsync.delete';
+        this.type = AEM_ASSET_SYNC_EVENT_CODE.DELETE;
         this.data = assetData;
     }
 

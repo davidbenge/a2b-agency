@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { IIoEvent, IS2SAuthenticationCredentials } from "../types";
+import { IIoEvent, IS2SAuthenticationCredentials, IApplicationRuntimeInfo } from "../types";
 import { BrandManager } from "./BrandManager";
 import { IoCustomEventManager } from "./IoCustomEventManager";
 import * as aioLogger from "@adobe/aio-lib-core-logging";
@@ -16,8 +16,9 @@ export class EventManager {
      * @param s2sAuthenticationCredentials - the s2s authentication credentials 
      * @param registrationProviderId - the registration provider ID
      * @param assetSyncProviderId - the asset sync provider ID
+     * @param applicationRuntimeInfo - the application runtime information
      */
-    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, registrationProviderId: string, assetSyncProviderId: string) {
+    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, registrationProviderId: string, assetSyncProviderId: string, applicationRuntimeInfo: any) {
         this.logger = aioLogger("EventManager", { level: logLevel || "info" });
         if(s2sAuthenticationCredentials.clientId && s2sAuthenticationCredentials.clientSecret && s2sAuthenticationCredentials.scopes && s2sAuthenticationCredentials.orgId){
             this.s2sAuthenticationCredentials = s2sAuthenticationCredentials;
@@ -29,7 +30,8 @@ export class EventManager {
         this.brandManager = new BrandManager(logLevel);
         this.logger.debug('EventManager:constructor: Creating IoCustomEventManager with registrationProviderId', registrationProviderId);
         this.logger.debug('EventManager:constructor: Creating IoCustomEventManager with assetSyncProviderId', assetSyncProviderId);
-        this.ioCustomEventManager = new IoCustomEventManager(logLevel, this.s2sAuthenticationCredentials, registrationProviderId, assetSyncProviderId);
+        this.logger.debug('EventManager:constructor: Application runtime info', applicationRuntimeInfo);
+        this.ioCustomEventManager = new IoCustomEventManager(logLevel, this.s2sAuthenticationCredentials, registrationProviderId, assetSyncProviderId, applicationRuntimeInfo);
         this.logLevel = logLevel;
     }
 
@@ -134,5 +136,36 @@ export class EventManager {
             throw new Error('EventManager:getAssetSyncProviderId: missing AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID parameter');
         }
         return params.AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID;
+    }
+
+    /***
+     * getApplicationRuntimeInfo
+     * 
+     * @param params - the parameters object from an action invoke
+     * 
+     * @returns the application runtime information or undefined
+     */
+    static getApplicationRuntimeInfo(params: any): IApplicationRuntimeInfo | undefined {
+        // Parse and process APPLICATION_RUNTIME_INFO if provided
+        if (params.APPLICATION_RUNTIME_INFO) {
+            try {
+                const runtimeInfo = JSON.parse(params.APPLICATION_RUNTIME_INFO);
+                if (runtimeInfo.namespace && runtimeInfo.app_name) {
+                    // Split namespace into consoleId, projectName, and workspace
+                    const namespaceParts = runtimeInfo.namespace.split('/');
+                    if (namespaceParts.length >= 3) {
+                        const applicationRuntimeInfo: IApplicationRuntimeInfo = {
+                            consoleId: namespaceParts[0],
+                            projectName: namespaceParts[1],
+                            workspace: namespaceParts[2]
+                        };
+                        return applicationRuntimeInfo;
+                    }
+                }
+            } catch (error) {
+                console.warn('Failed to parse APPLICATION_RUNTIME_INFO:', error);
+            }
+        }
+        return undefined;
     }
 }

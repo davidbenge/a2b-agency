@@ -10,14 +10,18 @@ export class IoCustomEventManager {
     private s2sAuthenticationCredentials: IS2SAuthenticationCredentials;
     private registrationProviderId: string; 
     private assetSyncProviderId: string;
+    private applicationRuntimeInfo: any;
     
     /*******
      * constructor - constructor for the IoCustomEventManager
      * 
      * @param logLevel: string
      * @param s2sAuthenticationCredentials: IS2SAuthenticationCredentials from action
+     * @param registrationProviderId: string
+     * @param assetSyncProviderId: string
+     * @param applicationRuntimeInfo: object containing runtime information
      *******/
-    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, registrationProviderId: string, assetSyncProviderId: string) {
+    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, registrationProviderId: string, assetSyncProviderId: string, applicationRuntimeInfo: any) {
         this.logger = aioLogger("IoCustomEventManager", { level: logLevel || "info" });
         this.logger.debug('IoCustomEventManager constructor');
 
@@ -32,8 +36,10 @@ export class IoCustomEventManager {
 
         this.registrationProviderId = registrationProviderId; // that has to come from action invocation and not process.env since its openwhisk specific
         this.assetSyncProviderId = assetSyncProviderId; // that has to come from action invocation and not process.env since its openwhisk specific
+        this.applicationRuntimeInfo = applicationRuntimeInfo; // application runtime information for event isolation
         this.logger.debug('IoCustomEventManager constructor registrationProviderId', this.registrationProviderId);
         this.logger.debug('IoCustomEventManager constructor assetSyncProviderId', this.assetSyncProviderId);
+        this.logger.debug('IoCustomEventManager constructor applicationRuntimeInfo', this.applicationRuntimeInfo);
     }
 
     /*******
@@ -68,6 +74,21 @@ export class IoCustomEventManager {
         event.id = uuidv4(); // set the id
         event.source = `urn:uuid:${providerId}`; // set the source
         this.logger.debug('IoCustomEventManager:publishEvent: Event source set to', event.source);
+        
+        // Add application runtime info to the event data for environment isolation
+        if (this.applicationRuntimeInfo && event.data) {
+            // Parse the namespace to extract consoleId, projectName, and workspace
+            const namespaceParts = this.applicationRuntimeInfo.namespace.split('-');
+            const parsedRuntimeInfo = {
+                consoleId: namespaceParts[0] || '',
+                projectName: namespaceParts[1] || '',
+                workspace: namespaceParts.slice(2).join('-') || '',
+                app_name: this.applicationRuntimeInfo.app_name
+            };
+            
+            event.data.app_runtime_info = parsedRuntimeInfo;
+            this.logger.debug('IoCustomEventManager:publishEvent: Added app_runtime_info to event data', parsedRuntimeInfo);
+        }
         
         if(event.validate()){
             this.logger.debug('Event is valid', event);
