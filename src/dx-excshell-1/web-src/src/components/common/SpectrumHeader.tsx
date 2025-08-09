@@ -34,11 +34,11 @@ const SpectrumHeader: React.FC<SpectrumHeaderProps> = ({ viewProps }) => {
 
     return (
         <View 
-            backgroundColor="blue-600" 
+            backgroundColor="purple-600" 
             paddingX="size-300" 
             paddingY="size-200"
             borderBottomWidth="thick"
-            borderBottomColor="blue-700"
+            borderBottomColor="purple-700"
         >
             <Flex 
                 direction="row" 
