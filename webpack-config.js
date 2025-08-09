@@ -14,10 +14,27 @@ module.exports = {
     module: {
       rules: [
         {
-          // includes, excludes are in tsconfig.json
           test: /\.ts?$/,
           exclude: /node_modules/,
-          use: 'ts-loader'
+          use: {
+            loader: 'ts-loader',
+            options: {
+              compilerOptions: {
+                target: 'ES2020',
+                module: 'CommonJS',
+                lib: ['ES2020'],
+                strict: true,
+                esModuleInterop: true,
+                skipLibCheck: true,
+                forceConsistentCasingInFileNames: true,
+                declaration: true,
+                sourceMap: true,
+                moduleResolution: 'node',
+                allowSyntheticDefaultImports: true,
+                resolveJsonModule: true
+              }
+            }
+          }
         }
       ]
     },

@@ -6,7 +6,7 @@ import React from 'react'
 import { Provider, defaultTheme, Grid, View } from '@adobe/react-spectrum'
 import ErrorBoundary from 'react-error-boundary'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
-import SideBar from './common/SideBar'
+import SpectrumHeader from './common/SpectrumHeader'
 import ActionsForm from './ActionsForm'
 import { Home } from './Home'
 import { About } from './About'
@@ -37,18 +37,14 @@ function App (props) {
       <Router>
         <Provider theme={defaultTheme} colorScheme={'light'}>
           <Grid
-            areas={['sidebar content']}
-            columns={['256px', '3fr']}
-            rows={['auto']}
+            areas={['header', 'content']}
+            columns={['1fr']}
+            rows={['auto', '1fr']}
             height='100vh'
             gap='size-100'
           >
-            <View
-              gridArea='sidebar'
-              backgroundColor='gray-200'
-              padding='size-200'
-            >
-              <SideBar></SideBar>
+            <View gridArea='header'>
+              <SpectrumHeader viewProps={safeViewProps} />
             </View>
             <View gridArea='content' padding='size-200'>
               <Routes>
