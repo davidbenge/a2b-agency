@@ -5,24 +5,6 @@ application:
       a2b-agency:
         license: Apache-2.0
         actions:
-          assetsync-event-handler:
-            function: src/actions/assetsync-event-handler/index.ts
-            web: 'yes'
-            runtime: nodejs:20
-            inputs:
-              LOG_LEVEL: debug
-              ORG_ID: $ORG_ID
-              AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID: $AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID
-              AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID: $AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID
-              AEM_AUTH_CLIENT_SECRET: $AEM_AUTH_CLIENT_SECRET
-              AEM_AUTH_SCOPES: $AEM_AUTH_SCOPES
-              S2S_CLIENT_ID: $SERVICE_API_KEY
-              S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
-              S2S_SCOPES: $S2S_SCOPES
-              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
-            annotations:
-              require-adobe-auth: true
-              final: true
           new-brand-registration:
             function: src/actions/new-brand-registration/index.ts
             web: 'yes'
@@ -87,6 +69,9 @@ application:
               S2S_API_KEY: $SERVICE_API_KEY
               S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
               S2S_SCOPES: $S2S_SCOPES
+              AIO_runtime_apihost: $AIO_runtime_apihost
+              AIO_runtime_auth: $AIO_runtime_auth
+              AIO_runtime_namespace: $AIO_runtime_namespace
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_APP_NAME}"}'
             annotations:
               require-adobe-auth: true
@@ -97,6 +82,7 @@ application:
             runtime: nodejs:20
             inputs:
               LOG_LEVEL: debug
+              ADOBE_INTERNAL_URL_ENDPOINT: $ADOBE_INTERNAL_URL_ENDPOINT
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
             annotations:
               require-adobe-auth: false

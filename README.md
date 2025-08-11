@@ -76,6 +76,9 @@ AIO_app_name=
 AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=
 AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID=
 
+# Adobe Internal Calls
+ADOBE_INTERNAL_URL_ENDPOINT=
+
 # AEM Authentication
 AEM_AUTH_CLIENT_SECRET=
 AEM_AUTH_SCOPES=
@@ -125,6 +128,10 @@ AGENCY_ID=12345678-1234-1234-1234-123456789abc
 
 # Your application name (should match your Adobe Developer Console project)
 AIO_app_name=your-app-name
+
+# Adobe Internal Calls Configuration
+# Endpoint for getting presigned read URLs from Adobe internal services
+ADOBE_INTERNAL_URL_ENDPOINT=https://27200-609silverstork-stage.adobeioruntime.net/api/v1/web/a2b-agency
 ```
 
 #### 3. AEM Cloud Service Integration
@@ -208,6 +215,18 @@ AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID=your-asset-sync-provider-uuid
 - [ ] Event provider UUIDs copied to environment variables
 - [ ] All environment variables populated
 - [ ] Application deployed with `aio app deploy`
+
+### Adobe Internal Calls Configuration
+
+The application can integrate with Adobe internal services to retrieve presigned URLs for assets. This is configured through the `ADOBE_INTERNAL_URL_ENDPOINT` environment variable.
+
+```bash
+# Adobe Internal Calls Configuration
+# Endpoint for getting presigned read URLs from Adobe internal services
+ADOBE_INTERNAL_URL_ENDPOINT=https://27200-609silverstork-stage.adobeioruntime.net/api/v1/web/a2b-agency
+```
+
+**Note**: This endpoint is used by the `agency-assetsync-internal-handler` action to retrieve presigned URLs when processing asset sync events. The endpoint should be configured to point to your Adobe internal service that provides presigned URLs for AEM assets.
 
 ### Runtime Environment Isolation
 

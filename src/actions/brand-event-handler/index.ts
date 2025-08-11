@@ -10,7 +10,7 @@
  */
 
 import * as aioLogger from "@adobe/aio-lib-core-logging";
-import { checkMissingRequestInputs, errorResponse } from '../utils/common';
+import { checkMissingRequestInputs, errorResponse, stripOpenWhiskParams } from '../utils/common';
 
 export async function main(params: any): Promise<any> {
   const ACTION_NAME = 'agency:brand-event-handler';
@@ -90,18 +90,13 @@ async function routeToInternalHandler(actionName: string, eventData: any, logger
     
     // Initialize the OpenWhisk client
     const ow = openwhisk({
-      apihost: process.env.AIO_runtime_apihost || 'https://adobeioruntime.net',
-      api_key: process.env.AIO_runtime_auth,
-      namespace: process.env.AIO_runtime_namespace
+      apihost: eventData.AIO_runtime_apihost || 'https://adobeioruntime.net',
+      api_key: eventData.AIO_runtime_auth,
+      namespace: eventData.AIO_runtime_namespace
     });
 
     // Prepare the parameters for the internal action
-    const actionParams = {
-      ...eventData.data.app_runtime_info, // Include runtime info
-      eventType: eventData.type,
-      eventData: eventData.data,
-      LOG_LEVEL: eventData.LOG_LEVEL || 'info'
-    };
+    const actionParams = stripOpenWhiskParams(eventData);
 
     logger.debug(`${actionName}: Action parameters`, actionParams);
 

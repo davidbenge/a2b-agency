@@ -5,7 +5,7 @@
  * and routes them to the appropriate internal event handlers based on event type.
  */
 import { EventManager } from "../classes/EventManager";
-import { errorResponse, checkMissingRequestInputs } from "../utils/common";
+import { errorResponse, checkMissingRequestInputs, stripOpenWhiskParams } from "../utils/common";
 import * as aioLogger from "@adobe/aio-lib-core-logging";
 const openwhisk = require("openwhisk");
 
@@ -110,35 +110,36 @@ async function routeToAssetSyncHandler(params: any, logger: any): Promise<any> {
   try {
     // Initialize OpenWhisk client
     const ow = openwhisk();
+
+    logger.debug('routeToAssetSyncHandler incoming params', JSON.stringify(params, null, 2));
     
     // Prepare the parameters for the asset sync handler
-    const assetSyncParams = {
-      ...params, // Pass through all original parameters
-      // Add any additional parameters specific to asset sync if needed
-    };
+    const assetSyncParams = stripOpenWhiskParams(params);
 
-    logger.debug('Invoking agency-assetsync-event-handler with params:', JSON.stringify(assetSyncParams, null, 2));
+    logger.debug('Invoking agency-assetsync-internal-handler with params:', JSON.stringify(assetSyncParams, null, 2));
 
-    // Invoke the agency-assetsync-event-handler action
+    // Invoke the agency-assetsync-internal-handler action
     const result = await ow.actions.invoke({
       name: 'a2b-agency/agency-assetsync-internal-handler',
-      params: assetSyncParams,
+      params: {
+        assetSyncParams: assetSyncParams
+      },
       blocking: true,
       result: true
     });
 
-    logger.info('agency-assetsync-event-handler invocation successful:', result);
+    logger.info('agency-assetsync-internal-handler invocation successful:', result);
     return {
       success: true,
-      handler: 'agency-assetsync-event-handler',
+      handler: 'adobe-product-event-handler agency-assetsync-internal-handler',
       result: result
     };
 
   } catch (error) {
-    logger.error('Error invoking agency-assetsync-event-handler:', error);
+    logger.error('Error invoking agency-assetsync-internal-handler:', error);
     return {
       success: false,
-      handler: 'agency-assetsync-event-handler',
+      handler: 'adobe-product-event-handler agency-assetsync-internal-handler',
       error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
