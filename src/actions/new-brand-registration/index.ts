@@ -3,28 +3,34 @@
  *
  * todo:// add in a custom event and throw it when the brand trys to register
  */
-import { errorResponse, checkMissingRequestInputs } from "../utils/common";
-import * as aioLogger from "@adobe/aio-lib-core-logging";
-import { Brand } from "../classes/Brand";
-import { BRAND_STATE_PREFIX } from "../constants";
-import { BrandManager } from "../classes/BrandManager";
+import { errorResponse, checkMissingRequestInputs } from '../utils/common';
+import * as aioLogger from '@adobe/aio-lib-core-logging';
+import { Brand } from '../classes/Brand';
+import { BRAND_STATE_PREFIX } from '../constants';
+import { BrandManager } from '../classes/BrandManager';
 import * as randomstring from 'randomstring';
 import { v4 as uuidv4 } from 'uuid';
-import { getServer2ServerToken } from "../utils/adobeAuthUtils";
-import { IoCustomEventManager } from "../classes/IoCustomEventManager";
-import { NewBrandRegistrationEvent } from "../classes/io_events/NewBrandRegistrationEvent";
+import { getServer2ServerToken } from '../utils/adobeAuthUtils';
+import { IoCustomEventManager } from '../classes/IoCustomEventManager';
+import { NewBrandRegistrationEvent } from '../classes/io_events/NewBrandRegistrationEvent';
 
 export async function main(params: any): Promise<any> {
-  const logger = aioLogger("new-brand-registration", { level: params.LOG_LEVEL || "info" });
+  const logger = aioLogger('new-brand-registration', {
+    level: params.LOG_LEVEL || 'info'
+  });
 
   try {
     logger.debug(JSON.stringify(params, null, 2));
-    const requiredParams = ['name', 'endPointUrl']
-    const requiredHeaders = []
-    const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
+    const requiredParams = ['name', 'endPointUrl'];
+    const requiredHeaders = [];
+    const errorMessage = checkMissingRequestInputs(
+      params,
+      requiredParams,
+      requiredHeaders
+    );
     if (errorMessage) {
       // return and log client errors
-      return errorResponse(400, errorMessage, logger)
+      return errorResponse(400, errorMessage, logger);
     }
 
     params.bid = uuidv4();
@@ -35,8 +41,8 @@ export async function main(params: any): Promise<any> {
     params.enabledAt = null;
 
     const brand = Brand.fromJSON(params);
-    logger.debug('Brand',JSON.stringify(brand, null, 2));
-    logger.debug('Brand stringify',brand.toJSON());
+    logger.debug('Brand', JSON.stringify(brand, null, 2));
+    logger.debug('Brand stringify', brand.toJSON());
 
     const brandManager = new BrandManager(params.LOG_LEVEL);
     const savedBrand = await brandManager.saveBrand(brand);
@@ -45,20 +51,25 @@ export async function main(params: any): Promise<any> {
     //TODO: We should make a manager or util to make this all much simpler
     try {
       logger.debug('new-brand-registration starting cloud event construction');
-      const ioCustomEventManager = new IoCustomEventManager(params.AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID,params.LOG_LEVEL, params);
-      await ioCustomEventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand));
-      
+      const ioCustomEventManager = new IoCustomEventManager(
+        params.AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID,
+        params.LOG_LEVEL,
+        params
+      );
+      await ioCustomEventManager.publishEvent(
+        new NewBrandRegistrationEvent(savedBrand)
+      );
     } catch (error) {
       logger.error('Error sending event', error);
     }
-    
+
     return {
       statusCode: 200,
       body: {
         message: `Brand registration processed successfully for brand id ${brand.bid}`,
-        brand: savedBrand
+        data: savedBrand
       }
-    }
+    };
   } catch (error) {
     return {
       statusCode: 500,
@@ -66,6 +77,6 @@ export async function main(params: any): Promise<any> {
         message: 'Error processing new client registration',
         error: error instanceof Error ? error.message : 'Unknown error'
       }
-    }
+    };
   }
 }

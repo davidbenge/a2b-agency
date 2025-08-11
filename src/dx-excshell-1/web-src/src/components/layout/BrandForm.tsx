@@ -1,3 +1,4 @@
+// TODO: Refactor this component
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { Brand } from '../../../../../actions/classes/Brand';
