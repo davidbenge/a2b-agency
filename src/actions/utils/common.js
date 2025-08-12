@@ -225,6 +225,31 @@ function stripOpenWhiskParams(params) {
   return cleanParams;
 }
 
+/**
+ * Normalize action parameters by merging any nested routerParams into the top-level params.
+ *
+ * If params.routerParams exists and is a plain object, this returns a new object where:
+ * - Keys from params.routerParams are included
+ * - Top-level keys from params overwrite matching keys from routerParams
+ * - The routerParams property itself is removed
+ *
+ * @param {object} params - The original action parameters
+ * @returns {object} - The merged parameters with top-level keys taking precedence
+ */
+function mergeRouterParams(params) {
+  if (
+    params &&
+    typeof params === 'object' &&
+    params.routerParams &&
+    typeof params.routerParams === 'object' &&
+    !Array.isArray(params.routerParams)
+  ) {
+    const { routerParams, ...topLevelParams } = params;
+    return { ...routerParams, ...topLevelParams };
+  }
+  return params;
+}
+
 module.exports = { 
   errorResponse,
   getBearerToken,
@@ -232,5 +257,6 @@ module.exports = {
   checkMissingRequestInputs,
   contentInit,
   stripOpenWhiskParams,
-  hasOpenWhiskParams
+  hasOpenWhiskParams,
+  mergeRouterParams
 }

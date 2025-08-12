@@ -20,6 +20,14 @@ export interface IApplicationRuntimeInfo {
     consoleId: string;
     projectName: string;
     workspace: string;
+    actionPackageName: string;
+    app_name: string;
+}
+
+export interface IValidationResult {
+    valid: boolean;
+    message?: string;
+    missing?: string[];
 }
 
 export interface IIoEvent {
@@ -28,7 +36,7 @@ export interface IIoEvent {
     datacontenttype: string;
     data: any;
     id: string;
-    validate(): boolean;
+    validate(): IValidationResult;
     toJSON(): any;
     toCloudEvent(): CloudEvent;
 }

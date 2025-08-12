@@ -4,8 +4,7 @@
  * This action handles events from Adobe products (AEM, Creative Cloud, etc.)
  * and routes them to the appropriate internal event handlers based on event type.
  */
-import { EventManager } from "../classes/EventManager";
-import { errorResponse, checkMissingRequestInputs, stripOpenWhiskParams } from "../utils/common";
+import { errorResponse, checkMissingRequestInputs } from "../utils/common";
 import * as aioLogger from "@adobe/aio-lib-core-logging";
 const openwhisk = require("openwhisk");
 
@@ -13,8 +12,7 @@ export async function main(params: any): Promise<any> {
   const logger = aioLogger("adobe-product-event-handler", { level: params.LOG_LEVEL || "info" });
 
   try {
-    logger.debug(JSON.stringify(params, null, 2));
-    const requiredParams = ['APPLICATION_RUNTIME_INFO']
+    const requiredParams = []
     const requiredHeaders = [] // TODO: Add security required headers
     const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
     if (errorMessage) {
@@ -114,15 +112,18 @@ async function routeToAssetSyncHandler(params: any, logger: any): Promise<any> {
     logger.debug('routeToAssetSyncHandler incoming params', JSON.stringify(params, null, 2));
     
     // Prepare the parameters for the asset sync handler
-    const assetSyncParams = stripOpenWhiskParams(params);
+    //const assetSyncParams = stripOpenWhiskParams(params);
 
-    logger.debug('Invoking agency-assetsync-internal-handler with params:', JSON.stringify(assetSyncParams, null, 2));
+    logger.debug('Invoking agency-assetsync-internal-handler with params:', JSON.stringify(params, null, 2));
 
     // Invoke the agency-assetsync-internal-handler action
+    // we pass in the params as a single object so that the internal handler can access the params and we label it routerParams so on the internal handler we can access the params as routerParams.routerParams
+    // if we see params.routerParams we know that the params are coming from the adobe-product-event-handler and we can merge down. this way the internal handler can access the params and we can access the params as routerParams.routerParams
+    // can stand as standalone or as part of a larger orchestration
     const result = await ow.actions.invoke({
       name: 'a2b-agency/agency-assetsync-internal-handler',
       params: {
-        assetSyncParams: assetSyncParams
+        routerParams: params
       },
       blocking: true,
       result: true

@@ -8,12 +8,17 @@ export class AssetSyncUpdateEvent extends IoEvent {
         this.data = assetData;
     }
 
-    validate(): boolean {
-        return (
-            this.data.asset_id !== undefined &&
-            this.data.asset_path !== undefined &&
-            this.data.metadate !== undefined &&
-            this.data.brandId !== undefined
-        );
+    validate() {
+        const missing: string[] = [];
+        if (this.data.asset_id === undefined) missing.push('asset_id');
+        if (this.data.asset_path === undefined) missing.push('asset_path');
+        if (this.data.metadata === undefined) missing.push('metadata');
+        if (this.data.brandId === undefined) missing.push('brandId');
+        const valid = missing.length === 0;
+        return {
+            valid,
+            message: valid ? undefined : `AssetSyncUpdateEvent validation failed: missing field(s): ${missing.join(', ')}`,
+            missing: valid ? undefined : missing
+        };
     }
 } 

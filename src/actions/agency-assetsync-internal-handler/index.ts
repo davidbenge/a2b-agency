@@ -7,19 +7,39 @@
  */
 
 import * as aioLogger from "@adobe/aio-lib-core-logging";
-import { checkMissingRequestInputs, errorResponse } from '../utils/common';
+import { checkMissingRequestInputs, errorResponse, mergeRouterParams } from '../utils/common';
+import { createLazy } from '../utils/lazy';
 import { EventManager } from '../classes/EventManager';
 import { getAemAssetData, getAemAuth } from '../utils/aemCscUtils';
 import { AssetSyncUpdateEvent } from '../classes/io_events/AssetSyncUpdateEvent';
 import { AssetSyncNewEvent } from '../classes/io_events/AssetSyncNewEvent';
 
-export async function main(incommingParams: any): Promise<any> {
-  const ACTION_NAME = 'agency:assetsync-event-handler';
-  const params = incommingParams.assetSyncParams;
+export async function main(params: any): Promise<any> {
+  const ACTION_NAME = 'agency:agency-assetsync-internal-handler';
   const logger = aioLogger(ACTION_NAME, { level: params.LOG_LEVEL || "info" });
-  let eventManager: EventManager;
 
-  logger.debug('agency-assetsync-internal-handler incoming params', JSON.stringify(params, null, 2));
+  logger.debug(`${ACTION_NAME} incoming params`, JSON.stringify(params, null, 2));
+  // Normalize the params using shared helper
+  params = mergeRouterParams(params);
+  logger.debug(`${ACTION_NAME} incoming params post merge`, JSON.stringify(params, null, 2));
+  
+  // Lazily compute inputs independently so each is only created when needed
+  const getS2sAuthenticationCredentials = createLazy(() => EventManager.getS2sAuthenticationCredentials(params));
+  const getAssetSyncProviderId = createLazy(() => EventManager.getAssetSyncProviderId(params));
+  const getApplicationRuntimeInfo = createLazy(() => EventManager.getApplicationRuntimeInfo(params));
+
+  const getEventManager = createLazy(() => {
+    const currentS2sAuthenticationCredentials = getS2sAuthenticationCredentials();
+    const assetSyncProviderId = getAssetSyncProviderId();
+    const applicationRuntimeInfo = getApplicationRuntimeInfo();
+    return new EventManager(
+      params.LOG_LEVEL,
+      currentS2sAuthenticationCredentials,
+      assetSyncProviderId,
+      assetSyncProviderId,
+      applicationRuntimeInfo
+    );
+  });
 
   // Check for required params
   const requiredParams = []
@@ -30,20 +50,8 @@ export async function main(incommingParams: any): Promise<any> {
     return errorResponse(400, errorMessage, logger)
   }
 
-  // Get credentials
-  try {
-    const currentS2sAuthenticationCredentials = EventManager.getS2sAuthenticationCredentials(params);
-    const registrationProviderId = EventManager.getRegistrationProviderId(params);
-    const assetSyncProviderId = EventManager.getAssetSyncProviderId(params);
-    const applicationRuntimeInfo = EventManager.getApplicationRuntimeInfo(params);
-    logger.debug(`${ACTION_NAME}: currentS2sAuthenticationCredentials`, currentS2sAuthenticationCredentials);
-    logger.debug(`${ACTION_NAME}: applicationRuntimeInfo`, applicationRuntimeInfo);
-    eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, registrationProviderId, assetSyncProviderId, applicationRuntimeInfo);
-  } catch (error) {
-    logger.error(`${ACTION_NAME}: error getting credentials`, error);
-    return errorResponse(500, `Error handling event`, logger)
-  }
-
+  // Any errors during lazy initialization will be caught at call sites below
+  
   try {
     logger.info(`${ACTION_NAME}:Asset Sync Event Handler called`);
 
@@ -62,9 +70,11 @@ export async function main(incommingParams: any): Promise<any> {
       * @param {object} params action input parameters.
       * @param {object} logger logger object
       */
-      const aemHost = params.data.repositoryMetadata["repo:repositoryId"];
-      const aemHostUrl = `https://${aemHost}`;
+      const aemHostFqdn = params.data.repositoryMetadata["repo:repositoryId"];
+      const aemHostHostOnly = aemHostFqdn.replace(/\.adobeaemcloud\.com$/i, '');
+      const aemHostUrl = `https://${aemHostFqdn}`;
       const aemAssetPath = params.data.repositoryMetadata["repo:path"];
+      // todo: should make this more in alignment and pass in a AEM Auth object we build off the params like we do with the s2s auth
       const aemAssetData = await getAemAssetData(aemHostUrl, aemAssetPath, params, logger);
       logger.info(`${ACTION_NAME}: aemAssetData from aemCscUtils getAemAssetData`, aemAssetData);
       logger.info(`${ACTION_NAME}: aemAssetData from aemCscUtils getAemAssetData TYPE`, (typeof aemAssetData));
@@ -79,24 +89,31 @@ export async function main(incommingParams: any): Promise<any> {
         if (metadata["a2b__sync_on_change"] && (metadata["a2b__sync_on_change"] === true || metadata["a2b__sync_on_change"] === "true") && metadata["a2b__customers"]) {
           // loop over brands and send an event for each brand
           const customers = metadata["a2b__customers"];
-          const presignedUrlEndpoint = incommingParams.ADOBE_INTERNAL_URL_ENDPOINT + "/aem-getPresignedReadUrl";
+          const presignedUrlEndpoint = params.ADOBE_INTERNAL_URL_ENDPOINT + "/aem-getPresignedReadUrl";
+          const aemAuth = await getAemAuth(params, logger);
           const adobeInternalCallHeaders = {
+            "Content-Type": "application/json",
             "x-api-key": params.AEM_AUTH_CLIENT_ID,
-            "Authorization": "Bearer " + await getAemAuth(params, logger),
+            "Authorization": `Bearer ${aemAuth}`,
           }
           let presignedUrl = "";
+          const presignedCallBody = JSON.stringify({
+            "host": aemHostHostOnly,
+            "path": aemAssetPath
+          });
+
+          logger.debug(`${ACTION_NAME}: presignedUrlEndpoint`, presignedUrlEndpoint);
+          logger.debug(`${ACTION_NAME}: presignedUrlEndpoint headers`, adobeInternalCallHeaders);
+          logger.debug(`${ACTION_NAME}: presignedCallBody`, presignedCallBody);
 
           // Get presigned URL for the asset using Adobe internal endpoint
           try {
-
             // need to pass in host and path to the asset
             const response = await fetch(presignedUrlEndpoint, {
               method: 'POST',
               headers: adobeInternalCallHeaders,
-              body: JSON.stringify({
-                "host": aemHost,
-                "path": aemAssetPath
-              })
+              body: presignedCallBody,
+              redirect: "follow"
             });
 
             if (!response.ok) {
@@ -104,9 +121,9 @@ export async function main(incommingParams: any): Promise<any> {
             }
 
             const data = await response.json();
+            presignedUrl = data.data.presignedUrl;
 
-            logger.info(`${ACTION_NAME}: Getting presigned URL from Adobe internal endpoint: ${presignedUrlEndpoint}`);
-            logger.info(`${ACTION_NAME}: data`, data);
+            logger.info(`${ACTION_NAME}: Getting presigned URL from Adobe internal endpoint: ${presignedUrlEndpoint} got presigned url: ${presignedUrl}`);
 
           } catch (error) {
             logger.error(`${ACTION_NAME}: Error getting presigned URL:`, error);
@@ -134,18 +151,19 @@ export async function main(incommingParams: any): Promise<any> {
             };
           }
 
+          let eventData = {
+            "asset_id": aemAssetData["jcr:uuid"],
+            "asset_path": aemAssetPath,
+            "metadata": metadata,
+            "presignedUrl": presignedUrl
+          };
+
           for (const customer of customersArray) {
             // set the brand id
             logger.info(`brand id ${customer} in customersArray`);
             const brandId = customer;
 
-            let eventData = {
-              "brandId": brandId,
-              "asset_id": aemAssetData["jcr:uuid"],
-              "asset_path": aemAssetData["jcr:content"]["cq:parentPath"],
-              "metadata": aemAssetData["jcr:content"].metadata,
-              "presignedUrl": presignedUrl
-            };
+            eventData["brandId"] = brandId;
 
             // has the asset been synced before?
             if (aemAssetData["jcr:content"].metadata["a2b__last_sync"]) {
@@ -153,7 +171,7 @@ export async function main(incommingParams: any): Promise<any> {
               logger.info(`assetSyncEventUpdate`, eventData);
               //const assetSyncEventUpdate = new AssetSyncUpdateEvent(eventData);
               //logger.info(`${ACTION_NAME}: assetSyncEventUpdate`,assetSyncEventUpdate);
-              //await eventManager.publishEvent(assetSyncEventUpdate);
+              //await getEventManager().publishEvent(assetSyncEventUpdate);
 
               //todo: update the last sync date in AEM data
               //eventData.metadate["a2d__last_sync"] = new Date().toISOString();
@@ -161,9 +179,11 @@ export async function main(incommingParams: any): Promise<any> {
               // new event  
               logger.info(`assetSyncEventNew`, eventData);
               const assetSyncEventNew = new AssetSyncNewEvent(eventData);
-              logger.info(`assetSyncEventNew event data is valid ${assetSyncEventNew.validate}`);
+              assetSyncEventNew.setSource(getAssetSyncProviderId());
+              const validationResult = assetSyncEventNew.validate();
+              logger.info(`assetSyncEventNew event data validation: ${validationResult.valid}${validationResult.message ? ` - ${validationResult.message}` : ''}`);
 
-              await eventManager.publishEvent(assetSyncEventNew);
+              await getEventManager().publishEvent(assetSyncEventNew);
               logger.info(`assetSyncEventNew complete`);
 
               // update todo: the last sync date in AEM data

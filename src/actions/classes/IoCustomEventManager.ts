@@ -25,17 +25,42 @@ export class IoCustomEventManager {
         this.logger = aioLogger("IoCustomEventManager", { level: logLevel || "info" });
         this.logger.debug('IoCustomEventManager constructor');
 
-        //check that the params object has the data we need
-        if(s2sAuthenticationCredentials.clientId && s2sAuthenticationCredentials.clientSecret && s2sAuthenticationCredentials.scopes && s2sAuthenticationCredentials.orgId){
+        // Validate S2S credentials
+        if (s2sAuthenticationCredentials.clientId && s2sAuthenticationCredentials.clientSecret && s2sAuthenticationCredentials.scopes && s2sAuthenticationCredentials.orgId) {
             this.logger.debug('IoCustomEventManager constructor params', s2sAuthenticationCredentials);
             this.s2sAuthenticationCredentials = s2sAuthenticationCredentials;
-        }else{
-            this.logger.error('IoCustomEventManager constructor params missing', s2sAuthenticationCredentials);
-            throw new Error('IoCustomEventManager constructor params missing. We need S2S_API_KEY, S2S_CLIENT_SECRET, S2S_SCOPES, and ORG_ID');
+        } else {
+            const missing: string[] = [];
+            if (!s2sAuthenticationCredentials.clientId) missing.push('S2S_CLIENT_ID');
+            if (!s2sAuthenticationCredentials.clientSecret) missing.push('S2S_CLIENT_SECRET');
+            if (!s2sAuthenticationCredentials.scopes) missing.push('S2S_SCOPES');
+            if (!s2sAuthenticationCredentials.orgId) missing.push('ORG_ID');
+            const message = `IoCustomEventManager:constructor: missing required S2S parameter(s): ${missing.join(', ')}`;
+            this.logger.error(message, s2sAuthenticationCredentials);
+            throw new Error(message);
         }
 
-        this.registrationProviderId = registrationProviderId; // that has to come from action invocation and not process.env since its openwhisk specific
-        this.assetSyncProviderId = assetSyncProviderId; // that has to come from action invocation and not process.env since its openwhisk specific
+        // Validate provider ids
+        if (!registrationProviderId) {
+            throw new Error('IoCustomEventManager:constructor: missing registrationProviderId');
+        }
+        if (!assetSyncProviderId) {
+            throw new Error('IoCustomEventManager:constructor: missing assetSyncProviderId');
+        }
+        this.registrationProviderId = registrationProviderId; // from action invocation
+        this.assetSyncProviderId = assetSyncProviderId; // from action invocation
+
+        // Validate application runtime info
+        if (!applicationRuntimeInfo || typeof applicationRuntimeInfo !== 'object') {
+            throw new Error('IoCustomEventManager:constructor: missing applicationRuntimeInfo');
+        }
+        const missingRuntimeFields: string[] = [];
+        if (!('consoleId' in applicationRuntimeInfo) || !applicationRuntimeInfo.consoleId) missingRuntimeFields.push('consoleId');
+        if (!('projectName' in applicationRuntimeInfo) || !applicationRuntimeInfo.projectName) missingRuntimeFields.push('projectName');
+        if (!('workspace' in applicationRuntimeInfo) || !applicationRuntimeInfo.workspace) missingRuntimeFields.push('workspace');
+        if (missingRuntimeFields.length > 0) {
+            throw new Error(`IoCustomEventManager:constructor: applicationRuntimeInfo missing field(s): ${missingRuntimeFields.join(', ')}`);
+        }
         this.applicationRuntimeInfo = applicationRuntimeInfo; // application runtime information for event isolation
         this.logger.debug('IoCustomEventManager constructor registrationProviderId', this.registrationProviderId);
         this.logger.debug('IoCustomEventManager constructor assetSyncProviderId', this.assetSyncProviderId);

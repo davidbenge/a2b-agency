@@ -20,18 +20,35 @@ export class EventManager {
      */
     constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, registrationProviderId: string, assetSyncProviderId: string, applicationRuntimeInfo: any) {
         this.logger = aioLogger("EventManager", { level: logLevel || "info" });
-        if(s2sAuthenticationCredentials.clientId && s2sAuthenticationCredentials.clientSecret && s2sAuthenticationCredentials.scopes && s2sAuthenticationCredentials.orgId){
+        if (s2sAuthenticationCredentials.clientId && s2sAuthenticationCredentials.clientSecret && s2sAuthenticationCredentials.scopes && s2sAuthenticationCredentials.orgId) {
             this.s2sAuthenticationCredentials = s2sAuthenticationCredentials;
-        }else{
-            this.logger.error('EventManager:constructor: s2sAuthenticationCredentials missing', s2sAuthenticationCredentials);
-            throw new Error('EventManager:constructor: s2sAuthenticationCredentials missing');
+        } else {
+            const missing: string[] = [];
+            if (!s2sAuthenticationCredentials.clientId) missing.push('clientId');
+            if (!s2sAuthenticationCredentials.clientSecret) missing.push('clientSecret');
+            if (!s2sAuthenticationCredentials.scopes) missing.push('scopes');
+            if (!s2sAuthenticationCredentials.orgId) missing.push('orgId');
+            const message = `EventManager:constructor: s2sAuthenticationCredentials missing required field(s): ${missing.join(', ')}`;
+            this.logger.error(message);
+            throw new Error(message);
         }
 
         this.brandManager = new BrandManager(logLevel);
         this.logger.debug('EventManager:constructor: Creating IoCustomEventManager with registrationProviderId', registrationProviderId);
         this.logger.debug('EventManager:constructor: Creating IoCustomEventManager with assetSyncProviderId', assetSyncProviderId);
         this.logger.debug('EventManager:constructor: Application runtime info', applicationRuntimeInfo);
-        this.ioCustomEventManager = new IoCustomEventManager(logLevel, this.s2sAuthenticationCredentials, registrationProviderId, assetSyncProviderId, applicationRuntimeInfo);
+
+        if(!registrationProviderId || !assetSyncProviderId || !applicationRuntimeInfo){
+            const missing2: string[] = [];
+            if(!registrationProviderId) missing2.push('registrationProviderId');
+            if(!assetSyncProviderId) missing2.push('assetSyncProviderId');
+            if(!applicationRuntimeInfo) missing2.push('applicationRuntimeInfo');
+            const message2 = `EventManager:constructor: missing required field(s): ${missing2.join(', ')}`;
+            this.logger.error(message2);
+            throw new Error(message2);
+        }else{
+            this.ioCustomEventManager = new IoCustomEventManager(logLevel, this.s2sAuthenticationCredentials, registrationProviderId, assetSyncProviderId, applicationRuntimeInfo);
+        }
         this.logLevel = logLevel;
     }
 
@@ -43,10 +60,12 @@ export class EventManager {
     async publishEvent(event: IIoEvent): Promise<void> {
         this.logger.debug('EventManager:publishEvent: event', event);
 
-        // TODO: all events are echoed on IO
-        if(!event.validate()){
-            this.logger.error('EventManager:publishEvent: event is not valid', event);
-            throw new Error('EventManager:publishEvent: event is not valid');
+        // Validate event with informative response
+        const validation = event.validate();
+        if(!validation.valid){
+            const msg = `EventManager:publishEvent: event is not valid${validation.message ? ` - ${validation.message}` : ''}`;
+            this.logger.error(msg);
+            throw new Error(msg);
         }
 
         // send the event to IO
@@ -93,8 +112,14 @@ export class EventManager {
      * @returns the s2s authentication credentials
      */
     static getS2sAuthenticationCredentials(params: any): IS2SAuthenticationCredentials {
-        if(!params.S2S_CLIENT_ID || !params.S2S_CLIENT_SECRET || !params.S2S_SCOPES || !params.ORG_ID){
-            throw new Error('EventManager:getS2sAuthenticationCredentials: missing required parameters');
+        //check for missing params and build a descriptive error message
+        const missing: string[] = [];
+        if (!params.S2S_CLIENT_ID) missing.push('S2S_CLIENT_ID');
+        if (!params.S2S_CLIENT_SECRET) missing.push('S2S_CLIENT_SECRET');
+        if (!params.S2S_SCOPES) missing.push('S2S_SCOPES');
+        if (!params.ORG_ID) missing.push('ORG_ID');
+        if (missing.length > 0) {
+            throw new Error(`EventManager:getS2sAuthenticationCredentials: missing required parameter(s): ${missing.join(', ')}`);
         }
         
         // clean up the meta scopes
@@ -117,25 +142,33 @@ export class EventManager {
     /***
      * @param params - the parameters object from an action invoke
      * 
-     * @returns the registration provider ID
+     * @returns the asset sync provider ID
      */
-    static getRegistrationProviderId(params: any): string {
-        if(!params.AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID){
-            throw new Error('EventManager:getRegistrationProviderId: missing AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID parameter');
+    static getAssetSyncProviderId(params: any): string {
+        const key = 'AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID';
+        const value = params[key];
+        if (!value || typeof value !== 'string' || value.trim().length === 0) {
+            throw new Error(
+                `EventManager:getAssetSyncProviderId: missing parameter ${key}. Ensure it is defined in your .env and mapped in app.config.yaml inputs.`
+            );
         }
-        return params.AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID;
+        return value;
     }
 
     /***
      * @param params - the parameters object from an action invoke
      * 
-     * @returns the asset sync provider ID
+     * @returns the new brand registration provider ID
      */
-    static getAssetSyncProviderId(params: any): string {
-        if(!params.AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID){
-            throw new Error('EventManager:getAssetSyncProviderId: missing AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID parameter');
+    static getRegistrationProviderId(params: any): string {
+        const key = 'AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID';
+        const value = params[key];
+        if (!value || typeof value !== 'string' || value.trim().length === 0) {
+            throw new Error(
+                `EventManager:getRegistrationProviderId: missing parameter ${key}. Ensure it is defined in your .env and mapped in app.config.yaml inputs.`
+            );
         }
-        return params.AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID;
+        return value;
     }
 
     /***
@@ -151,13 +184,15 @@ export class EventManager {
             try {
                 const runtimeInfo = JSON.parse(params.APPLICATION_RUNTIME_INFO);
                 if (runtimeInfo.namespace && runtimeInfo.app_name) {
-                    // Split namespace into consoleId, projectName, and workspace
-                    const namespaceParts = runtimeInfo.namespace.split('/');
+                    // Split namespace into consoleId, projectName, and workspace (expected format: consoleId-projectName-workspace)
+                    const namespaceParts = String(runtimeInfo.namespace).split('-');
                     if (namespaceParts.length >= 3) {
                         const applicationRuntimeInfo: IApplicationRuntimeInfo = {
                             consoleId: namespaceParts[0],
                             projectName: namespaceParts[1],
-                            workspace: namespaceParts[2]
+                            workspace: namespaceParts[2],
+                            actionPackageName: runtimeInfo.action_package_name,
+                            app_name: runtimeInfo.app_name
                         };
                         return applicationRuntimeInfo;
                     }

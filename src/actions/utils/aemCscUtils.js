@@ -319,7 +319,6 @@ module.exports = {
   writeCommentToAsset,
   writeJsonExpressCompatibiltyReportToComment,
   getAemAssetDataRapi,
-  getAemAssetPresignedDownloadUrl,
   addMetadataToAemAsset
 }
 

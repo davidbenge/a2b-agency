@@ -1,5 +1,5 @@
 import { CloudEvent } from 'cloudevents';
-import { IIoEvent } from '../types/index';
+import { IIoEvent, IValidationResult } from '../types/index';
 
 export abstract class IoEvent implements IIoEvent {
     source: string;
@@ -13,23 +13,28 @@ export abstract class IoEvent implements IIoEvent {
         this.datacontenttype = 'application/json';
     }
 
-    validate(): boolean {
-        return (
-            this.data.brandId !== undefined &&
-            this.data.secret !== undefined &&
-            this.data.name !== undefined &&
-            this.data.endPointUrl !== undefined &&
-            typeof this.data.enabled === 'boolean'
-        );
+    validate(): IValidationResult {
+        const missing: string[] = [];
+        if (this.data.brandId === undefined) missing.push('brandId');
+        if (this.data.secret === undefined) missing.push('secret');
+        if (this.data.name === undefined) missing.push('name');
+        if (this.data.endPointUrl === undefined) missing.push('endPointUrl');
+        if (typeof this.data.enabled !== 'boolean') missing.push('enabled(boolean)');
+        const valid = missing.length === 0;
+        return {
+            valid,
+            message: valid ? undefined : `Missing or invalid required field(s): ${missing.join(', ')}`,
+            missing: valid ? undefined : missing
+        };
     }
 
     toJSON(): any {
         var returnJson = {
-            source: this.source,
-            type: this.type,
-            datacontenttype: this.datacontenttype,
-            id: this.id,
-            data: {} as any
+            "source": `${this.source}`,
+            "type": `${this.type}`,
+            "datacontenttype": `${this.datacontenttype}`,
+            "id": `${this.id}`,
+            "data": {} as any
         };
 
         // if the data is an object and has a toJSON function, use it
