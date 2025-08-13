@@ -64,10 +64,10 @@ export async function main(params: any): Promise<any> {
       logger.debug('new-brand-registration registrationProviderId', registrationProviderId);
       logger.debug('new-brand-registration assetSyncProviderId', assetSyncProviderId);
       logger.debug('new-brand-registration applicationRuntimeInfo', applicationRuntimeInfo);
-      const eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, registrationProviderId, assetSyncProviderId, applicationRuntimeInfo);
+      const eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, applicationRuntimeInfo);
 
       // publish the event
-      await eventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand));
+      await eventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand,registrationProviderId));
 
     } catch (error) {
       logger.error('Error sending event', error);

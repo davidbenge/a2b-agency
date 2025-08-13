@@ -35,8 +35,6 @@ export async function main(params: any): Promise<any> {
     return new EventManager(
       params.LOG_LEVEL,
       currentS2sAuthenticationCredentials,
-      assetSyncProviderId,
-      assetSyncProviderId,
       applicationRuntimeInfo
     );
   });
@@ -89,6 +87,7 @@ export async function main(params: any): Promise<any> {
         if (metadata["a2b__sync_on_change"] && (metadata["a2b__sync_on_change"] === true || metadata["a2b__sync_on_change"] === "true") && metadata["a2b__customers"]) {
           // loop over brands and send an event for each brand
           const customers = metadata["a2b__customers"];
+          const sourceProviderId = getAssetSyncProviderId();
           const presignedUrlEndpoint = params.ADOBE_INTERNAL_URL_ENDPOINT + "/aem-getPresignedReadUrl";
           const aemAuth = await getAemAuth(params, logger);
           const adobeInternalCallHeaders = {
@@ -103,7 +102,6 @@ export async function main(params: any): Promise<any> {
           });
 
           logger.debug(`${ACTION_NAME}: presignedUrlEndpoint`, presignedUrlEndpoint);
-          logger.debug(`${ACTION_NAME}: presignedUrlEndpoint headers`, adobeInternalCallHeaders);
           logger.debug(`${ACTION_NAME}: presignedCallBody`, presignedCallBody);
 
           // Get presigned URL for the asset using Adobe internal endpoint
@@ -127,6 +125,7 @@ export async function main(params: any): Promise<any> {
 
           } catch (error) {
             logger.error(`${ACTION_NAME}: Error getting presigned URL:`, error);
+            throw new Error(`${ACTION_NAME}: Error getting presigned URL: ${error}`);
           }
   
           // Handle customers as either an array, object, or string
@@ -158,6 +157,7 @@ export async function main(params: any): Promise<any> {
             "presignedUrl": presignedUrl
           };
 
+          // loop over customers and send an event for each customer subscribed to the asset
           for (const customer of customersArray) {
             // set the brand id
             logger.info(`brand id ${customer} in customersArray`);
@@ -169,20 +169,12 @@ export async function main(params: any): Promise<any> {
             if (aemAssetData["jcr:content"].metadata["a2b__last_sync"]) {
               // update event
               logger.info(`assetSyncEventUpdate`, eventData);
-              //const assetSyncEventUpdate = new AssetSyncUpdateEvent(eventData);
-              //logger.info(`${ACTION_NAME}: assetSyncEventUpdate`,assetSyncEventUpdate);
-              //await getEventManager().publishEvent(assetSyncEventUpdate);
+              //TODO: send out an update event
 
-              //todo: update the last sync date in AEM data
-              //eventData.metadate["a2d__last_sync"] = new Date().toISOString();
             } else {
               // new event  
-              logger.info(`assetSyncEventNew`, eventData);
-              const assetSyncEventNew = new AssetSyncNewEvent(eventData);
-              assetSyncEventNew.setSource(getAssetSyncProviderId());
-              const validationResult = assetSyncEventNew.validate();
-              logger.info(`assetSyncEventNew event data validation: ${validationResult.valid}${validationResult.message ? ` - ${validationResult.message}` : ''}`);
-
+              logger.info(`assetSyncEventNew`, eventData.asset_id, eventData.asset_path, eventData.metadata, brandId);
+              const assetSyncEventNew = new AssetSyncNewEvent(eventData.asset_id, eventData.asset_path, eventData.metadata, brandId, sourceProviderId);
               await getEventManager().publishEvent(assetSyncEventNew);
               logger.info(`assetSyncEventNew complete`);
 

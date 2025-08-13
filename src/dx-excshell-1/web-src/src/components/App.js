@@ -49,7 +49,6 @@ function App (props) {
               <Routes>
                 <Route path='/' element={<Home />} />
                 <Route path='/brand_manager' element={<BrandManagerView viewProps={props.viewProps} />}/>
-                <Route path='/actions' element={<ActionsForm runtime={props.runtime} ims={props.viewProps.ims} />}/>
                 <Route path='/about' element={<About />}/>
               </Routes>
             </View>

@@ -27,7 +27,7 @@ async function getAemAssetData(aemHost,aemAssetPath,params,logger){
   const fetchUrl = aemHost + aemAssetPath + '.3.json'
   logger.debug("getAemAssetData fetchUrl",fetchUrl);
   const aemAuthToken = await getAemAuth(params,logger);
-  logger.debug("getAemAssetData aemAuthToken",aemAuthToken);
+  //logger.debug("getAemAssetData aemAuthToken",aemAuthToken);
 
   const res = await fetch(fetchUrl, {
     method: 'get',
@@ -221,7 +221,7 @@ async function addMetadataToAemAsset(aemHost,aemAssetPath,tagPath,tagValue,param
 
   const aemAuthToken = await getAemAuth(params,logger)
 
-  logger.debug(`aemCscUtils:aemAssetAddMetadata got auth ${JSON.stringify(aemAuthToken, null, 2)}`)
+  //logger.debug(`aemCscUtils:aemAssetAddMetadata got auth ${JSON.stringify(aemAuthToken, null, 2)}`)
   let config = {
     method: 'patch',
     url: `${aemHost}/adobe/repository${aemAssetPath};resource=applicationmetadata`,

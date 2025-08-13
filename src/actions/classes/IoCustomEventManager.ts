@@ -8,8 +8,6 @@ import { getServer2ServerToken } from "../utils/adobeAuthUtils";
 export class IoCustomEventManager {
     private logger: any;
     private s2sAuthenticationCredentials: IS2SAuthenticationCredentials;
-    private registrationProviderId: string; 
-    private assetSyncProviderId: string;
     private applicationRuntimeInfo: any;
     
     /*******
@@ -17,11 +15,9 @@ export class IoCustomEventManager {
      * 
      * @param logLevel: string
      * @param s2sAuthenticationCredentials: IS2SAuthenticationCredentials from action
-     * @param registrationProviderId: string
-     * @param assetSyncProviderId: string
      * @param applicationRuntimeInfo: object containing runtime information
      *******/
-    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, registrationProviderId: string, assetSyncProviderId: string, applicationRuntimeInfo: any) {
+    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, applicationRuntimeInfo: any) {
         this.logger = aioLogger("IoCustomEventManager", { level: logLevel || "info" });
         this.logger.debug('IoCustomEventManager constructor');
 
@@ -40,16 +36,6 @@ export class IoCustomEventManager {
             throw new Error(message);
         }
 
-        // Validate provider ids
-        if (!registrationProviderId) {
-            throw new Error('IoCustomEventManager:constructor: missing registrationProviderId');
-        }
-        if (!assetSyncProviderId) {
-            throw new Error('IoCustomEventManager:constructor: missing assetSyncProviderId');
-        }
-        this.registrationProviderId = registrationProviderId; // from action invocation
-        this.assetSyncProviderId = assetSyncProviderId; // from action invocation
-
         // Validate application runtime info
         if (!applicationRuntimeInfo || typeof applicationRuntimeInfo !== 'object') {
             throw new Error('IoCustomEventManager:constructor: missing applicationRuntimeInfo');
@@ -62,9 +48,6 @@ export class IoCustomEventManager {
             throw new Error(`IoCustomEventManager:constructor: applicationRuntimeInfo missing field(s): ${missingRuntimeFields.join(', ')}`);
         }
         this.applicationRuntimeInfo = applicationRuntimeInfo; // application runtime information for event isolation
-        this.logger.debug('IoCustomEventManager constructor registrationProviderId', this.registrationProviderId);
-        this.logger.debug('IoCustomEventManager constructor assetSyncProviderId', this.assetSyncProviderId);
-        this.logger.debug('IoCustomEventManager constructor applicationRuntimeInfo', this.applicationRuntimeInfo);
     }
 
     /*******
@@ -75,44 +58,16 @@ export class IoCustomEventManager {
      *******/
     async publishEvent(event: IIoEvent): Promise<void> {
         this.logger.debug('IoCustomEventManager:publishEvent starting');
-        let providerId = "not-set";
 
-        // based on the event type lets pull the provider id
-        switch(event.type) {
-            case "com.adobe.a2b.registration.enabled":
-            case "com.adobe.a2b.registration.disabled":
-            case "com.adobe.a2b.registration.received":
-                providerId = this.registrationProviderId;
-                this.logger.debug('IoCustomEventManager:publishEvent: Using registration provider ID', providerId);
-                break;
-            case "com.adobe.a2b.assetsync.new":
-            case "com.adobe.a2b.assetsync.updated":
-            case "com.adobe.a2b.assetsync.deleted":
-                providerId = this.assetSyncProviderId;
-                this.logger.debug('IoCustomEventManager:publishEvent: Using asset sync provider ID', providerId);
-                break;
-            default:
-                this.logger.error('IoCustomEventManager:publishEvent: Event type not supported', event);
-        }
-
-        this.logger.debug('IoCustomEventManager:publishEvent: Final provider ID', providerId);
-        event.id = uuidv4(); // set the id
-        event.source = `urn:uuid:${providerId}`; // set the source
-        this.logger.debug('IoCustomEventManager:publishEvent: Event source set to', event.source);
-        
-        // Add application runtime info to the event data for environment isolation
-        if (this.applicationRuntimeInfo && event.data) {
-            // Parse the namespace to extract consoleId, projectName, and workspace
-            const namespaceParts = this.applicationRuntimeInfo.namespace.split('-');
-            const parsedRuntimeInfo = {
-                consoleId: namespaceParts[0] || '',
-                projectName: namespaceParts[1] || '',
-                workspace: namespaceParts.slice(2).join('-') || '',
-                app_name: this.applicationRuntimeInfo.app_name
+        // add the application runtime info to the event data
+        if (event.data) {
+            event.data.app_runtime_info = {
+                "consoleId": this.applicationRuntimeInfo.consoleId,
+                "projectName": this.applicationRuntimeInfo.projectName,
+                "workspace": this.applicationRuntimeInfo.workspace,
+                "app_name": this.applicationRuntimeInfo.app_name,
+                "action_package_name": this.applicationRuntimeInfo.actionPackageName
             };
-            
-            event.data.app_runtime_info = parsedRuntimeInfo;
-            this.logger.debug('IoCustomEventManager:publishEvent: Added app_runtime_info to event data', parsedRuntimeInfo);
         }
         
         if(event.validate()){
@@ -147,7 +102,6 @@ export class IoCustomEventManager {
         // initialize the event client
         //This class provides methods to call your Adobe I/O Events APIs. Before calling any method initialize the instance by calling the init method on it with valid values for organizationId, apiKey, accessToken and optional http options such as timeout and max number of retries
         const eventClient = await eventSdk.init(this.s2sAuthenticationCredentials.orgId, this.s2sAuthenticationCredentials.clientId, token);
-        this.logger.debug('IoCustomEventManager:publishEventToAdobeEventHub eventClient', eventClient);
 
         const cloudEventToSend = event.toCloudEvent();
         this.logger.debug('IoCustomEventManager:publishEventToAdobeEventHub cloudEvent to publish toJSON',event.toJSON());

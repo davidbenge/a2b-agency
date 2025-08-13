@@ -1,5 +1,6 @@
 import { CloudEvent } from 'cloudevents';
 import { IIoEvent, IValidationResult } from '../types/index';
+import { v4 as uuidv4 } from 'uuid';
 
 export abstract class IoEvent implements IIoEvent {
     source: string;
@@ -11,6 +12,7 @@ export abstract class IoEvent implements IIoEvent {
     constructor() {
         // Abstract class constructor
         this.datacontenttype = 'application/json';
+        this.id = uuidv4(); // set the id
     }
 
     validate(): IValidationResult {
@@ -28,6 +30,11 @@ export abstract class IoEvent implements IIoEvent {
         };
     }
 
+    /****
+     * toJSON - convert the event to a JSON object
+     * 
+     * @returns any
+     *******/
     toJSON(): any {
         var returnJson = {
             "source": `${this.source}`,

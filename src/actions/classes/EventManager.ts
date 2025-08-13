@@ -14,11 +14,9 @@ export class EventManager {
     /****
      * @param logLevel - the log level to use
      * @param s2sAuthenticationCredentials - the s2s authentication credentials 
-     * @param registrationProviderId - the registration provider ID
-     * @param assetSyncProviderId - the asset sync provider ID
      * @param applicationRuntimeInfo - the application runtime information
      */
-    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, registrationProviderId: string, assetSyncProviderId: string, applicationRuntimeInfo: any) {
+    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, applicationRuntimeInfo: any) {
         this.logger = aioLogger("EventManager", { level: logLevel || "info" });
         if (s2sAuthenticationCredentials.clientId && s2sAuthenticationCredentials.clientSecret && s2sAuthenticationCredentials.scopes && s2sAuthenticationCredentials.orgId) {
             this.s2sAuthenticationCredentials = s2sAuthenticationCredentials;
@@ -34,20 +32,15 @@ export class EventManager {
         }
 
         this.brandManager = new BrandManager(logLevel);
-        this.logger.debug('EventManager:constructor: Creating IoCustomEventManager with registrationProviderId', registrationProviderId);
-        this.logger.debug('EventManager:constructor: Creating IoCustomEventManager with assetSyncProviderId', assetSyncProviderId);
-        this.logger.debug('EventManager:constructor: Application runtime info', applicationRuntimeInfo);
 
-        if(!registrationProviderId || !assetSyncProviderId || !applicationRuntimeInfo){
+        if(!applicationRuntimeInfo){
             const missing2: string[] = [];
-            if(!registrationProviderId) missing2.push('registrationProviderId');
-            if(!assetSyncProviderId) missing2.push('assetSyncProviderId');
             if(!applicationRuntimeInfo) missing2.push('applicationRuntimeInfo');
             const message2 = `EventManager:constructor: missing required field(s): ${missing2.join(', ')}`;
             this.logger.error(message2);
             throw new Error(message2);
         }else{
-            this.ioCustomEventManager = new IoCustomEventManager(logLevel, this.s2sAuthenticationCredentials, registrationProviderId, assetSyncProviderId, applicationRuntimeInfo);
+            this.ioCustomEventManager = new IoCustomEventManager(logLevel, this.s2sAuthenticationCredentials, applicationRuntimeInfo);
         }
         this.logLevel = logLevel;
     }
@@ -58,7 +51,7 @@ export class EventManager {
      * @returns void
      */
     async publishEvent(event: IIoEvent): Promise<void> {
-        this.logger.debug('EventManager:publishEvent: event', event);
+        this.logger.debug('EventManager:publishEvent: event', event.toJSON());
 
         // Validate event with informative response
         const validation = event.validate();
@@ -68,7 +61,7 @@ export class EventManager {
             throw new Error(msg);
         }
 
-        // send the event to IO
+        // send the LOCAL custom event to IO
         try{
             await this.ioCustomEventManager.publishEvent(event);
         }catch(error){
