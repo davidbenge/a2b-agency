@@ -64,7 +64,7 @@ application:
               final: true
           adobe-product-event-handler:
             function: src/actions/adobe-product-event-handler/index.ts
-            web: 'no'
+            web: 'yes'
             runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
