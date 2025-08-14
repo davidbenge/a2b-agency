@@ -18,7 +18,10 @@ application:
               S2S_CLIENT_ID: $SERVICE_API_KEY
               S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
               S2S_SCOPES: $S2S_SCOPES
-              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
+              AIO_runtime_apihost: $AIO_runtime_apihost
+              AIO_runtime_auth: $AIO_runtime_auth
+              AIO_runtime_namespace: $AIO_runtime_namespace
+              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
             annotations:
               require-adobe-auth: false
               final: true
@@ -30,7 +33,7 @@ application:
               LOG_LEVEL: debug
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
             annotations:
-              require-adobe-auth: true
+              require-adobe-auth: false
               final: true
           delete-brand:
             function: src/actions/delete-brand/index.ts
@@ -44,7 +47,7 @@ application:
               ORG_ID: $ORG_ID
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
             annotations:
-              require-adobe-auth: true
+              require-adobe-auth: false
               final: true
           brand-event-handler:
             function: src/actions/brand-event-handler/index.ts
