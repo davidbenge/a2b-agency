@@ -8,7 +8,7 @@ application:
           new-brand-registration:
             function: src/actions/new-brand-registration/index.ts
             web: 'yes'
-            runtime: nodejs:20
+            runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
               ORG_ID: $ORG_ID
@@ -25,7 +25,7 @@ application:
           get-brands:
             function: src/actions/get-brands/index.ts
             web: 'yes'
-            runtime: nodejs:20
+            runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
@@ -35,7 +35,7 @@ application:
           delete-brand:
             function: src/actions/delete-brand/index.ts
             web: 'yes'
-            runtime: nodejs:20
+            runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
               S2S_CLIENT_ID: $SERVICE_API_KEY
@@ -49,7 +49,7 @@ application:
           brand-event-handler:
             function: src/actions/brand-event-handler/index.ts
             web: 'yes'
-            runtime: nodejs:20
+            runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
               AIO_runtime_apihost: $AIO_runtime_apihost
@@ -62,7 +62,7 @@ application:
           adobe-product-event-handler:
             function: src/actions/adobe-product-event-handler/index.ts
             web: 'no'
-            runtime: nodejs:20
+            runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
             annotations:
@@ -71,7 +71,7 @@ application:
           agency-assetsync-internal-handler:
             function: src/actions/agency-assetsync-internal-handler/index.ts
             web: 'no'
-            runtime: nodejs:20
+            runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
               ADOBE_INTERNAL_URL_ENDPOINT: $ADOBE_INTERNAL_URL_ENDPOINT

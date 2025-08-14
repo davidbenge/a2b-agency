@@ -5,8 +5,8 @@ import { Brand } from '../../../../actions/classes/Brand';
  */
 const API_CONFIG = {
     ENDPOINTS: {
-        BRAND_GET_LIST: '/get-brands',
-        BRAND_DELETE: '/delete-brand'
+        BRAND_GET_LIST: '/__secured_get-brands',
+        BRAND_DELETE: '/__secured_delete-brand'
     }
 };
 

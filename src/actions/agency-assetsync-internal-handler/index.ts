@@ -174,6 +174,7 @@ export async function main(params: any): Promise<any> {
             } else {
               // new event  
               logger.info(`assetSyncEventNew`, eventData.asset_id, eventData.asset_path, eventData.metadata, brandId);
+              
               const assetSyncEventNew = new AssetSyncNewEvent(eventData.asset_id, eventData.asset_path, eventData.metadata, brandId, sourceProviderId);
               await getEventManager().publishEvent(assetSyncEventNew);
               logger.info(`assetSyncEventNew complete`);
