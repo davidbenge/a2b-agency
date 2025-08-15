@@ -7,7 +7,6 @@ import { Provider, defaultTheme, Grid, View } from '@adobe/react-spectrum'
 import ErrorBoundary from 'react-error-boundary'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import SideBar from './common/SideBar'
-import ActionsForm from './ActionsForm'
 import { Home } from './Home'
 import { About } from './About'
 import BrandManagerView from './layout/BrandManagerView'
@@ -50,7 +49,6 @@ function App (props) {
               <Routes>
                 <Route path='/' element={<Home />} />
                 <Route path='/brand_manager' element={<BrandManagerView viewProps={props.viewProps} />}/>
-                <Route path='/actions' element={<ActionsForm runtime={props.runtime} ims={props.viewProps.ims} />}/>
                 <Route path='/about' element={<About />}/>
               </Routes>
             </View>

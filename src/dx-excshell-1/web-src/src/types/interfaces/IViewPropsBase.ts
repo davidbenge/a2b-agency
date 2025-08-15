@@ -15,4 +15,5 @@ export interface IViewPropsBase {
     tenant: string; //tenant name for current ims organization
     aioRuntimeNamespace: string; //namespace for the runtime pulled in from .env
     aioAppName: string; //app name pulled in from .env
+    aioActionPackageName: string; //action package name pulled in from .env
 }

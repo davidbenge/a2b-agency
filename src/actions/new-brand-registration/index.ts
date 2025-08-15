@@ -53,18 +53,13 @@ export async function main(params: any): Promise<any> {
     try {
       logger.debug('new-brand-registration starting cloud event construction');
       logger.debug('new-brand-registration params keys', Object.keys(params));
-      logger.debug('new-brand-registration AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID', params.AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID);
-      logger.debug('new-brand-registration AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID', params.AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID);
       const currentS2sAuthenticationCredentials = EventManager.getS2sAuthenticationCredentials(params);
       const registrationProviderId = EventManager.getRegistrationProviderId(params);
-      const assetSyncProviderId = EventManager.getAssetSyncProviderId(params);
-      logger.debug('new-brand-registration currentS2sAuthenticationCredentials', JSON.stringify(currentS2sAuthenticationCredentials, null, 2));
-      logger.debug('new-brand-registration registrationProviderId', registrationProviderId);
-      logger.debug('new-brand-registration assetSyncProviderId', assetSyncProviderId);
-      const eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, registrationProviderId, assetSyncProviderId);
+      const applicationRuntimeInfo = EventManager.getApplicationRuntimeInfo(params);
+      const eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, applicationRuntimeInfo);
 
       // publish the event
-      await eventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand));
+      await eventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand,registrationProviderId));
 
     } catch (error) {
       logger.error('Error sending event', error);

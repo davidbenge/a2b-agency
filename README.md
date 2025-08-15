@@ -1,4 +1,13 @@
-# a2b Brand Application 
+```
+ █████  ██████╗ ███████╗███╗   ██╗ ██████╗██╗   ██╗
+██╔══██╗██╔════╝ ██╔════╝████╗  ██║██╔════╝╚██╗ ██╔╝
+███████║██║  ███╗█████╗  ██╔██╗ ██║██║  ███╗╚████╔╝ 
+██╔══██║██║   ██║██╔══╝  ██║╚██╗██║██║   ██║ ╚██╔╝  
+██║  ██║╚██████╔╝███████╗██║ ╚████║╚██████╔╝  ██║   
+╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝ ╚═════╝   ╚═╝   
+```
+
+# a2b Agency Application 
 
 The Agency to Brand solution is an active proof of concept being developed using Adobe App Builder. It’s designed to connect asset workflows between agencies and brand-owned AEM environments in a secure and auditable way—without requiring direct access to the brand’s systems.
 This POC establishes a repeatable pattern that can be shared with agencies and partners to build their own Agency-to-Brand extension using Adobe App Builder and distributing on Adobe Exchange.
@@ -61,10 +70,14 @@ You can generate the `.env` file using the command `aio app use`.
 # Adobe I/O Runtime
 AIO_RUNTIME_AUTH=
 AIO_RUNTIME_NAMESPACE=
+AIO_app_name=
 
 # Adobe I/O Events
 AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=
 AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID=
+
+# Adobe Internal Calls
+ADOBE_INTERNAL_URL_ENDPOINT=
 
 # AEM Authentication
 AEM_AUTH_CLIENT_SECRET=
@@ -82,6 +95,187 @@ S2S_SCOPES=
 # Organization
 ORG_ID=
 ```
+
+### Environment Setup Instructions
+
+To run this application, you need to configure several environment variables with values from your Adobe Developer Console and AEM Cloud Service settings.
+
+#### 1. Adobe Developer Console Settings
+
+Update these variables with values from your Adobe Developer Console project:
+
+```bash
+# Organization ID from your Adobe Developer Console
+ORG_ID=your-org-id@AdobeOrg
+
+# Service Account (JWT) credentials from your project
+S2S_API_KEY=your-service-account-api-key
+S2S_CLIENT_ID=your-service-account-client-id
+S2S_CLIENT_SECRET=your-service-account-client-secret
+S2S_SCOPES=["AdobeID","openid","read_organizations","additional_info.projectedProductContext","additional_info.roles","adobeio_api","read_client_secret","manage_client_secrets"]
+```
+
+#### 2. Application-Specific Settings
+
+Set these to your own target values:
+
+```bash
+# Your agency name (used for events and identification)
+AGENCY_NAME=Your Agency Name
+
+# Generate a UUID for your agency (use a UUID generator)
+AGENCY_ID=12345678-1234-1234-1234-123456789abc
+
+# Your application name (should match your Adobe Developer Console project)
+AIO_app_name=your-app-name
+
+# Adobe Internal Calls Configuration
+# Endpoint for getting presigned read URLs from Adobe internal services
+ADOBE_INTERNAL_URL_ENDPOINT=https://27200-609silverstork-stage.adobeioruntime.net/api/v1/web/a2b-agency
+```
+
+#### 3. AEM Cloud Service Integration
+
+These values come from your AEM Cloud Service Developer Console:
+
+```bash
+# AEM JWT Integration credentials
+AEM_AUTH_CLIENT_ID=your-aem-client-id
+AEM_AUTH_TECH_ACCOUNT_ID=your-aem-tech-account-id@techacct.adobe.com
+AEM_AUTH_CLIENT_SECRET=your-aem-client-secret
+AEM_AUTH_SCOPES=ent_aem_cloud_api
+AEM_AUTH_TYPE=jwt
+```
+
+##### Private Key Setup (Important!)
+
+The `AEM_AUTH_PRIVATE_KEY` requires special handling:
+
+1. **Download the JWT token** from your AEM Developer Console
+2. **Remove the last `\r\n`** from the key
+3. **Replace all other `\r\n` with `\n`**
+4. **Surround the entire key with double quotes**
+
+Example:
+```bash
+AEM_AUTH_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEAyvm41fmvihTKPVhRDWWHFeZP7UjwPElofsnn8IxkXI3SKvqt\nDOQj7cTMt0mNtp40TtsYXNrRiLn4w3rqF0CgYEAlczUQJJQRjcAqWEUKBDzOVh2TL61aRU3cixHiVj/w0EgaN07EE7Y\n5ffeGxvk+N0zSJeJFppBmePtMpGSO0CTsQh8hJ9Kpc31vWv2+x8VwGBLaoIyV9qY\n74SVLtYBabOtWOhQ7+ZWmV9wlF6cFfBB/O2Q+t5ZLZD859apHzsbvu0=\n-----END RSA PRIVATE KEY-----"
+```
+
+#### 4. Event Provider IDs
+
+These are generated when you register event providers in Adobe I/O Events. You need to find existing providers or create new ones.
+
+##### Finding Existing Event Providers
+
+Use the Adobe I/O CLI to list existing event providers:
+
+```bash
+# List all event providers in your organization
+aio event provider list
+
+# Look for providers with names like:
+# - "Agency Asset Sync Events" or similar for asset sync
+# - "Agency Brand Registration Events" or similar for registration
+```
+
+##### Creating Event Providers (if none exist)
+
+If you don't have the required event providers, create them:
+
+```bash
+# Create asset sync event provider
+aio event provider create --name "Agency Asset Sync Events" --description "Events for AEM asset synchronization"
+
+# Create brand registration event provider  
+aio event provider create --name "Agency Brand Registration Events" --description "Events for brand registration workflows"
+```
+
+##### Updating Environment Variables
+
+After finding or creating the providers, update these variables with the provider UUIDs:
+
+```bash
+# Registration events provider ID (from aio event provider list)
+AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=your-registration-provider-uuid
+
+# Asset sync events provider ID (from aio event provider list)
+AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID=your-asset-sync-provider-uuid
+```
+
+**Note**: The provider UUIDs are required for the application to publish events. If you don't have these set up, the application will fail to publish events.
+
+### Setup Checklist
+
+- [ ] Adobe Developer Console project created
+- [ ] Server to Server Account credentials configured
+- [ ] AEM Cloud Service JWT integration set up
+- [ ] JWT private key properly formatted
+- [ ] Event providers checked with `aio event provider list`
+- [ ] Event providers created if needed with `aio event provider create`
+- [ ] Event provider UUIDs copied to environment variables
+- [ ] All environment variables populated
+- [ ] Application deployed with `aio app deploy`
+
+### Adobe Internal Calls Configuration
+
+The application can integrate with Adobe internal services to retrieve presigned URLs for assets. This is configured through the `ADOBE_INTERNAL_URL_ENDPOINT` environment variable.
+
+```bash
+# Adobe Internal Calls Configuration
+# Endpoint for getting presigned read URLs from Adobe internal services
+ADOBE_INTERNAL_URL_ENDPOINT=https://27200-609silverstork-stage.adobeioruntime.net/api/v1/web/a2b-agency
+```
+
+**Note**: This endpoint is used by the `agency-assetsync-internal-handler` action to retrieve presigned URLs when processing asset sync events. The endpoint should be configured to point to your Adobe internal service that provides presigned URLs for AEM assets.
+
+### Runtime Environment Isolation
+
+The application implements a sophisticated runtime environment isolation system to prevent cross-contamination of events between different development environments. This is crucial when multiple developers are working simultaneously on the same IMS organization.
+
+#### How It Works
+
+1. **Runtime Information Injection**: Every action receives an `APPLICATION_RUNTIME_INFO` parameter containing:
+   ```json
+   {
+     "namespace": "your-runtime-namespace",
+     "app_name": "your-app-name"
+   }
+   ```
+
+2. **Event Enrichment**: All events published by the EventManager are automatically enriched with `app_runtime_info` in their data payload:
+   ```json
+   {
+     "app_runtime_info": {
+       "consoleId": "12345",
+       "projectName": "a2b", 
+       "workspace": "benge",
+       "app_name": "a2b-agency"
+     }
+   }
+   ```
+
+3. **Namespace Parsing**: The runtime namespace is parsed into three components:
+   - `consoleId`: The Adobe Developer Console ID (first part of namespace)
+   - `projectName`: The project name (second part of namespace)
+   - `workspace`: The workspace identifier (remaining parts)
+
+#### Benefits
+
+- **Event Isolation**: Events from different development environments can be filtered based on `app_runtime_info`
+- **Debugging Clarity**: Developers can easily identify which environment generated specific events
+- **Multi-Developer Support**: Multiple developers can work simultaneously without interference
+- **Environment Tracking**: Clear visibility into which runtime environment is processing events
+
+#### Implementation Details
+
+The isolation system is implemented through:
+
+- **EventManager**: Automatically adds `app_runtime_info` to all published events
+- **IoCustomEventManager**: Parses namespace and enriches event data
+- **Action Configuration**: All actions receive `APPLICATION_RUNTIME_INFO` parameter
+- **Event Filtering**: Consumers can filter events based on runtime information
+
+This architecture ensures that when multiple developers deploy their own instances of the application, each instance will only process events from its own runtime environment, eliminating confusion and cross-contamination issues.
 
 ### Project Configuration
 
@@ -280,6 +474,8 @@ Events to subscribe to:
 These events will be published to the BRAND and also echoed locally for secondary in-house systems use.
 
 ## Troubleshooting
+removing all your runtime actions 
+`aio rt actions list --json | jq -r '.[] | (.namespace + "/" + .name)' | while read -r a; do [ -n "$a" ] && aio rt action delete "$a"; done`
 
 ### Common Issues
 

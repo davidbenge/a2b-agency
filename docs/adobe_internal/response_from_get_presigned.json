@@ -1,0 +1,6 @@
+{
+    "data": {
+        "presignedUrl": "https://author-p111858-e1309055.adobeaemcloud.com/aem-blob-ns-team-aem-cm-prd-n127835-cm-p111858-e1309055/1111-97296aa06a2eb0c7121f0a8705db7e717eb2ef311d48a9d68d411477908b?sig=VAgYhI9ZsN4ZNbsxI1m8XrlNeJ8XbIE5yKGsEdgzFVE%3D&se=2025-08-12T05%3A46%3A47Z&sv=2019-02-02&rscc=private%2C%20max-age%3D43200%2C%20immutable&rsct=image%2Fjpeg&rscd=attachment%3B%20filename%3D%22my_test_image.jpeg%22%3B%20filename*%3DUTF-8%27%27my_test_image.jpeg&sp=r&sr=b"
+    },
+    "message": "Got presigned url for https://author-p111858-e1309055//content/dam/hls_company/my_test_image.jpeg"
+}

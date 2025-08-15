@@ -10,7 +10,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
     const [deletingBrands, setDeletingBrands] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-        const apiBaseUrl = `https://${viewProps.aioRuntimeNamespace}.adobeioruntime.net/api/v1/web/${viewProps.aioAppName}`;
+        const apiBaseUrl = `https://${viewProps.aioRuntimeNamespace}.adobeio-static.net/api/v1/web/${viewProps.aioActionPackageName}`;
         apiService.initialize(apiBaseUrl, viewProps.imsToken, viewProps.imsOrg);
         
         const fetchBrands = async () => {

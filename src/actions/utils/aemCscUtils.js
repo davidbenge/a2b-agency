@@ -27,7 +27,7 @@ async function getAemAssetData(aemHost,aemAssetPath,params,logger){
   const fetchUrl = aemHost + aemAssetPath + '.3.json'
   logger.debug("getAemAssetData fetchUrl",fetchUrl);
   const aemAuthToken = await getAemAuth(params,logger);
-  logger.debug("getAemAssetData aemAuthToken",aemAuthToken);
+  //logger.debug("getAemAssetData aemAuthToken",aemAuthToken);
 
   const res = await fetch(fetchUrl, {
     method: 'get',
@@ -74,53 +74,6 @@ async function getAemAssetDataRapi(aemHost,aemAssetPath,params,logger){
   }
 }
 
-/***
- * Get AEM Asset presigned url
- * 
- * @param {string} aemHost aem host
- * @param {string} aemAssetPath aem asset path
- * @param {object} params action input parameters.
- * @param {object} logger logger object
- * 
- * @returns {string} presigned dowload url
- */
-async function getAemAssetPresignedDownloadUrl(aemHost,aemAssetPath,params,logger){
-  // get repo data
-  let assetRepoData
-  try {
-    logger.debug(`getAemAssetPresignedDownloadUrl:getAemAssetDataRapi ${aemHost}${aemAssetPath}`)
-    assetRepoData = await getAemAssetDataRapi(aemHost,aemAssetPath,params,logger) 
-  } catch (error) {
-    logger.error(`getAemAssetPresignedDownloadUrl:getAemAssetDataRapi request to ${aemHost}${aemAssetPath} failed with error ${error.message}`)
-    throw new Error(`getAemAssetPresignedDownloadUrl:getAemAssetDataRapi request to ${aemHost}${aemAssetPath} failed with error ${error.message}`)
-  }
-
-  //get download link  TODO
-  const fetchUrl = assetRepoData['_links']['http://ns.adobe.com/adobecloud/rel/download'].href
-  const aemAuthToken = await getAemAuth(params,logger)
-
-  try {
-    const res = await fetch(fetchUrl, {
-      method: 'get',
-      headers: {
-        'Authorization': 'Bearer ' + aemAuthToken,
-        'Content-Type': 'application/json',
-        'x-api-key': params.AEM_SERVICE_TECH_ACCOUNT_CLIENT_ID
-      }
-    })
-
-    if (!res.ok) {
-      throw new Error('getAemAssetPresignedDownloadUrl:getAemAssetDataRapi request to ' + fetchUrl + ' failed with status code ' + res.status)
-    }else{
-      const jsonResponse = await res.json()
-      logger.debug(`getAemAssetPresignedDownloadUrl:getAemAssetDataRapi ${JSON.stringify(jsonResponse, null, 2)}`)
-      return jsonResponse.href
-    }
-  } catch (error) {
-    logger.error(`getAemAssetPresignedDownloadUrl:fetch presigned request to ${aemHost}${aemAssetPath} failed with error ${error.message}`)
-    throw new Error(`getAemAssetPresignedDownloadUrl:fetch presigned request to ${aemHost}${aemAssetPath} failed with error ${error.message}`)
-  }
-}
 
 /****
  * Write rendition to asset
@@ -268,7 +221,7 @@ async function addMetadataToAemAsset(aemHost,aemAssetPath,tagPath,tagValue,param
 
   const aemAuthToken = await getAemAuth(params,logger)
 
-  logger.debug(`aemCscUtils:aemAssetAddMetadata got auth ${JSON.stringify(aemAuthToken, null, 2)}`)
+  //logger.debug(`aemCscUtils:aemAssetAddMetadata got auth ${JSON.stringify(aemAuthToken, null, 2)}`)
   let config = {
     method: 'patch',
     url: `${aemHost}/adobe/repository${aemAssetPath};resource=applicationmetadata`,
@@ -366,7 +319,6 @@ module.exports = {
   writeCommentToAsset,
   writeJsonExpressCompatibiltyReportToComment,
   getAemAssetDataRapi,
-  getAemAssetPresignedDownloadUrl,
   addMetadataToAemAsset
 }
 

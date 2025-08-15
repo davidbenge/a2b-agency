@@ -16,13 +16,27 @@ export interface IBrand {
     enabledAt: Date;
 }
 
+export interface IApplicationRuntimeInfo {
+    consoleId: string;
+    projectName: string;
+    workspace: string;
+    actionPackageName: string;
+    app_name: string;
+}
+
+export interface IValidationResult {
+    valid: boolean;
+    message?: string;
+    missing?: string[];
+}
+
 export interface IIoEvent {
     source: string;
     type: string;
     datacontenttype: string;
     data: any;
     id: string;
-    validate(): boolean;
+    validate(): IValidationResult;
     toJSON(): any;
     toCloudEvent(): CloudEvent;
 }

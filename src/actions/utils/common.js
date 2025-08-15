@@ -177,10 +177,86 @@ function contentInit(params){
   return content
 }
 
+/**
+ * Check if an object contains any internal OpenWhisk parameters
+ * @param {Object} params - The object to check
+ * @returns {boolean} - True if the object contains __ow_ parameters
+ */
+function hasOpenWhiskParams(params) {
+  if (!params || typeof params !== 'object') {
+    return false;
+  }
+  
+  return Object.keys(params).some(key => key.startsWith('__ow_'));
+}
+
+/**
+ * Strip internal OpenWhisk parameters, LOG_LEVEL, and reserved OpenWhisk properties from action parameters
+ * @param {Object} params - The original action parameters
+ * @returns {Object} - Cleaned parameters without internal OpenWhisk parameters, LOG_LEVEL, and reserved properties
+ */
+function stripOpenWhiskParams(params) {
+  if (!params || typeof params !== 'object') {
+    return params;
+  }
+  
+  const cleanParams = {};
+  let strippedCount = 0;
+  
+  // List of reserved OpenWhisk properties that cannot be passed to actions
+  const reservedProperties = [];
+  
+  // Iterate through all properties and exclude OpenWhisk internal ones, LOG_LEVEL, and reserved properties
+  for (const [key, value] of Object.entries(params)) {
+    if (!key.startsWith('__ow_') && 
+        key !== 'LOG_LEVEL' && 
+        !reservedProperties.includes(key)) {
+      cleanParams[key] = value;
+    } else {
+      strippedCount++;
+    }
+  }
+  
+  // Log if we stripped any parameters (useful for debugging)
+  if (strippedCount > 0) {
+    console.log(`stripOpenWhiskParams: Stripped ${strippedCount} internal OpenWhisk parameters, LOG_LEVEL, and reserved properties`);
+  }
+  
+  return cleanParams;
+}
+
+/**
+ * Normalize action parameters by merging any nested routerParams into the top-level params.
+ *
+ * If params.routerParams exists and is a plain object, this returns a new object where:
+ * - Keys from params.routerParams are included
+ * - Top-level keys from params overwrite matching keys from routerParams
+ * - The routerParams property itself is removed
+ *
+ * @param {object} params - The original action parameters
+ * @returns {object} - The merged parameters with top-level keys taking precedence
+ */
+function mergeRouterParams(params) {
+  if (
+    params &&
+    typeof params === 'object' &&
+    params.routerParams &&
+    typeof params.routerParams === 'object' &&
+    !Array.isArray(params.routerParams)
+  ) {
+    const { routerParams, ...topLevelParams } = params;
+    return { ...routerParams, ...topLevelParams };
+  }
+  return params;
+}
+
 module.exports = { 
   errorResponse,
   getBearerToken,
   stringParameters,
   checkMissingRequestInputs,
-  contentInit
+  contentInit,
+  stripOpenWhiskParams,
+  hasOpenWhiskParams,
+  mergeRouterParams
 }
