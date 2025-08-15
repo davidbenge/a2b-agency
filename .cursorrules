@@ -1,0 +1,93 @@
+# Cursor Rules for a2b-agency Project
+
+## Project Structure
+This is an Adobe App Builder project with the following structure:
+- `src/actions/` - OpenWhisk serverless functions (TypeScript)
+- `src/dx-excshell-1/web-src/` - React frontend application
+- `src/actions/classes/` - Core business logic classes
+- `src/actions/utils/` - Utility functions for actions
+- `docs/` - Project documentation
+
+## Coding Standards
+
+### TypeScript Actions
+- Use TypeScript for all action files
+- Follow Adobe I/O Runtime patterns
+- Include proper error handling and logging
+- Use `@adobe/aio-lib-core-logging` for logging
+- Return consistent response format: `{ statusCode, body }`
+
+### React Components
+- Use Adobe React Spectrum components (`@adobe/react-spectrum`)
+- Follow functional component patterns with hooks
+- Use TypeScript for component props
+- Implement proper error boundaries
+- Use demo mode patterns for development
+
+### Demo Mode
+- Feature flag: `ENABLE_DEMO_MODE = process.env.REACT_APP_ENABLE_DEMO_MODE === 'true'`
+- Use mock data when in demo mode
+- Provide visual indicators for demo mode
+- Maintain same validation logic in both modes
+
+### Event System
+- Use CloudEvents specification
+- Implement proper event routing
+- Include event validation
+- Use consistent event naming: `com.adobe.a2b.*`
+
+### File Naming
+- Actions: kebab-case (`new-brand-registration`)
+- Components: PascalCase (`BrandManagerView`)
+- Classes: PascalCase (`BrandManager`)
+- Utilities: camelCase (`adobeAuthUtils`)
+
+### Import Patterns
+- Use relative imports for local files
+- Use absolute imports for external packages
+- Group imports: external, internal, relative
+
+## Common Patterns
+
+### Action Response Format
+```typescript
+return {
+  statusCode: 200,
+  body: {
+    message: 'Success message',
+    data: resultData
+  }
+}
+```
+
+### Error Handling
+```typescript
+try {
+  // action logic
+} catch (error) {
+  logger.error('Error description', error);
+  return {
+    statusCode: 500,
+    body: {
+      message: 'Error message',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }
+  }
+}
+```
+
+### Demo Mode Pattern
+```typescript
+if (ENABLE_DEMO_MODE) {
+  // Demo mode logic
+} else {
+  // Production logic
+}
+```
+
+## Architecture Guidelines
+- Actions should be stateless
+- Use dependency injection for services
+- Implement proper validation at entry points
+- Follow Adobe App Builder best practices
+- Use Adobe I/O Runtime environment variables
