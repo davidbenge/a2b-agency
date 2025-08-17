@@ -1,12 +1,13 @@
 /**
- * Delete a brand by ID
+ * Get a single brand by ID
  */
 import { errorResponse, checkMissingRequestInputs } from "../utils/common";
 import * as aioLogger from "@adobe/aio-lib-core-logging";
+import { Brand } from "../classes/Brand";
 import { BrandManager } from "../classes/BrandManager";
 
 export async function main(params: any): Promise<any> {
-  const logger = aioLogger("delete-brand", { level: params.LOG_LEVEL || "info" });
+  const logger = aioLogger("get-brand", { level: params.LOG_LEVEL || "info" });
 
   try {
     logger.debug(JSON.stringify(params, null, 2));
@@ -18,29 +19,24 @@ export async function main(params: any): Promise<any> {
       return errorResponse(400, errorMessage, logger)
     }
 
-    try {
-      const brandManager = new BrandManager(params.LOG_LEVEL);
-      await brandManager.deleteBrand(params.bid);
-    } catch (error) {
-      logger.error('Error deleting brand', error);
-      return errorResponse(500, `Error deleting brand ${params.brandId}`, logger);
-    }
+    const brandManager = new BrandManager(params.LOG_LEVEL);
+    const brand = await brandManager.getBrand(params.bid);
+    logger.debug('Brand', JSON.stringify(brand, null, 2));
 
     return {
       statusCode: 200,
       body: {
-        "message": `${params.bid} deleted successfully`,
-        "data":{}
+        "message": `Brand ${params.bid} fetched successfully`,
+        "data": brand
       }
     }
   } catch (error) {
     return {
       statusCode: 500,
       body: {
-        message: 'Error deleting brand',
+        message: 'Error getting brand',
         error: error instanceof Error ? error.message : 'Unknown error'
       }
     }
   }
-
-}
+} 
