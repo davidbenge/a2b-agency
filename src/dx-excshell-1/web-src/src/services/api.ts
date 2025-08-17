@@ -5,7 +5,8 @@ import { Brand } from '../../../../actions/classes/Brand';
  */
 const API_CONFIG = {
     ENDPOINTS: {
-        BRAND_GET_LIST: '/get-brands'
+        BRAND_GET_LIST: '/get-brands',
+        BRAND_DELETE: '/delete-brand'
     }
 };
 
@@ -131,6 +132,15 @@ export class ApiService {
     async getBrandList(): Promise<ApiResponse<Brand[]>> {
         return this.callApi<Brand[]>(
             `${API_CONFIG.ENDPOINTS.BRAND_GET_LIST}`, 'GET'
+        );
+    }
+
+    /**
+     * delete brand
+     */
+    async deleteBrand(brandId:string): Promise<ApiResponse<any>> {
+        return this.callApi<any>(
+            `${API_CONFIG.ENDPOINTS.BRAND_DELETE}`, 'POST',{"brandId":brandId}
         );
     }
 }

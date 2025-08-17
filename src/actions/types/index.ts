@@ -6,7 +6,7 @@ export interface IIoEventHandler {
 }
 
 export interface IBrand {
-    bid: string;
+    brandId: string;
     secret: string;
     name: string;
     endPointUrl: string;
@@ -17,13 +17,34 @@ export interface IBrand {
     enabledAt: Date;
 }
 
+export interface IApplicationRuntimeInfo {
+    consoleId: string;
+    projectName: string;
+    workspace: string;
+    actionPackageName: string;
+    app_name: string;
+}
+
+export interface IValidationResult {
+    valid: boolean;
+    message?: string;
+    missing?: string[];
+}
+
 export interface IIoEvent {
     source: string;
     type: string;
     datacontenttype: string;
     data: any;
     id: string;
-    validate(): boolean;
+    validate(): IValidationResult;
     toJSON(): any;
     toCloudEvent(): CloudEvent;
+}
+
+export interface IS2SAuthenticationCredentials {
+    clientId: string;
+    clientSecret: string;
+    scopes: string;
+    orgId: string;
 }

@@ -31,3 +31,15 @@ export const LOG_LEVELS = {
 
 export const BRAND_STATE_PREFIX = 'BRAND_';
 export const BRAND_FILE_STORE_DIR = 'brand';
+
+export const AGENCY_BRAND_REGISTRATION_EVENT_CODE = {
+    DISABLED: 'com.adobe.a2b.registration.disabled',
+    RECEIVED: 'com.adobe.a2b.registration.received',
+    ENABLED: 'com.adobe.a2b.registration.enabled'
+};
+
+export const AEM_ASSET_SYNC_EVENT_CODE = {
+    NEW: 'com.adobe.a2b.assetsync.new',
+    UPDATE: 'com.adobe.a2b.assetsync.update',
+    DELETE: 'com.adobe.a2b.assetsync.delete'
+};

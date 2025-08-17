@@ -1,86 +1,348 @@
-# a2b Brand Application 
+```
+ █████  ██████╗ ███████╗███╗   ██╗ ██████╗██╗   ██╗
+██╔══██╗██╔════╝ ██╔════╝████╗  ██║██╔════╝╚██╗ ██╔╝
+███████║██║  ███╗█████╗  ██╔██╗ ██║██║  ███╗╚████╔╝ 
+██╔══██║██║   ██║██╔══╝  ██║╚██╗██║██║   ██║ ╚██╔╝  
+██║  ██║╚██████╔╝███████╗██║ ╚████║╚██████╔╝  ██║   
+╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝ ╚═════╝   ╚═╝   
+```
 
-Welcome to my Adobe I/O Application!
+# a2b Agency Application 
+
+The Agency to Brand solution is an active proof of concept being developed using Adobe App Builder. It’s designed to connect asset workflows between agencies and brand-owned AEM environments in a secure and auditable way—without requiring direct access to the brand’s systems.
+This POC establishes a repeatable pattern that can be shared with agencies and partners to build their own Agency-to-Brand extension using Adobe App Builder and distributing on Adobe Exchange.
+
+[Brand To Agency](https://github.com/davidbenge/a2b-brand)   
+[Adobe](https://github.com/davidbenge/a2b-adobe)   
+
+## Prerequisites
+
+- Node.js = 20
+- Adobe I/O CLI (`aio`)
+- Adobe Developer Console access
 
 ## Setup
 
-- Populate the `.env` file in the project root and fill it as shown [below](#env)
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Populate the `.env` file in the project root and fill it as shown [below](#environment-variables)
+4. Start the development server:
+   ```bash
+   npm run run:application
+   ```
 
-## Local Dev
+## Local Development
 
-- `aio app run` to start your local Dev server
-- App will run on `localhost:9080` by default
+- `npm run run:application` - Run the application locally
+- `npm run run:excshell` - Run the application in Experience Cloud Shell
 
-By default the UI will be served locally but actions will be deployed and served from Adobe I/O Runtime. To start a
-local serverless stack and also run your actions locally use the `aio app run --local` option.
+## Testing & Coverage
 
-## Test & Coverage
 
-- Run `aio app test` to run unit tests for ui and actions
-- Run `aio app test --e2e` to run e2e tests
-
-## Deploy & Cleanup
+## Deployment & Cleanup
 
 - `aio app deploy` to build and deploy all actions on Runtime and static files to CDN
 - `aio app undeploy` to undeploy the app
 
-## Config
+## Dependencies
 
-### `.env`
+This project uses several key Adobe and React libraries:
 
-You can generate this file using the command `aio app use`. 
+- @adobe/aio-sdk
+- @adobe/exc-app
+- @adobe/react-spectrum
+- React 16.13.1
+- TypeScript
+- Jest for testing
+
+## Configuration
+
+### Environment Variables
+
+You can generate the `.env` file using the command `aio app use`. 
 
 ```bash
 # This file must **not** be committed to source control
 
-## please provide your Adobe I/O Runtime credentials
-# AIO_RUNTIME_AUTH=
-# AIO_RUNTIME_NAMESPACE=
+# Adobe I/O Runtime
+AIO_RUNTIME_AUTH=
+AIO_RUNTIME_NAMESPACE=
+AIO_app_name=
+
+# Adobe I/O Events
+AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=
+AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID=
+
+# Adobe Internal Calls
+ADOBE_INTERNAL_URL_ENDPOINT=
+
+# AEM Authentication
+AEM_AUTH_CLIENT_SECRET=
+AEM_AUTH_SCOPES=
+AEM_AUTH_CLIENT_ID=
+AEM_AUTH_TECH_ACCOUNT_ID=
+AEM_AUTH_PRIVATE_KEY=
+AEM_AUTH_TYPE=
+
+# Service-to-Service Authentication
+S2S_API_KEY=
+S2S_CLIENT_SECRET=
+S2S_SCOPES=
+
+# Organization
+ORG_ID=
 ```
 
-### `app.config.yaml`
+### Environment Setup Instructions
+
+To run this application, you need to configure several environment variables with values from your Adobe Developer Console and AEM Cloud Service settings.
+
+#### 1. Adobe Developer Console Settings
+
+Update these variables with values from your Adobe Developer Console project:
+
+```bash
+# Organization ID from your Adobe Developer Console
+ORG_ID=your-org-id@AdobeOrg
+
+# Service Account (JWT) credentials from your project
+S2S_API_KEY=your-service-account-api-key
+S2S_CLIENT_ID=your-service-account-client-id
+S2S_CLIENT_SECRET=your-service-account-client-secret
+S2S_SCOPES=["AdobeID","openid","read_organizations","additional_info.projectedProductContext","additional_info.roles","adobeio_api","read_client_secret","manage_client_secrets"]
+```
+
+#### 2. Application-Specific Settings
+
+Set these to your own target values:
+
+```bash
+# Your agency name (used for events and identification)
+AGENCY_NAME=Your Agency Name
+
+# Generate a UUID for your agency (use a UUID generator)
+AGENCY_ID=12345678-1234-1234-1234-123456789abc
+
+# Your application name (should match your Adobe Developer Console project)
+AIO_app_name=your-app-name
+
+# Adobe Internal Calls Configuration
+# Endpoint for getting presigned read URLs from Adobe internal services
+ADOBE_INTERNAL_URL_ENDPOINT=https://27200-609silverstork-stage.adobeioruntime.net/api/v1/web/a2b-agency
+```
+
+#### 3. AEM Cloud Service Integration
+
+These values come from your AEM Cloud Service Developer Console:
+
+```bash
+# AEM JWT Integration credentials
+AEM_AUTH_CLIENT_ID=your-aem-client-id
+AEM_AUTH_TECH_ACCOUNT_ID=your-aem-tech-account-id@techacct.adobe.com
+AEM_AUTH_CLIENT_SECRET=your-aem-client-secret
+AEM_AUTH_SCOPES=ent_aem_cloud_api
+AEM_AUTH_TYPE=jwt
+```
+
+##### Private Key Setup (Important!)
+
+The `AEM_AUTH_PRIVATE_KEY` requires special handling:
+
+1. **Download the JWT token** from your AEM Developer Console
+2. **Remove the last `\r\n`** from the key
+3. **Replace all other `\r\n` with `\n`**
+4. **Surround the entire key with double quotes**
+
+Example:
+```bash
+AEM_AUTH_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEAyvm41fmvihTKPVhRDWWHFeZP7UjwPElofsnn8IxkXI3SKvqt\nDOQj7cTMt0mNtp40TtsYXNrRiLn4w3rqF0CgYEAlczUQJJQRjcAqWEUKBDzOVh2TL61aRU3cixHiVj/w0EgaN07EE7Y\n5ffeGxvk+N0zSJeJFppBmePtMpGSO0CTsQh8hJ9Kpc31vWv2+x8VwGBLaoIyV9qY\n74SVLtYBabOtWOhQ7+ZWmV9wlF6cFfBB/O2Q+t5ZLZD859apHzsbvu0=\n-----END RSA PRIVATE KEY-----"
+```
+
+#### 4. Event Provider IDs
+
+These are generated when you register event providers in Adobe I/O Events. You need to find existing providers or create new ones.
+
+##### Finding Existing Event Providers
+
+Use the Adobe I/O CLI to list existing event providers:
+
+```bash
+# List all event providers in your organization
+aio event provider list
+
+# Look for providers with names like:
+# - "Agency Asset Sync Events" or similar for asset sync
+# - "Agency Brand Registration Events" or similar for registration
+```
+
+##### Creating Event Providers (if none exist)
+
+If you don't have the required event providers, create them:
+
+```bash
+# Create asset sync event provider
+aio event provider create --name "Agency Asset Sync Events" --description "Events for AEM asset synchronization"
+
+# Create brand registration event provider  
+aio event provider create --name "Agency Brand Registration Events" --description "Events for brand registration workflows"
+```
+
+##### Updating Environment Variables
+
+After finding or creating the providers, update these variables with the provider UUIDs:
+
+```bash
+# Registration events provider ID (from aio event provider list)
+AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=your-registration-provider-uuid
+
+# Asset sync events provider ID (from aio event provider list)
+AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID=your-asset-sync-provider-uuid
+```
+
+**Note**: The provider UUIDs are required for the application to publish events. If you don't have these set up, the application will fail to publish events.
+
+### Setup Checklist
+
+- [ ] Adobe Developer Console project created
+- [ ] Server to Server Account credentials configured
+- [ ] AEM Cloud Service JWT integration set up
+- [ ] JWT private key properly formatted
+- [ ] Event providers checked with `aio event provider list`
+- [ ] Event providers created if needed with `aio event provider create`
+- [ ] Event provider UUIDs copied to environment variables
+- [ ] All environment variables populated
+- [ ] Application deployed with `aio app deploy`
+
+### Adobe Internal Calls Configuration
+
+The application can integrate with Adobe internal services to retrieve presigned URLs for assets. This is configured through the `ADOBE_INTERNAL_URL_ENDPOINT` environment variable.
+
+```bash
+# Adobe Internal Calls Configuration
+# Endpoint for getting presigned read URLs from Adobe internal services
+ADOBE_INTERNAL_URL_ENDPOINT=https://27200-609silverstork-stage.adobeioruntime.net/api/v1/web/a2b-agency
+```
+
+**Note**: This endpoint is used by the `agency-assetsync-internal-handler` action to retrieve presigned URLs when processing asset sync events. The endpoint should be configured to point to your Adobe internal service that provides presigned URLs for AEM assets.
+
+### Runtime Environment Isolation
+
+The application implements a sophisticated runtime environment isolation system to prevent cross-contamination of events between different development environments. This is crucial when multiple developers are working simultaneously on the same IMS organization.
+
+#### How It Works
+
+1. **Runtime Information Injection**: Every action receives an `APPLICATION_RUNTIME_INFO` parameter containing:
+   ```json
+   {
+     "namespace": "your-runtime-namespace",
+     "app_name": "your-app-name"
+   }
+   ```
+
+2. **Event Enrichment**: All events published by the EventManager are automatically enriched with `app_runtime_info` in their data payload:
+   ```json
+   {
+     "app_runtime_info": {
+       "consoleId": "12345",
+       "projectName": "a2b", 
+       "workspace": "benge",
+       "app_name": "a2b-agency"
+     }
+   }
+   ```
+
+3. **Namespace Parsing**: The runtime namespace is parsed into three components:
+   - `consoleId`: The Adobe Developer Console ID (first part of namespace)
+   - `projectName`: The project name (second part of namespace)
+   - `workspace`: The workspace identifier (remaining parts)
+
+#### Benefits
+
+- **Event Isolation**: Events from different development environments can be filtered based on `app_runtime_info`
+- **Debugging Clarity**: Developers can easily identify which environment generated specific events
+- **Multi-Developer Support**: Multiple developers can work simultaneously without interference
+- **Environment Tracking**: Clear visibility into which runtime environment is processing events
+
+#### Implementation Details
+
+The isolation system is implemented through:
+
+- **EventManager**: Automatically adds `app_runtime_info` to all published events
+- **IoCustomEventManager**: Parses namespace and enriches event data
+- **Action Configuration**: All actions receive `APPLICATION_RUNTIME_INFO` parameter
+- **Event Filtering**: Consumers can filter events based on runtime information
+
+This architecture ensures that when multiple developers deploy their own instances of the application, each instance will only process events from its own runtime environment, eliminating confusion and cross-contamination issues.
+
+### Project Configuration
+
+```yaml
 benge app project in TMD dev org: 27200-brand2agency-stage
 title: brand to agency
+```
 
-endpoints 
+## Project Structure
 
-## Exc Shell project structure 
-src/
-├── assets/
-│   ├── images/         # Static images and icons
-│   └── styles/         # Global styles, CSS modules
-│       └── index.css
-├── components/
-│   ├── common/         # Reusable components (buttons, inputs, etc.)
-│   └── layout/         # Layout components (header, footer, sidebar)
-├── contexts/           # React Context providers
-├── hooks/              # Custom React hooks
-├── services/           # API calls and external services
-├── types/
-│   ├── interfaces/     # TypeScript interfaces
-│   │   └── ViewPropsBase.ts
-│   └── enums/         # TypeScript enums
-├── utils/
-│   ├── constants/     # Constants and configuration
-│   │   └── config.json
-│   └── helpers/       # Helper functions
-│       └── utils.js
-├── index.js           # Main application entry
-└── exc-runtime.js     # Runtime configuration
+```
+.
+├── src/                          # Source code
+│   ├── actions/                  # Adobe I/O Runtime actions
+│   │   ├── assetsync-event-handler/  # Asset sync event handling
+│   │   ├── get-brands/          # Brand retrieval functionality
+│   │   ├── new-brand-registration/    # Brand registration handling
+│   │   ├── classes/             # Shared classes
+│   │   ├── types/               # TypeScript type definitions
+│   │   ├── utils/               # Utility functions
+│   │   └── constants.ts         # Shared constants
+│   └── dx-excshell-1/           # Experience Cloud Shell configuration
+│       ├── web-src/             # Web application source
+│       ├── test/                # Unit tests
+│       ├── e2e/                 # End-to-end tests
+│       └── ext.config.yaml      # Extension configuration
+├── test/                        # Test files
+├── docs/                        # Documentation
+├── setup/                       # Setup scripts
+└── dist/                        # Build output
+```
+
+## API Endpoints
+
+The application exposes the following endpoints:
+
+- `GET /api/v1/web/a2b-agency/get-brands` - Retrieve list of brands
+- `POST /api/v1/web/a2b-agency/new-brand-registration` - Register a new brand
+- `POST /api/v1/web/a2b-agency/assetsync-event-handler` - Handle asset sync events
 
 ## Unified Shell API
-https://github.com/AdobeDocs/exc-app
 
-## Register events
-`aio event provider create`
-"label": "Brand Registration"
+For more information, visit the [Unified Shell API documentation](https://github.com/AdobeDocs/exc-app).
 
-### Events to create
-`aio event eventmetadata create <id>`
-"label": "Brand Registration Received"
-"code" : "com.adobe.a2b.registration.received"
-"description": "this contains an echo of event that was recieved from remote brand"
-`
+## Event Registration
+
+### Brand Registration Events
+
+1. Create event provider:
+```bash
+aio event provider create
+```
+Label: "a2b Brand Registration Event Provider"
+
+2. Create event metadata:
+```bash
+aio event eventmetadata create <id>
+```
+
+#### Event Types
+
+1. **a2b Brand Registration Received**
+   - Label: "a2b Brand Registration Received"
+   - Code: `com.adobe.a2b.registration.received`
+   - Description: "This contains an echo of event that was received from remote brand"
+
+```json
 {
   "specversion": "1.0",
   "id": "20daaf84-c938-48e6-815c-3d3dfcf8c900",
@@ -102,12 +364,14 @@ https://github.com/AdobeDocs/exc-app
     "updatedAt": "2025-06-08T05:44:51.219Z"
   }
 }
-`
+```
 
-"label": "Brand Registration Enabled"
-"code" : "com.adobe.a2b.registration.enabled"
-"description" : "when an admin approves a brand registration this event is thrown"
-`
+2. **a2b Brand Registration Enabled**
+   - Label: "a2b Brand Registration Enabled"
+   - Code: `com.adobe.a2b.registration.enabled`
+   - Description: "When an admin approves a brand registration this event is thrown"
+
+```json
 {
   "specversion": "1.0",
   "id": "381691a0-a5c6-4c97-b1ac-662a06686856",
@@ -129,12 +393,14 @@ https://github.com/AdobeDocs/exc-app
     "updatedAt": "2025-06-08T05:39:46.778Z"
   }
 }
-`
+```
 
-"label": "Brand Registration Disabled"
-"code" : "com.adobe.a2b.registration.disabled"
-"description" : "when an admin disableds a brand registration this event is thrown"
-`
+3. **a2b Brand Registration Disabled**
+   - Label: "a2b Brand Registration Disabled"
+   - Code: `com.adobe.a2b.registration.disabled`
+   - Description: "When an admin disables a brand registration this event is thrown"
+
+```json
 {
   "specversion": "1.0",
   "id": "706c19f6-2975-49a3-9e33-39672aed756e",
@@ -156,40 +422,9 @@ https://github.com/AdobeDocs/exc-app
     "updatedAt": "2025-06-08T05:42:21.855Z"
   }
 }
-`
+```
 
-Update your .env with the provider id returned by `aio event provider create`
-`AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=fefcd900-fake-fake-fake-1b9ff1c5d0ac`
-
-## Asset Synch Events
-`aio event provider create`
-"label": "A2B Asset Synch"
-
-### Events to create
-`aio event eventmetadata create <provider id>`
-"label": "New Asset Published"
-"code" : "com.adobe.a2b.assetsynch.new"
-"description": "Asset that has never been synched before is coming over for the first time"
-todo: event body
-
-`aio event eventmetadata create <provider id>`
-"label": "Asset Updated"
-"code" : "com.adobe.a2b.assetsynch.update"
-"description": "Asset that has been synched before has changed"
-todo: event body
-
-`aio event eventmetadata create <provider id>`
-"label": "Asset Deleted"
-"code" : "com.adobe.a2b.assetsynch.delete"
-"description": "Asset that has been synched before has been deleted"
-todo: event body
-
-These events will be published to the BRAND and also echo'ed localy for secondary in house systems use
-
-### Asset Synch Setup
-Using the AEM Assets Author API subscribe `https://your_adobe_developer_project.adobeioruntime.net/api/v1/web/a2b-agency/assetsynch-event-handler` to the following events. This is done in the Adobe Developer Console. [See setup documentation](https://experienceleague.adobe.com/en/docs/experience-manager-learn/cloud-service/aem-apis/openapis/setup)
-Asset deleted event - aem.assets.asset.deleted
-Asset metadata updated event - aem.assets.asset.metadata_updated
+### Environment Configuration
 
 ## Brand Manager
 
@@ -341,6 +576,109 @@ When contributing to the Brand Manager:
 
 For more information about the Brand Manager implementation, see the technical documentation in the `docs/` directory.
 
+=======
+Update your `.env` with the provider id returned by `aio event provider create`:
+```bash
+AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=5c3431a2-bd91-4eff-a356-26b747d0aad4
+```
 
+## Asset Sync Events
 
+### Event Provider Setup
 
+```bash
+aio event provider create
+```
+Label: "a2b Asset Sync Event Provider"
+
+### Event Types
+
+1. **New Asset Published**
+   - Label: "a2b New Asset Published"
+   - Code: `com.adobe.a2b.assetsync.new`
+- Description: "Asset that has never been synced before is coming over for the first time"
+   - Event body: TODO
+
+2. **Asset Updated**
+   - Label: "a2b Asset Updated"
+   - Code: `com.adobe.a2b.assetsync.update`
+- Description: "Asset that has been synced before has changed"
+   - Event body: TODO
+
+3. **Asset Deleted**
+   - Label: "a2b Asset Deleted"
+   - Code: `com.adobe.a2b.assetsync.delete`
+- Description: "Asset that has been synced before has been deleted"
+   - Event body: TODO
+
+### Asset Sync Setup
+
+Using the AEM Assets Author API, subscribe to the following events at:
+`https://your_adobe_developer_project.adobeioruntime.net/api/v1/web/a2b-agency/assetsync-event-handler`
+
+This is done in the Adobe Developer Console. [See setup documentation](https://experienceleague.adobe.com/en/docs/experience-manager-learn/cloud-service/aem-apis/openapis/setup)
+
+Events to subscribe to:
+- Asset deleted event: `aem.assets.asset.deleted`
+- Asset metadata updated event: `aem.assets.asset.metadata_updated`
+
+These events will be published to the BRAND and also echoed locally for secondary in-house systems use.
+
+## Troubleshooting
+removing all your runtime actions 
+`aio rt actions list --json | jq -r '.[] | (.namespace + "/" + .name)' | while read -r a; do [ -n "$a" ] && aio rt action delete "$a"; done`
+
+### Common Issues
+
+1. **Authentication Issues**
+   - Ensure all required environment variables are set
+   - Verify Adobe I/O credentials are valid
+   - Check AEM authentication configuration
+
+2. **Asset Sync Issues**
+   - Verify AEM event subscriptions
+   - Check asset sync provider configuration
+   - Review logs for detailed error messages
+
+## Rules
+1. all event are cloud events see (cloud events)[https://github.com/cloudevents/spec]
+
+## Contributing
+
+1. Make a branch or fork
+2. Follow the coding standards (ESLint configuration is provided)
+3. Write tests for new features that are actions. UI is nice to have but not wired
+4. Submit a pull request
+
+## First build
+1. git pull the repo local
+2. go to adobe developer console and setup a workspace in org Tech Marketing Development in the project "agency to brand" 
+3. inside your new project add the following services 
+   - Adobe Workfront and use a server to server credential
+   - I/O Mangement API
+4. For testing reasons add in Custom Event listeners for Brand Registration
+   - Test registration provider events is the name
+   - Add Event
+   - Select 3rd Party Custom Events
+   - Select a2b Brand Registration Event Provider
+   - Add event subscriptions for all the listed events
+5. For testing reasons add in Custom Event listeners for Asset Event Provider
+   - Test asset events provider events is the name
+   - Add Event
+   - Select 3rd Party Custom Events
+   - Select a2b Brand Registration Event Provider
+   - Add event subscriptions for all the listed events (a2b Asset Deleted, a2b Asset Updated, a2b New Asset Published)
+6. Navigate back to your new workspace home 
+7. in top right `download all` and pull the json file down that has all the workspace config
+8. install Node Version Manager nvm
+9. install Node version 22 `nvm install 22`
+10. set node 22 current `nvm use 22`
+11. alias 22 to default `nvm alias default 22`
+12. install aio cli `npm install -g @adobe/aio-cli`
+13. import the adobe developer console config to project `aio app use ~/Downloads/a2b-27200-benge.json` or simular command to your downloaded workspace config
+14. .env needs to be updated with values from _dot.env. Every thing in that file from `###### do not change the items in your .env above this.` down goes in your new .env that was created with the aio app use command
+15. Update any of the values needed from the values in your adobe developer console. see above in readme for help on vars 
+16. run the application with `aio app run -e application` or `npm run run:application`
+17. Stop the running application 
+18. verify actions were installed `aio rt actions list`
+19. you can now run the local web app if you would like to work on it `aio app run -e dx/excshell/1` or `npm run run:excshell`

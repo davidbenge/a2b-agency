@@ -10,9 +10,9 @@ import { BRAND_STATE_PREFIX } from "../constants";
 import { BrandManager } from "../classes/BrandManager";
 import * as randomstring from 'randomstring';
 import { v4 as uuidv4 } from 'uuid';
-import { getServer2ServerToken } from "../utils/adobeAuthUtils";
-import { IoCustomEventManager } from "../classes/IoCustomEventManager";
 import { NewBrandRegistrationEvent } from "../classes/io_events/NewBrandRegistrationEvent";
+import { EventManager } from "../classes/EventManager";
+import { IS2SAuthenticationCredentials } from "../types";
 
 export async function main(params: any): Promise<any> {
   const logger = aioLogger("new-brand-registration", { level: params.LOG_LEVEL || "info" });
@@ -27,36 +27,50 @@ export async function main(params: any): Promise<any> {
       return errorResponse(400, errorMessage, logger)
     }
 
-    params.bid = uuidv4();
+    params.brandId = uuidv4();
     params.secret = randomstring.generate(32);
-    params.enabled = false;
+    params.enabled = true;
     params.createdAt = new Date();
     params.updatedAt = new Date();
-    params.enabledAt = null;
+    params.enabledAt = new Date();
 
-    const brand = Brand.fromJSON(params);
-    logger.debug('Brand',JSON.stringify(brand, null, 2));
-    logger.debug('Brand stringify',brand.toJSON());
+    let savedBrand: Brand;
+    try{
+      const brand = Brand.fromJSON(params);
+      logger.debug('Brand',JSON.stringify(brand, null, 2));
+      logger.debug('Brand stringify',brand.toJSON());
 
-    const brandManager = new BrandManager(params.LOG_LEVEL);
-    const savedBrand = await brandManager.saveBrand(brand);
+      const brandManager = new BrandManager(params.LOG_LEVEL);
+      savedBrand = await brandManager.saveBrand(brand);
+
+    }catch(error){
+      logger.error('Error saving brand', error);
+      return errorResponse(500, 'Error saving brand', logger);
+    }
 
     // We dont want to block the brand registration if the event fails to send.
     //TODO: We should make a manager or util to make this all much simpler
     try {
       logger.debug('new-brand-registration starting cloud event construction');
-      const ioCustomEventManager = new IoCustomEventManager(params.AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID,params.LOG_LEVEL, params);
-      await ioCustomEventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand));
-      
+      logger.debug('new-brand-registration params keys', Object.keys(params));
+      const currentS2sAuthenticationCredentials = EventManager.getS2sAuthenticationCredentials(params);
+      const registrationProviderId = EventManager.getRegistrationProviderId(params);
+      const applicationRuntimeInfo = EventManager.getApplicationRuntimeInfo(params);
+      const eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, applicationRuntimeInfo);
+
+      // publish the event
+      await eventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand,registrationProviderId));
+
     } catch (error) {
       logger.error('Error sending event', error);
+      return errorResponse(500, 'Error handling event', logger);
     }
     
     return {
       statusCode: 200,
       body: {
-        message: `Brand registration processed successfully for brand id ${brand.bid}`,
-        brand: savedBrand
+        message: `Brand registration processed successfully for brand id ${savedBrand.brandId}`,
+        data: savedBrand
       }
     }
   } catch (error) {

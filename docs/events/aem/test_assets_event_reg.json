@@ -1,0 +1,20 @@
+{
+    "_links": {
+      "rel:eventmetadata": {
+        "href": "https://api.adobe.io/events/providers/09cae703-be74-4e94-b9a4-ffca7be6e7b0/eventmetadata"
+      },
+      "self": {
+        "href": "https://api.adobe.io/events/providers/09cae703-be74-4e94-b9a4-ffca7be6e7b0?eventmetadata=false"
+      }
+    },
+    "id": "09cae703-be74-4e94-b9a4-ffca7be6e7b0",
+    "label": "genstudio-solution-reference-stage",
+    "description": "AEM Core (name: `genstudio-solution-reference-stage`, type: `stage`, id: `acct:aem-p142461-e1463137@adobe.com`, product profile context: `AEM Administrators - author - Program 142461 - Environment 1463137`)",
+    "source": "urn:uuid:09cae703-be74-4e94-b9a4-ffca7be6e7b0",
+    "docs_url": "https://developer.adobe.com/events/docs/guides/using/aem/cloud-native/",
+    "provider_metadata": "aemcore",
+    "instance_id": "acct:aem-p142461-e1463137@adobe.com",
+    "event_delivery_format": "cloud_events_v1",
+    "environment_type": "stage",
+    "publisher": "33C1401053CF76370A490D4C@AdobeOrg"
+  }

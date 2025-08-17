@@ -6,7 +6,6 @@
 const fetch = require('node-fetch');
 const { Core } = require('@adobe/aio-sdk');
 const { errorResponse, getBearerToken, stringParameters, checkMissingRequestInputs } = require('./common');
-const jwt = require('jsonwebtoken');
 const auth = require("@adobe/jwt-auth");
 
 /***
@@ -18,7 +17,6 @@ const auth = require("@adobe/jwt-auth");
  * @param {string} authOptions.org_id - org id
  * @param {string} authOptions.client_secret - client secret
  * @param {string} authOptions.private_key - PrivateKey is a string (utf-8 encoded), buffer, object, or KeyObject containing either the secret for HMAC algorithms or the PEM encoded private key for RSA and ECDSA
- * @param {boolean} authOptions.private_key_base64 - private key base64 encoded
  * @param {Array<string>} authOptions.meta_scopes - meta scopes
  * @param {string} authOptions.ims_endpoint - IMS https://ims-na1.adobelogin.com
  * @param {object} params - raw request parameters
@@ -29,52 +27,62 @@ const auth = require("@adobe/jwt-auth");
  * return {string} tokenResponse.token_type - token type
  * return {string} tokenResponse.expires_in - expires in
  */
-async function getJwtToken(authOptions,params,logger){
+async function getJwtToken(authOptions,logger){
+  logger.debug("getJwtToken authOptions",authOptions)
+
+  // clean up the meta scopes
+  let metaScopes = authOptions.meta_scopes
+  if (metaScopes.constructor !== Array) {
+    metaScopes = metaScopes.split(',').toString();
+  }
 
   const config = {
-    clientId: authOptions.client_id,
-    clientSecret: authOptions.client_secret,
-    technicalAccountId: authOptions.technical_account_id,
-    orgId: authOptions.org_id,
-    metaScopes: authOptions.meta_scopes,
-    privateKey: authOptions.private_key.replace(/\\r\\n/g, '\r\n'),
+    clientId: `${authOptions.client_id}`,
+    clientSecret: `${authOptions.client_secret}`,
+    technicalAccountId: `${authOptions.technical_account_id}`,
+    orgId: `${authOptions.org_id}`,
+    metaScopes: `${metaScopes}`,
+    privateKey: `${authOptions.private_key}`
   };
 
-  //logger.debug(`authOptions: ${JSON.stringify(authOptions, null, 2)}`)  
-  //logger.debug(`call config: ${JSON.stringify(config, null, 2)}`)  
+  //logger.debug(`call config: ${JSON.stringify(config, null, 2)}`);
 
-  let tokenResponse = await auth(config);
-
-  logger.debug(`tokenResponse: ${JSON.stringify(tokenResponse, null, 2)}`)
-  
-  return tokenResponse
+  try {
+    let tokenResponse = await auth(config);
+    return tokenResponse.access_token;
+  } catch (error) {
+    logger.error(`getJwtToken error: ${error}`);
+    throw error;
+  }
 }
 
 /***
  * Get a server to server token
  * 
- * @param {string} clientId - client id
- * @param {string} clientSecret - client secret
- * @param {string} orgId - org id
- * @param {string} scopes - scopes
+ * @param {object} s2sAuthenticationCredentials - s2s authentication credentials
+ * @param {string} s2sAuthenticationCredentials.clientId - client id
+ * @param {string} s2sAuthenticationCredentials.clientSecret - client secret
+ * @param {string} s2sAuthenticationCredentials.orgId - org id
+ * @param {string} s2sAuthenticationCredentials.scopes - scopes
  * @param {object} logger - logger object
  * 
  * return {object} callResult - call result
  */     
-async function getServer2ServerToken(clientId,clientSecret,orgId,scopes,logger){
+async function getServer2ServerToken(s2sAuthenticationCredentials,logger){
   const urlencoded = new URLSearchParams();
-  urlencoded.append('client_id', clientId);
-  urlencoded.append('client_secret', clientSecret);
+  urlencoded.append('client_id', s2sAuthenticationCredentials.clientId);
+  urlencoded.append('client_secret', s2sAuthenticationCredentials.clientSecret);
   urlencoded.append('grant_type', 'client_credentials');
-  urlencoded.append('scope', scopes);
+  urlencoded.append('scope', s2sAuthenticationCredentials.scopes);
 
   logger.debug("getServer2ServerToken urlencoded",urlencoded.toString());
-
+  logger.debug("getServer2ServerToken s2sAuthenticationCredentials",s2sAuthenticationCredentials);
+  
   const callConfig = {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      "x-gw-ims-org-id": orgId,
+      "x-gw-ims-org-id": s2sAuthenticationCredentials.orgId,
     },
     body: urlencoded.toString()
   };

@@ -18,15 +18,19 @@ export async function main(params: any): Promise<any> {
       return errorResponse(400, errorMessage, logger)
     }
 
-    const brandManager = new BrandManager(params.LOG_LEVEL);
-    await brandManager.deleteBrand(params.bid);
-    logger.debug(`Brand ${params.bid} deleted successfully`);
+    try {
+      const brandManager = new BrandManager(params.LOG_LEVEL);
+      await brandManager.deleteBrand(params.bid);
+    } catch (error) {
+      logger.error('Error deleting brand', error);
+      return errorResponse(500, `Error deleting brand ${params.brandId}`, logger);
+    }
 
     return {
       statusCode: 200,
       body: {
-        "message": `Brand ${params.bid} deleted successfully`,
-        "data": true
+        "message": `${params.bid} deleted successfully`,
+        "data":{}
       }
     }
   } catch (error) {
@@ -38,4 +42,5 @@ export async function main(params: any): Promise<any> {
       }
     }
   }
-} 
+
+}

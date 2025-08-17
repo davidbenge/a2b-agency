@@ -5,46 +5,98 @@ application:
       a2b-agency:
         license: Apache-2.0
         actions:
-          assetsynch-event-handler:
-            function: src/actions/assetsynch-event-handler/index.ts
-            web: 'yes'
-            runtime: nodejs:20
-            inputs:
-              LOG_LEVEL: debug
-              ORG_ID: $ORG_ID
-              API_KEY: $SERVICE_API_KEY
-              AIO_AGENCY_EVENTS_AEM_ASSET_SYNCH_PROVIDER_ID: $AIO_AGENCY_EVENTS_AEM_ASSET_SYNCH_PROVIDER_ID
-              AUTH_CLIENT_SECRET: $S2S_CLIENT_SECRET
-              AUTH_SCOPES: $S2S_SCOPES
-              AEM_AUTH_TYPE: server2server
-              S2S_API_KEY: $SERVICE_API_KEY
-              S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
-              S2S_SCOPES: $S2S_SCOPES
-            annotations:
-              require-adobe-auth: true
-              final: true
           new-brand-registration:
             function: src/actions/new-brand-registration/index.ts
             web: 'yes'
-            runtime: nodejs:20
+            runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
               ORG_ID: $ORG_ID
               S2S_API_KEY: $SERVICE_API_KEY
-              AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID: $AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID
+              AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID: $AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID
+              AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID: $AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID
+              S2S_CLIENT_ID: $SERVICE_API_KEY
               S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
               S2S_SCOPES: $S2S_SCOPES
+              AIO_runtime_apihost: $AIO_runtime_apihost
+              AIO_runtime_auth: $AIO_runtime_auth
+              AIO_runtime_namespace: $AIO_runtime_namespace
+              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
             annotations:
               require-adobe-auth: false
               final: true
           get-brands:
             function: src/actions/get-brands/index.ts
             web: 'yes'
-            runtime: nodejs:20
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
+            annotations:
+              require-adobe-auth: false
+              final: true
+          delete-brand:
+            function: src/actions/delete-brand/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+              S2S_CLIENT_ID: $SERVICE_API_KEY
+              S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
+              S2S_SCOPES: $S2S_SCOPES
+              ORG_ID: $ORG_ID
+              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
+            annotations:
+              require-adobe-auth: false
+              final: true
+          brand-event-handler:
+            function: src/actions/brand-event-handler/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+              AIO_runtime_apihost: $AIO_runtime_apihost
+              AIO_runtime_auth: $AIO_runtime_auth
+              AIO_runtime_namespace: $AIO_runtime_namespace
+              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
+            annotations:
+              require-adobe-auth: false
+              final: true
+          adobe-product-event-handler:
+            function: src/actions/adobe-product-event-handler/index.ts
+            web: 'yes'
+            runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
             annotations:
-              require-adobe-auth: true
+              require-adobe-auth: false
+              final: true
+          agency-assetsync-internal-handler:
+            function: src/actions/agency-assetsync-internal-handler/index.ts
+            web: 'no'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+              ADOBE_INTERNAL_URL_ENDPOINT: $ADOBE_INTERNAL_URL_ENDPOINT
+              ORG_ID: $ORG_ID
+              S2S_API_KEY: $SERVICE_API_KEY
+              S2S_CLIENT_ID: $SERVICE_API_KEY
+              S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
+              S2S_SCOPES: $S2S_SCOPES
+              AIO_runtime_apihost: $AIO_runtime_apihost
+              AIO_runtime_auth: $AIO_runtime_auth
+              AIO_runtime_namespace: $AIO_runtime_namespace
+              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
+              AEM_AUTH_TYPE: $AEM_AUTH_TYPE
+              AEM_AUTH_CLIENT_ID: $AEM_AUTH_CLIENT_ID
+              AEM_AUTH_CLIENT_SECRET: $AEM_AUTH_CLIENT_SECRET
+              AEM_AUTH_TECH_ACCOUNT_ID: $AEM_AUTH_TECH_ACCOUNT_ID
+              AEM_AUTH_SCOPES: $AEM_AUTH_SCOPES
+              AEM_AUTH_PRIVATE_KEY: $AEM_AUTH_PRIVATE_KEY
+              AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID: $AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID
+              AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID: $AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID
+            annotations:
+              require-adobe-auth: false
               final: true
 extensions:
   dx/excshell/1:

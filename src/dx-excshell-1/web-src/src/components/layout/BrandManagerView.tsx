@@ -78,6 +78,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
     const safeViewProps = viewProps || {} as any;
     const userEmail = safeViewProps.imsProfile?.email || 'Demo User';
 
+
     // Load brands from API when not in demo mode
     useEffect(() => {
         if (!ENABLE_DEMO_MODE) {
@@ -392,6 +393,8 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             loading={formLoading}
         />
     );
+
+    const isDeleting = (brandId: string) => deletingBrands.has(brandId);
 
     return (
         <View>

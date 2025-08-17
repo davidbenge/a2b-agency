@@ -1,42 +1,53 @@
 import * as aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "./Brand";
 import { BRAND_FILE_STORE_DIR } from "../constants";
-import { IIoEvent } from "../types";
+import { IIoEvent, IS2SAuthenticationCredentials } from "../types";
 import { v4 as uuidv4 } from 'uuid';
 import { getServer2ServerToken } from "../utils/adobeAuthUtils";
 
 export class IoCustomEventManager {
     private logger: any;
-    private providerId: string;
-    private serviceApiKey: string;
-    private s2sClientSecret: string;
-    private s2sScopes: string;
-    private orgId: string;
-
+    private s2sAuthenticationCredentials: IS2SAuthenticationCredentials;
+    private applicationRuntimeInfo: any;
+    
     /*******
      * constructor - constructor for the IoCustomEventManager
      * 
-     * @param providerId: string
      * @param logLevel: string
-     * @param params: any from action
+     * @param s2sAuthenticationCredentials: IS2SAuthenticationCredentials from action
+     * @param applicationRuntimeInfo: object containing runtime information
      *******/
-    constructor(providerId: string,logLevel: string, params: any) {
+    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, applicationRuntimeInfo: any) {
         this.logger = aioLogger("IoCustomEventManager", { level: logLevel || "info" });
         this.logger.debug('IoCustomEventManager constructor');
 
-        //check that the params object has the data we need
-        if(params.S2S_API_KEY && params.S2S_CLIENT_SECRET && params.S2S_SCOPES && params.ORG_ID){
-            this.logger.debug('IoCustomEventManager constructor params', params);
-        }else{
-            this.logger.error('IoCustomEventManager constructor params missing', params);
-            throw new Error('IoCustomEventManager constructor params missing. We need S2S_API_KEY, S2S_CLIENT_SECRET, S2S_SCOPES, and ORG_ID');
+        // Validate S2S credentials
+        if (s2sAuthenticationCredentials.clientId && s2sAuthenticationCredentials.clientSecret && s2sAuthenticationCredentials.scopes && s2sAuthenticationCredentials.orgId) {
+            this.logger.debug('IoCustomEventManager constructor params', s2sAuthenticationCredentials);
+            this.s2sAuthenticationCredentials = s2sAuthenticationCredentials;
+        } else {
+            const missing: string[] = [];
+            if (!s2sAuthenticationCredentials.clientId) missing.push('S2S_CLIENT_ID');
+            if (!s2sAuthenticationCredentials.clientSecret) missing.push('S2S_CLIENT_SECRET');
+            if (!s2sAuthenticationCredentials.scopes) missing.push('S2S_SCOPES');
+            if (!s2sAuthenticationCredentials.orgId) missing.push('ORG_ID');
+            const message = `IoCustomEventManager:constructor: missing required S2S parameter(s): ${missing.join(', ')}`;
+            this.logger.error(message, s2sAuthenticationCredentials);
+            throw new Error(message);
         }
-        this.providerId = providerId;
-        this.serviceApiKey = params.S2S_API_KEY;
-        this.s2sClientSecret = params.S2S_CLIENT_SECRET;
-        let scopesCleaned = JSON.parse(params.S2S_SCOPES);
-        this.s2sScopes = scopesCleaned.join(',');
-        this.orgId = params.ORG_ID;
+
+        // Validate application runtime info
+        if (!applicationRuntimeInfo || typeof applicationRuntimeInfo !== 'object') {
+            throw new Error('IoCustomEventManager:constructor: missing applicationRuntimeInfo');
+        }
+        const missingRuntimeFields: string[] = [];
+        if (!('consoleId' in applicationRuntimeInfo) || !applicationRuntimeInfo.consoleId) missingRuntimeFields.push('consoleId');
+        if (!('projectName' in applicationRuntimeInfo) || !applicationRuntimeInfo.projectName) missingRuntimeFields.push('projectName');
+        if (!('workspace' in applicationRuntimeInfo) || !applicationRuntimeInfo.workspace) missingRuntimeFields.push('workspace');
+        if (missingRuntimeFields.length > 0) {
+            throw new Error(`IoCustomEventManager:constructor: applicationRuntimeInfo missing field(s): ${missingRuntimeFields.join(', ')}`);
+        }
+        this.applicationRuntimeInfo = applicationRuntimeInfo; // application runtime information for event isolation
     }
 
     /*******
@@ -48,8 +59,16 @@ export class IoCustomEventManager {
     async publishEvent(event: IIoEvent): Promise<void> {
         this.logger.debug('IoCustomEventManager:publishEvent starting');
 
-        event.id = uuidv4(); // set the id
-        event.source = `urn:uuid:${this.providerId}`; // set the source
+        // add the application runtime info to the event data
+        if (event.data) {
+            event.data.app_runtime_info = {
+                "consoleId": this.applicationRuntimeInfo.consoleId,
+                "projectName": this.applicationRuntimeInfo.projectName,
+                "workspace": this.applicationRuntimeInfo.workspace,
+                "app_name": this.applicationRuntimeInfo.app_name,
+                "action_package_name": this.applicationRuntimeInfo.actionPackageName
+            };
+        }
         
         if(event.validate()){
             this.logger.debug('Event is valid', event);
@@ -72,12 +91,17 @@ export class IoCustomEventManager {
         const eventSdk = require('@adobe/aio-lib-events');
 
         // get the token
-        const token = await this.getServer2ServerToken();
+        let token = "";
+        try{
+            token = await getServer2ServerToken(this.s2sAuthenticationCredentials, this.logger);
+        }catch(error){
+            this.logger.error('IoCustomEventManager:publishEventToAdobeEventHub: Error getting server2server token', error);
+            throw new Error('Error getting server2server token');
+        }
 
         // initialize the event client
         //This class provides methods to call your Adobe I/O Events APIs. Before calling any method initialize the instance by calling the init method on it with valid values for organizationId, apiKey, accessToken and optional http options such as timeout and max number of retries
-        const eventClient = await eventSdk.init(this.orgId, this.serviceApiKey, token);
-        this.logger.debug('IoCustomEventManager:publishEventToAdobeEventHub eventClient', eventClient);
+        const eventClient = await eventSdk.init(this.s2sAuthenticationCredentials.orgId, this.s2sAuthenticationCredentials.clientId, token);
 
         const cloudEventToSend = event.toCloudEvent();
         this.logger.debug('IoCustomEventManager:publishEventToAdobeEventHub cloudEvent to publish toJSON',event.toJSON());
@@ -90,22 +114,5 @@ export class IoCustomEventManager {
             this.logger.error('IoCustomEventManager:publishEventToAdobeEventHub: Error sending event', eventSendResult);
             throw new Error('Error sending event');
         }
-    }
-
-    /*******
-     * getServer2ServerToken - get the server2server token
-     * 
-     * @returns Promise<string>
-     *******/
-    async getServer2ServerToken(): Promise<string> {
-        //TODO: put in some caching here
-        const token = await getServer2ServerToken(this.serviceApiKey, this.s2sClientSecret, this.orgId, this.s2sScopes, this.logger);
-        
-        if(!token){
-            this.logger.error('IoCustomEventManager Error getting server2server token');
-            throw new Error(' IoCustomEventManager: Error getting server2server token');
-        }
-        
-        return token;
     }
 }
