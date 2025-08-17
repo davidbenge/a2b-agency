@@ -7,6 +7,7 @@ export class AssetSyncNewEvent extends IoEvent {
     private _assetPath!: string;
     private _metadata!: any;
     private _brandId!: string;
+    private _assetPresignedUrl!: string;
 
     get assetId(): string { return this._assetId; }
     set assetId(value: string) { this._assetId = value; if (this.data) this.data.asset_id = value; }
@@ -20,6 +21,9 @@ export class AssetSyncNewEvent extends IoEvent {
     get brandId(): string { return this._brandId; }
     set brandId(value: string) { this._brandId = value; if (this.data) this.data.brandId = value; }
 
+    get assetPresignedUrl(): string { return this._assetPresignedUrl; }
+    set assetPresignedUrl(value: string) { this._assetPresignedUrl = value; if (this.data) this.data.asset_presigned_url = value; }
+
     /****
      * constructor
      * 
@@ -27,11 +31,12 @@ export class AssetSyncNewEvent extends IoEvent {
      * @param assetPath - the asset path
      * @param metadata - the metadata
      * @param brandId - the brand id    
+     * @param assetPresignedUrl - the asset presigned url
      * @param sourceProviderId - the source provider id
      * 
      * @returns void
      *******/
-    constructor(assetId: string, assetPath: string, metadata: any, brandId: string, sourceProviderId: string) {
+    constructor(assetId: string, assetPath: string, metadata: any, assetPresignedUrl: string, brandId: string, sourceProviderId: string) {
         super();
         this.type = AEM_ASSET_SYNC_EVENT_CODE.NEW;
         // check for missing params and throw an descriptive error
@@ -44,6 +49,9 @@ export class AssetSyncNewEvent extends IoEvent {
         if (!metadata || typeof metadata !== 'object') {
             throw new Error('AssetSyncNewEvent: constructor: metadata is required');
         }
+        if (!assetPresignedUrl || assetPresignedUrl.trim().length === 0) {
+            throw new Error('AssetSyncNewEvent: constructor: assetPresignedUrl is required');
+        }
         if (!brandId || brandId.length === 0) {
             throw new Error('AssetSyncNewEvent: constructor: brandId is required');
         }
@@ -53,6 +61,7 @@ export class AssetSyncNewEvent extends IoEvent {
         this._assetId = assetId;
         this._assetPath = assetPath;
         this._metadata = metadata;
+        this._assetPresignedUrl = assetPresignedUrl;
         this._brandId = brandId;
         // set the event provider source id
         super.setSource(sourceProviderId);
@@ -61,7 +70,8 @@ export class AssetSyncNewEvent extends IoEvent {
             asset_id: this._assetId,
             asset_path: this._assetPath,
             metadata: this._metadata,
-            brandId: this._brandId
+            brandId: this._brandId,
+            asset_presigned_url: this._assetPresignedUrl
         };
     }
 
@@ -101,6 +111,12 @@ export class AssetSyncNewEvent extends IoEvent {
       
           // brandId
           if (!isUuid(d.brandId)) missing.push('brandId');
+
+          // asset_presigned_url
+          const urlCandidate = (typeof d.asset_presigned_url === 'string') ? d.asset_presigned_url.trim() : '';
+          if (urlCandidate.length === 0) {
+            missing.push('asset_presigned_url');
+          }
         }
       
         const valid = missing.length === 0;

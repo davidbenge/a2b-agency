@@ -154,7 +154,7 @@ export async function main(params: any): Promise<any> {
             "asset_id": aemAssetData["jcr:uuid"],
             "asset_path": aemAssetPath,
             "metadata": metadata,
-            "presignedUrl": presignedUrl
+            "asset_presigned_url": presignedUrl
           };
 
           // loop over customers and send an event for each customer subscribed to the asset
@@ -173,9 +173,16 @@ export async function main(params: any): Promise<any> {
 
             } else {
               // new event  
-              logger.info(`assetSyncEventNew`, eventData.asset_id, eventData.asset_path, eventData.metadata, brandId);
+              logger.info(`assetSyncEventNew`, eventData.asset_id, eventData.asset_path, eventData.metadata, eventData.asset_presigned_url, brandId);
               
-              const assetSyncEventNew = new AssetSyncNewEvent(eventData.asset_id, eventData.asset_path, eventData.metadata, brandId, sourceProviderId);
+              const assetSyncEventNew = new AssetSyncNewEvent(
+                eventData.asset_id,
+                eventData.asset_path,
+                eventData.metadata,
+                eventData.asset_presigned_url,
+                brandId,
+                sourceProviderId
+              );
               await getEventManager().publishEvent(assetSyncEventNew);
               logger.info(`assetSyncEventNew complete`);
 
