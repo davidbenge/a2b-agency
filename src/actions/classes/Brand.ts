@@ -6,6 +6,7 @@ export class Brand implements IBrand {
     name: string;
     endPointUrl: string;
     enabled: boolean;
+    logo?: string;
     createdAt: Date;
     updatedAt: Date;
     enabledAt: Date;
@@ -16,6 +17,7 @@ export class Brand implements IBrand {
         this.name = params.name || '';
         this.endPointUrl = params.endPointUrl || '';
         this.enabled = params.enabled || false;
+        this.logo = params.logo;
         this.createdAt = params.createdAt || new Date();
         this.updatedAt = params.updatedAt || new Date();
         this.enabledAt = params.enabledAt || null;
@@ -48,6 +50,7 @@ export class Brand implements IBrand {
             name: json.name,
             endPointUrl: json.endPointUrl,
             enabled: json.enabled,
+            logo: json.logo,
             createdAt: json.createdAt ? new Date(json.createdAt) : new Date(),
             updatedAt: json.updatedAt ? new Date(json.updatedAt) : new Date(),
             enabledAt: json.enabledAt ? new Date(json.enabledAt) : null
@@ -65,6 +68,7 @@ export class Brand implements IBrand {
             name: this.name,
             endPointUrl: this.endPointUrl,
             enabled: this.enabled,
+            logo: this.logo,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
             enabledAt: this.enabledAt

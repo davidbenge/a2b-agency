@@ -11,6 +11,7 @@ export interface IBrand {
     name: string;
     endPointUrl: string;
     enabled: boolean;
+    logo?: string; // Base64 encoded logo image
     createdAt: Date;
     updatedAt: Date;
     enabledAt: Date;
