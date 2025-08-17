@@ -355,7 +355,7 @@ aio event eventmetadata create <id>
   "recipient_client_id": "4ab33463139e4f96b851589286cd46e4",
   "recipientclientid": "4ab33463139e4f96b851589286cd46e4",
   "data": {
-    "bid": "2e59b727-4f9c-4653-a6b9-a49a602ec983",
+    "brandId": "2e59b727-4f9c-4653-a6b9-a49a602ec983",
     "secret": "PFVZNkBLH9iquYvr8hGSctesInK4QlRh",
     "name": "test client benge 37",
     "endPointUrl": "https://pathtoendpoint/37",
@@ -384,7 +384,7 @@ aio event eventmetadata create <id>
   "recipient_client_id": "4ab33463139e4f96b851589286cd46e4",
   "recipientclientid": "4ab33463139e4f96b851589286cd46e4",
   "data": {
-    "bid": "f94496b9-a40c-4d7a-8c4e-e59db029f247",
+    "brandId": "f94496b9-a40c-4d7a-8c4e-e59db029f247",
     "secret": "Uebq3tGYkoDoxonUxQizqKFHzHG703F1",
     "name": "test client benge 36",
     "endPointUrl": "https://pathtoendpoint/36",
@@ -413,7 +413,7 @@ aio event eventmetadata create <id>
   "recipient_client_id": "4ab33463139e4f96b851589286cd46e4",
   "recipientclientid": "4ab33463139e4f96b851589286cd46e4",
   "data": {
-    "bid": "4e9976ab-95ea-47c1-a2e3-7e266aa47935",
+    "brandId": "4e9976ab-95ea-47c1-a2e3-7e266aa47935",
     "secret": "OMWwg3qNE5Mxlwye1KGXj3zYy7ORT9FC",
     "name": "test client benge 36",
     "endPointUrl": "https://pathtoendpoint/36",
@@ -464,7 +464,7 @@ The Brand Manager is a comprehensive web application for managing brand registra
 #### Data Model
 ```typescript
 interface IBrand {
-    bid: string;           // Brand ID (unique identifier)
+    brandId: string;           // Brand ID (unique identifier)
     secret: string;        // Authentication secret
     name: string;          // Brand name
     endPointUrl: string;   // API endpoint URL
@@ -522,10 +522,10 @@ The Brand Manager is designed to integrate with backend APIs for production use:
 
 #### Brand Operations
 - `GET /get-brands` - Retrieve all brands
-- `GET /get-brand/{bid}` - Retrieve specific brand
+- `GET /get-brand/{brandId}` - Retrieve specific brand
 - `POST /new-brand-registration` - Create new brand
-- `PUT /update-brand/{bid}` - Update existing brand
-- `DELETE /delete-brand/{bid}` - Delete brand
+- `PUT /update-brand/{brandId}` - Update existing brand
+- `DELETE /delete-brand/{brandId}` - Delete brand
 
 #### Logo Storage
 - Logos are stored as Base64 encoded strings in the brand record

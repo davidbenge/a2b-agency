@@ -37,7 +37,7 @@ const ENABLE_DEMO_MODE = process.env.REACT_APP_ENABLE_DEMO_MODE === 'true' ||
 // Mock data for testing (only used in demo mode)
 const mockBrands: Brand[] = [
     new Brand({
-        bid: '1',
+        brandId: '1',
         secret: 'mock-secret-1',
         name: 'Test Brand 1',
         endPointUrl: 'https://example1.com/api',
@@ -48,7 +48,7 @@ const mockBrands: Brand[] = [
         enabledAt: new Date('2024-01-01')
     }),
     new Brand({
-        bid: '2',
+        brandId: '2',
         secret: 'mock-secret-2',
         name: 'Test Brand 2',
         endPointUrl: 'https://example2.com/api',
@@ -175,7 +175,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
 
         if (ENABLE_DEMO_MODE) {
             // Demo mode: local state management
-            setBrands(brands.filter(brand => brand.bid !== brandId));
+            setBrands(brands.filter(brand => brand.brandId !== brandId));
             setSuccess('Brand deleted successfully');
         } else {
             // TODO: Implement real API call here
@@ -196,7 +196,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                 if (viewMode === 'add') {
                     const newBrand = new Brand({
                         ...brandData,
-                        bid: uuidv4(),
+                        brandId: uuidv4(),
                         secret: 'mock-secret-' + Math.random().toString(36).substr(2, 9),
                         createdAt: new Date(),
                         updatedAt: new Date(),
@@ -209,13 +209,13 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                     const updatedBrand = new Brand({
                         ...selectedBrand.toJSON(),
                         ...brandData,
-                        bid: selectedBrand.bid,
+                        brandId: selectedBrand.brandId,
                         updatedAt: new Date(),
                         enabledAt: brandData.enabled ? (selectedBrand.enabledAt || new Date()) : null
                     });
                     
                     setBrands(brands.map(brand => 
-                        brand.bid === selectedBrand.bid ? updatedBrand : brand
+                        brand.brandId === selectedBrand.brandId ? updatedBrand : brand
                     ));
                     setSuccess('Brand updated successfully');
                 }
@@ -331,7 +331,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         </TableHeader>
                         <TableBody>
                             {filteredAndSortedBrands.map((brand) => (
-                                <Row key={brand.bid}>
+                                <Row key={brand.brandId}>
                                     <Cell>
                                         {brand.logo ? (
                                             <Image 
@@ -369,7 +369,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                             </Button>
                                             <Button 
                                                 variant="negative" 
-                                                onPress={() => handleDeleteBrand(brand.bid)}
+                                                onPress={() => handleDeleteBrand(brand.brandId)}
                                             >
                                                 <Delete />
                                             </Button>

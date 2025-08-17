@@ -19,8 +19,8 @@ export async function main(params: any): Promise<any> {
 
   try {
     logger.debug(JSON.stringify(params, null, 2));
-    const requiredParams = ['name', 'endPointUrl']
-    const requiredHeaders = []
+    const requiredParams : string[] = ['name', 'endPointUrl']
+    const requiredHeaders : string[] = []
     const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
     if (errorMessage) {
       // return and log client errors

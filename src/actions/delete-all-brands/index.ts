@@ -15,7 +15,7 @@ export async function main(params: any): Promise<any> {
           logger.debug('File store initialized');
 
       } catch (error) {
-          this.logger.error(`Error initializing file store: ${error}`);
+          logger.error(`Error initializing file store: ${error}`);
           throw new Error(`Error initializing file store: ${error}`);
       }
 

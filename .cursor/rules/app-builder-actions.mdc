@@ -8,3 +8,6 @@ the source is in typescript and lives in src/actions_src and when we run build-a
 the actions are cncf cloud native functions built using Adobe App Builder which is built on the Apache OpenWhisk platform.
 
 The openwhisk services configuration lives at ./app.config.yaml and the openwhisk runtimeManifest is defined in that target yaml file under the section runtimeManifest:
+
+apache openwhisk actions live in src/actions and run in a node 22 flavored containder 
+and we have a standalone jam stack app at src/dx-excshell-1

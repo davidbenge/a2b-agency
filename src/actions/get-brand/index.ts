@@ -11,7 +11,7 @@ export async function main(params: any): Promise<any> {
 
   try {
     logger.debug(JSON.stringify(params, null, 2));
-    const requiredParams = ['bid']
+    const requiredParams = ['brandId']
     const requiredHeaders = []
     const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
     if (errorMessage) {
@@ -20,13 +20,13 @@ export async function main(params: any): Promise<any> {
     }
 
     const brandManager = new BrandManager(params.LOG_LEVEL);
-    const brand = await brandManager.getBrand(params.bid);
+    const brand = await brandManager.getBrand(params.brandId);
     logger.debug('Brand', JSON.stringify(brand, null, 2));
 
     return {
       statusCode: 200,
       body: {
-        "message": `Brand ${params.bid} fetched successfully`,
+        "message": `Brand ${params.brandId} fetched successfully`,
         "data": brand
       }
     }

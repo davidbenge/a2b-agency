@@ -10,8 +10,8 @@ export async function main(params: any): Promise<any> {
 
   try {
     logger.debug(JSON.stringify(params, null, 2));
-    const requiredParams = ['bid']
-    const requiredHeaders = []
+    const requiredParams : string[] = ['brandId']
+    const requiredHeaders : string[] = []
     const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
     if (errorMessage) {
       // return and log client errors
@@ -20,7 +20,7 @@ export async function main(params: any): Promise<any> {
 
     try {
       const brandManager = new BrandManager(params.LOG_LEVEL);
-      await brandManager.deleteBrand(params.bid);
+      await brandManager.deleteBrand(params.brandId);
     } catch (error) {
       logger.error('Error deleting brand', error);
       return errorResponse(500, `Error deleting brand ${params.brandId}`, logger);
@@ -29,7 +29,7 @@ export async function main(params: any): Promise<any> {
     return {
       statusCode: 200,
       body: {
-        "message": `${params.bid} deleted successfully`,
+        "message": `${params.brandId} deleted successfully`,
         "data":{}
       }
     }
