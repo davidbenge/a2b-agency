@@ -9,7 +9,7 @@
  * - data.app_runtime_info: object (runtime information for the target action)
  */
 
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 import { checkMissingRequestInputs, errorResponse, stripOpenWhiskParams } from '../utils/common';
 
 export async function main(params: any): Promise<any> {
@@ -26,8 +26,8 @@ export async function main(params: any): Promise<any> {
   }
   
   // Check for required params
-  const requiredParams = ['type', 'data']
-  const requiredHeaders = []
+  const requiredParams: string[] = ['type', 'data']
+  const requiredHeaders: string[] = []
   const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
   if (errorMessage) {
     // return and log client errors
@@ -62,8 +62,8 @@ export async function main(params: any): Promise<any> {
         }
     }
 
-  } catch (error) {
-    logger.error(`${ACTION_NAME}: Error processing event`, error);
+  } catch (error: unknown) {
+    logger.error(`${ACTION_NAME}: Error processing event`, error as any);
     return {
       statusCode: 500,
       body: {
@@ -118,8 +118,8 @@ async function routeToInternalHandler(actionName: string, eventData: any, logger
       }
     };
 
-  } catch (error) {
-    logger.error(`${actionName}: Error invoking internal action`, error);
-    throw new Error(`Failed to invoke internal action ${actionName}: ${error.message}`);
+  } catch (error: unknown) {
+    logger.error(`${actionName}: Error invoking internal action`, error as any);
+    throw new Error(`Failed to invoke internal action ${actionName}: ${error instanceof Error ? error.message : String(error)}`);
   }
 } 

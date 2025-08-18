@@ -1,4 +1,3 @@
-import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
     Flex,
@@ -7,17 +6,13 @@ import {
     View,
     StatusLight
 } from '@adobe/react-spectrum';
-import { ENABLE_DEMO_MODE } from '../../utils/demoMode';
+import { ViewPropsBase } from '../../types/ViewPropsBase';
 
-interface SpectrumHeaderProps {
-    viewProps?: any;
-}
-
-const SpectrumHeader: React.FC<SpectrumHeaderProps> = ({ viewProps }) => {
+const SpectrumHeader: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps }) => {
     const location = useLocation();
     const navigate = useNavigate();
 
-                        const navItems = [
+    const navItems = [
         { label: 'Home', path: '/' },
         { label: 'Brand Manager', path: '/brand_manager' },
         { label: 'Rules Manager', path: '/assets' },
@@ -56,8 +51,7 @@ const SpectrumHeader: React.FC<SpectrumHeaderProps> = ({ viewProps }) => {
                             fontWeight: 'bold' 
                         }}
                     >
-                        Agency
-                        {ENABLE_DEMO_MODE && ' (Demo Mode)'}
+                        Agency {viewProps.aioEnableDemoMode &&( ' (Demo Mode)')}
                     </Text>
                     {viewProps?.imsProfile?.email && (
                         <Text 
@@ -103,7 +97,7 @@ const SpectrumHeader: React.FC<SpectrumHeaderProps> = ({ viewProps }) => {
                 </Flex>
 
                 {/* Demo Mode Indicator */}
-                {ENABLE_DEMO_MODE && (
+                {viewProps.aioEnableDemoMode && (
                     <StatusLight 
                         variant="info"
                         UNSAFE_style={{

@@ -14,7 +14,7 @@ export interface IBrand {
     logo?: string; // Base64 encoded logo image
     createdAt: Date;
     updatedAt: Date;
-    enabledAt: Date;
+    enabledAt: Date | null;
 }
 
 export interface IApplicationRuntimeInfo {

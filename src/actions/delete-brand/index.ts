@@ -2,7 +2,7 @@
  * Delete a brand by ID
  */
 import { errorResponse, checkMissingRequestInputs } from "../utils/common";
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 import { BrandManager } from "../classes/BrandManager";
 
 export async function main(params: any): Promise<any> {
@@ -21,8 +21,8 @@ export async function main(params: any): Promise<any> {
     try {
       const brandManager = new BrandManager(params.LOG_LEVEL);
       await brandManager.deleteBrand(params.brandId);
-    } catch (error) {
-      logger.error('Error deleting brand', error);
+    } catch (error: unknown) {
+      logger.error('Error deleting brand', error as any);
       return errorResponse(500, `Error deleting brand ${params.brandId}`, logger);
     }
 

@@ -3,8 +3,8 @@ import { IIoEvent, IValidationResult } from '../types/index';
 import { v4 as uuidv4 } from 'uuid';
 
 export abstract class IoEvent implements IIoEvent {
-    source: string;
-    type: string;
+    source!: string;
+    type!: string;
     datacontenttype: string;
     data: any;
     id: string;
@@ -13,6 +13,7 @@ export abstract class IoEvent implements IIoEvent {
         // Abstract class constructor
         this.datacontenttype = 'application/json';
         this.id = uuidv4(); // set the id
+        this.data = {};
     }
 
     validate(): IValidationResult {
@@ -45,7 +46,7 @@ export abstract class IoEvent implements IIoEvent {
         };
 
         // if the data is an object and has a toJSON function, use it
-        if (typeof this.data.toJSON === 'function') {
+        if (this.data && typeof this.data.toJSON === 'function') {
             returnJson.data = this.data.toJSON();
         }else{
             returnJson.data = this.data;

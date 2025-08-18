@@ -36,8 +36,59 @@ This POC establishes a repeatable pattern that can be shared with agencies and p
 
 ## Local Development
 
-- `npm run run:application` - Run the application locally
-- `npm run run:excshell` - Run the application in Experience Cloud Shell
+- Actions only (Node/OpenWhisk):
+  - `aio app run -e application --no-serve`
+- Web only (Experience Cloud Shell):
+  - `aio app run -e dx/excshell/1 --no-actions`
+- You must choose one `-e` extension when running.
+
+## Architecture & Best Practices
+
+- Project layout:
+  - `src/actions/**` Node 22 OpenWhisk actions (TypeScript)
+  - `src/dx-excshell-1/web-src/**` JAMstack web app (React + React Spectrum)
+  - `docs/**` all documentation (Cursor-generated notes in `docs/cursor/`)
+  - `.cursor/rules/**` repository automation rules
+
+- TypeScript configuration:
+  - `tsconfig.base.json`: shared strict, interop, resolution
+  - `tsconfig.actions.json` (Node/CommonJS):
+    - `module: CommonJS`, `target/lib: ES2020`, `types: ["node"]`, `allowJs: true`
+    - consumed by actions build; do not move compilerOptions back into the loader
+  - `tsconfig.web.json` (browser/ESNext):
+    - `module: ESNext`, `lib: ["ES2020","DOM","DOM.Iterable"]`, `jsx: react-jsx`
+
+- Actions webpack:
+  - `webpack-config.js` uses `ts-loader` with `options.configFile = tsconfig.actions.json`
+  - `DefinePlugin` is limited to `AIO_*` envs; secrets are not baked into bundles
+  - Runtime inputs come from `app.config.yaml`
+
+- Module interop:
+  - With `esModuleInterop` enabled, import CommonJS libs with default import:
+    - `import aioLogger from '@adobe/aio-lib-core-logging'`
+
+- Strict typing:
+  - Avoid implicit `any` (e.g., type arrays: `const requiredHeaders: string[] = []`)
+  - In `catch`, use `catch (error: unknown)` and cast as needed
+
+- Actions vs Web boundaries:
+  - Do not import Node-only modules (`openwhisk`, `@adobe/aio-lib-*`) from `src/dx-excshell-1/**`
+  - If code must be shared, place browser-safe types/models under `src/shared/**`
+
+- JS utilities in actions:
+  - JS files under `src/actions/utils/**` may be imported (actions tsconfig enables `allowJs`)
+  - Prefer adding minimal `.d.ts` shims when introducing new JS utils
+
+- Runtime isolation contract:
+  - Every action accepts `APPLICATION_RUNTIME_INFO` (JSON string)
+  - All emitted events include `data.app_runtime_info` with `consoleId`, `projectName`, `workspace`, `app_name`, `action_package_name`
+
+- Tests:
+  - Store all tests under the root `test/` directory
+
+- Documentation structure:
+  - Keep all docs under `docs/`
+  - Cursor-generated notes/summaries live under `docs/cursor/`
 
 ## Testing & Coverage
 
@@ -513,7 +564,7 @@ The Brand Manager includes a comprehensive demo mode that allows:
    ```
 
 2. **Configure environment variables**:
-   - Set `REACT_APP_ENABLE_DEMO_MODE=false` for production
+   - Set `AIO_ENABLE_DEMO_MODE=false` for production (web-only; only AIO_* vars are exposed in the bundle)
    - Configure backend API endpoints
 
 ### API Integration
@@ -682,3 +733,30 @@ removing all your runtime actions
 17. Stop the running application 
 18. verify actions were installed `aio rt actions list`
 19. you can now run the local web app if you would like to work on it `aio app run -e dx/excshell/1` or `npm run run:excshell`
+
+## Quick Start for Contributors
+
+1. Install and configure
+   - Node.js 20, Adobe I/O CLI (`npm i -g @adobe/aio-cli`)
+   - `npm install`
+   - `aio app use ~/Downloads/<your-console-config>.json` to generate `.env`
+   - Copy any required values from `_dot.env` into your `.env`
+
+2. Run locally (choose one extension)
+   - Actions only: `aio app run -e application --no-serve`
+   - Web only: `aio app run -e dx/excshell/1 --no-actions` (open `https://localhost:9080`)
+
+3. Coding rules (must follow)
+   - Use default logger import: `import aioLogger from '@adobe/aio-lib-core-logging'`
+   - Keep actions and web separate; no Node-only imports in `src/dx-excshell-1/**`
+   - TS configs are split: `tsconfig.actions.json` (Node/CommonJS) and `tsconfig.web.json` (browser/ESNext)
+   - Actions webpack reads `tsconfig.actions.json` via `ts-loader` `configFile`
+   - Avoid implicit `any`; type arrays and `catch (error: unknown)`
+   - Put shared browser-safe types/models in `src/shared/**`
+
+4. Docs and tests
+   - All docs live under `docs/`; Cursor notes under `docs/cursor/`
+   - All tests belong under the root `test/` folder
+
+5. Deploy
+   - `aio app deploy`

@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 require('dotenv').config();
 
-// Get all environment variables with AIO_ prefix
+// Get all environment variables with AIO_ prefix (used by both actions and web builds)
 const aioEnvVars = Object.keys(process.env)
   .filter(key => key.startsWith('AIO_'))
   .reduce((acc, key) => {
@@ -19,20 +19,7 @@ module.exports = {
           use: {
             loader: 'ts-loader',
             options: {
-              compilerOptions: {
-                target: 'ES2020',
-                module: 'CommonJS',
-                lib: ['ES2020'],
-                strict: true,
-                esModuleInterop: true,
-                skipLibCheck: true,
-                forceConsistentCasingInFileNames: true,
-                declaration: true,
-                sourceMap: true,
-                moduleResolution: 'node',
-                allowSyntheticDefaultImports: true,
-                resolveJsonModule: true
-              }
+              configFile: 'tsconfig.actions.json'
             }
           }
         }
@@ -43,6 +30,7 @@ module.exports = {
       extensions: ['.ts', '.js'], // include necessary extensions
     },
     plugins: [
+      // Only AIO_* variables are inlined; set AIO_ENABLE_DEMO_MODE to control demo mode in web app
       new webpack.DefinePlugin(aioEnvVars)
     ]
 }

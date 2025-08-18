@@ -6,7 +6,7 @@
  * 
  */
 
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 import { checkMissingRequestInputs, errorResponse, mergeRouterParams } from '../utils/common';
 import { createLazy } from '../utils/lazy';
 import { EventManager } from '../classes/EventManager';
@@ -32,6 +32,9 @@ export async function main(params: any): Promise<any> {
     const currentS2sAuthenticationCredentials = getS2sAuthenticationCredentials();
     const assetSyncProviderId = getAssetSyncProviderId();
     const applicationRuntimeInfo = getApplicationRuntimeInfo();
+    if (!applicationRuntimeInfo) {
+      throw new Error('Missing APPLICATION_RUNTIME_INFO');
+    }
     return new EventManager(
       params.LOG_LEVEL,
       currentS2sAuthenticationCredentials,
@@ -40,8 +43,8 @@ export async function main(params: any): Promise<any> {
   });
 
   // Check for required params
-  const requiredParams = []
-  const requiredHeaders = [] // TODO: Add security required headers
+  const requiredParams: string[] = []
+  const requiredHeaders: string[] = [] // TODO: Add security required headers
   const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
   if (errorMessage) {
     // return and log client errors
@@ -118,14 +121,14 @@ export async function main(params: any): Promise<any> {
               throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
-            presignedUrl = data.data.presignedUrl;
+            const data: any = await response.json();
+            presignedUrl = data.data.presignedUrl as string;
 
             logger.info(`${ACTION_NAME}: Getting presigned URL from Adobe internal endpoint: ${presignedUrlEndpoint} got presigned url: ${presignedUrl}`);
 
-          } catch (error) {
-            logger.error(`${ACTION_NAME}: Error getting presigned URL:`, error);
-            throw new Error(`${ACTION_NAME}: Error getting presigned URL: ${error}`);
+          } catch (error: unknown) {
+            logger.error(`${ACTION_NAME}: Error getting presigned URL:`, error as any);
+            throw new Error(`${ACTION_NAME}: Error getting presigned URL: ${error instanceof Error ? error.message : String(error)}`);
           }
   
           // Handle customers as either an array, object, or string
@@ -150,7 +153,7 @@ export async function main(params: any): Promise<any> {
             };
           }
 
-          let eventData = {
+          let eventData: { asset_id: any; asset_path: any; metadata: any; asset_presigned_url: string; brandId?: string } = {
             "asset_id": aemAssetData["jcr:uuid"],
             "asset_path": aemAssetPath,
             "metadata": metadata,
@@ -210,7 +213,7 @@ export async function main(params: any): Promise<any> {
         message: 'Asset event processed successfully',
       }
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       statusCode: 500,
       body: {

@@ -16,4 +16,5 @@ export interface IViewPropsBase {
     aioRuntimeNamespace: string; //namespace for the runtime pulled in from .env
     aioAppName: string; //app name pulled in from .env
     aioActionPackageName: string; //action package name pulled in from .env
+    aioEnableDemoMode: boolean; //enable demo mode pulled in from .env
 }

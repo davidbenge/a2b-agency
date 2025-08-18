@@ -1,4 +1,4 @@
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "./Brand";
 import { BRAND_STATE_PREFIX, BRAND_FILE_STORE_DIR } from "../constants";
 

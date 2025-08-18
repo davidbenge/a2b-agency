@@ -1,7 +1,7 @@
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "./Brand";
 import { BRAND_FILE_STORE_DIR } from "../constants";
-import { IIoEvent, IS2SAuthenticationCredentials } from "../types";
+import { IApplicationRuntimeInfo, IIoEvent, IS2SAuthenticationCredentials } from "../types";
 import { v4 as uuidv4 } from 'uuid';
 import { getServer2ServerToken } from "../utils/adobeAuthUtils";
 
@@ -17,7 +17,7 @@ export class IoCustomEventManager {
      * @param s2sAuthenticationCredentials: IS2SAuthenticationCredentials from action
      * @param applicationRuntimeInfo: object containing runtime information
      *******/
-    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, applicationRuntimeInfo: any) {
+    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, applicationRuntimeInfo: IApplicationRuntimeInfo) {
         this.logger = aioLogger("IoCustomEventManager", { level: logLevel || "info" });
         this.logger.debug('IoCustomEventManager constructor');
 

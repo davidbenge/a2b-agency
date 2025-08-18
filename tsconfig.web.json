@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "declaration": false,
+    "sourceMap": true
+  },
+  "include": ["src/dx-excshell-1/web-src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import { IIoEvent, IS2SAuthenticationCredentials, IApplicationRuntimeInfo } from "../types";
 import { BrandManager } from "./BrandManager";
 import { IoCustomEventManager } from "./IoCustomEventManager";
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 
 export class EventManager {
     private s2sAuthenticationCredentials: IS2SAuthenticationCredentials;
@@ -14,9 +14,9 @@ export class EventManager {
     /****
      * @param logLevel - the log level to use
      * @param s2sAuthenticationCredentials - the s2s authentication credentials 
-     * @param applicationRuntimeInfo - the application runtime information
+     * @param applicationRuntimeInfo - the application runtime information (validated below)
      */
-    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, applicationRuntimeInfo: any) {
+    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, applicationRuntimeInfo: IApplicationRuntimeInfo) {
         this.logger = aioLogger("EventManager", { level: logLevel || "info" });
         if (s2sAuthenticationCredentials.clientId && s2sAuthenticationCredentials.clientSecret && s2sAuthenticationCredentials.scopes && s2sAuthenticationCredentials.orgId) {
             this.s2sAuthenticationCredentials = s2sAuthenticationCredentials;

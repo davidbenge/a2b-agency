@@ -4,9 +4,8 @@
 
 import React from 'react'
 import { Heading, View, Text, Flex, Content, Divider } from '@adobe/react-spectrum'
-import { ENABLE_DEMO_MODE } from '../utils/demoMode'
 
-export const Home = () => (
+export const Home = ({ viewProps }) => (
   <View maxWidth="size-6000">
     <Content>
       <Flex direction='column' gap='size-300'>
@@ -20,7 +19,9 @@ export const Home = () => (
           your agency and brand-owned AEM environments.
         </Text>
         
-        {ENABLE_DEMO_MODE && (
+        {
+        console.debug('Home: viewProps', viewProps),
+        viewProps.aioEnableDemoMode && (
           <View 
             backgroundColor="blue-100" 
             padding="size-200" 

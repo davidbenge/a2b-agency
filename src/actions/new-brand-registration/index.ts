@@ -4,7 +4,7 @@
  * todo:// add in a custom event and throw it when the brand trys to register
  */
 import { errorResponse, checkMissingRequestInputs } from "../utils/common";
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "../classes/Brand";
 import { BRAND_STATE_PREFIX } from "../constants";
 import { BrandManager } from "../classes/BrandManager";
@@ -43,8 +43,8 @@ export async function main(params: any): Promise<any> {
       const brandManager = new BrandManager(params.LOG_LEVEL);
       savedBrand = await brandManager.saveBrand(brand);
 
-    }catch(error){
-      logger.error('Error saving brand', error);
+    }catch(error: unknown){
+      logger.error('Error saving brand', error as any);
       return errorResponse(500, 'Error saving brand', logger);
     }
 
@@ -56,13 +56,16 @@ export async function main(params: any): Promise<any> {
       const currentS2sAuthenticationCredentials = EventManager.getS2sAuthenticationCredentials(params);
       const registrationProviderId = EventManager.getRegistrationProviderId(params);
       const applicationRuntimeInfo = EventManager.getApplicationRuntimeInfo(params);
+      if (!applicationRuntimeInfo) {
+        throw new Error('Missing APPLICATION_RUNTIME_INFO');
+      }
       const eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, applicationRuntimeInfo);
 
       // publish the event
       await eventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand,registrationProviderId));
 
-    } catch (error) {
-      logger.error('Error sending event', error);
+    } catch (error: unknown) {
+      logger.error('Error sending event', error as any);
       return errorResponse(500, 'Error handling event', logger);
     }
     

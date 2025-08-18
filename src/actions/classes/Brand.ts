@@ -9,7 +9,7 @@ export class Brand implements IBrand {
     logo?: string;
     createdAt: Date;
     updatedAt: Date;
-    enabledAt: Date;
+    enabledAt: Date | null;
 
     constructor(params: Partial<IBrand> = {}) {
         this.brandId = params.brandId || '';
@@ -20,7 +20,7 @@ export class Brand implements IBrand {
         this.logo = params.logo;
         this.createdAt = params.createdAt || new Date();
         this.updatedAt = params.updatedAt || new Date();
-        this.enabledAt = params.enabledAt || null;
+        this.enabledAt = params.enabledAt ?? null;
     }
 
     /**

@@ -2,7 +2,7 @@
  * Update an existing brand
  */
 import { errorResponse, checkMissingRequestInputs } from "../utils/common";
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "../classes/Brand";
 import { BrandManager } from "../classes/BrandManager";
 
