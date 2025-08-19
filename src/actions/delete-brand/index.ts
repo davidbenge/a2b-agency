@@ -2,7 +2,7 @@
  * Delete a brand by ID
  */
 import { errorResponse, checkMissingRequestInputs } from "../utils/common";
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 import { BrandManager } from "../classes/BrandManager";
 
 export async function main(params: any): Promise<any> {
@@ -10,8 +10,8 @@ export async function main(params: any): Promise<any> {
 
   try {
     logger.debug(JSON.stringify(params, null, 2));
-    const requiredParams = ['bid']
-    const requiredHeaders = []
+    const requiredParams : string[] = ['brandId']
+    const requiredHeaders : string[] = []
     const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
     if (errorMessage) {
       // return and log client errors
@@ -20,16 +20,16 @@ export async function main(params: any): Promise<any> {
 
     try {
       const brandManager = new BrandManager(params.LOG_LEVEL);
-      await brandManager.deleteBrand(params.bid);
-    } catch (error) {
-      logger.error('Error deleting brand', error);
+      await brandManager.deleteBrand(params.brandId);
+    } catch (error: unknown) {
+      logger.error('Error deleting brand', error as any);
       return errorResponse(500, `Error deleting brand ${params.brandId}`, logger);
     }
 
     return {
       statusCode: 200,
       body: {
-        "message": `${params.bid} deleted successfully`,
+        "message": `${params.brandId} deleted successfully`,
         "data":{}
       }
     }

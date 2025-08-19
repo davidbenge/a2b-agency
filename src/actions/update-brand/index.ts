@@ -2,7 +2,7 @@
  * Update an existing brand
  */
 import { errorResponse, checkMissingRequestInputs } from "../utils/common";
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "../classes/Brand";
 import { BrandManager } from "../classes/BrandManager";
 
@@ -11,8 +11,8 @@ export async function main(params: any): Promise<any> {
 
   try {
     logger.debug(JSON.stringify(params, null, 2));
-    const requiredParams = ['bid']
-    const requiredHeaders = []
+    const requiredParams : string[] = ['brandId']
+    const requiredHeaders : string[] = []
     const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
     if (errorMessage) {
       // return and log client errors
@@ -22,13 +22,17 @@ export async function main(params: any): Promise<any> {
     const brandManager = new BrandManager(params.LOG_LEVEL);
     
     // Get the existing brand
-    const existingBrand = await brandManager.getBrand(params.bid);
+    const existingBrand = await brandManager.getBrand(params.brandId);
     
     // Update the brand with new data
+    if(!existingBrand){
+      return errorResponse(404, `Brand ${params.brandId} not found`, logger);
+    }
+
     const updatedBrand = new Brand({
       ...existingBrand.toJSON(),
       ...params,
-      bid: params.bid, // Ensure bid doesn't change
+      brandId: params.brandId, // Ensure brandId doesn't change
       updatedAt: new Date()
     });
 
@@ -39,7 +43,7 @@ export async function main(params: any): Promise<any> {
     return {
       statusCode: 200,
       body: {
-        "message": `Brand ${params.bid} updated successfully`,
+        "message": `Brand ${params.brandId} updated successfully`,
         "data": savedBrand
       }
     }

@@ -48,9 +48,9 @@ function App (props) {
             </View>
             <View gridArea='content' padding='size-200'>
               <Routes>
-                <Route path='/' element={<Home />} />
-                <Route path='/brand_manager' element={<BrandManagerView viewProps={props.viewProps} />}/>
-                <Route path='/about' element={<About />}/>
+                <Route path='/' element={<Home viewProps={safeViewProps} />} />
+                <Route path='/brand_manager' element={<BrandManagerView viewProps={safeViewProps} />}/>
+                <Route path='/about' element={<About viewProps={safeViewProps} />}/>
               </Routes>
             </View>
           </Grid>

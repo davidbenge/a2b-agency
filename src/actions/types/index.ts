@@ -14,7 +14,11 @@ export interface IBrand {
     logo?: string; // Base64 encoded logo image
     createdAt: Date;
     updatedAt: Date;
-    enabledAt: Date;
+    enabledAt: Date | null;
+    /**
+     * Send an IO event payload to this brand's target endpoint
+     */
+    sendIoEventToEndpoint?: (event: IIoEvent) => Promise<Response>;
 }
 
 export interface IApplicationRuntimeInfo {

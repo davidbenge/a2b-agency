@@ -18,9 +18,9 @@ application:
               S2S_CLIENT_ID: $SERVICE_API_KEY
               S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
               S2S_SCOPES: $S2S_SCOPES
-              AIO_runtime_apihost: $AIO_runtime_apihost
-              AIO_runtime_auth: $AIO_runtime_auth
-              AIO_runtime_namespace: $AIO_runtime_namespace
+              AIO_RUNTIME_APIHOST: $AIO_runtime_apihost
+              AIO_RUNTIME_AUTH: $AIO_runtime_auth
+              AIO_RUNTIME_NAMESPACE: $AIO_runtime_namespace
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
             annotations:
               require-adobe-auth: false
@@ -31,7 +31,7 @@ application:
             runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
-              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
+              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
             annotations:
               require-adobe-auth: false
               final: true
@@ -45,7 +45,7 @@ application:
               S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
               S2S_SCOPES: $S2S_SCOPES
               ORG_ID: $ORG_ID
-              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
+              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
             annotations:
               require-adobe-auth: false
               final: true
@@ -55,10 +55,10 @@ application:
             runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
-              AIO_runtime_apihost: $AIO_runtime_apihost
-              AIO_runtime_auth: $AIO_runtime_auth
-              AIO_runtime_namespace: $AIO_runtime_namespace
-              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"${AIO_app_name}"}'
+              AIO_RUNTIME_APIHOST: $AIO_runtime_apihost
+              AIO_RUNTIME_AUTH: $AIO_runtime_auth
+              AIO_RUNTIME_NAMESPACE: $AIO_runtime_namespace
+              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
             annotations:
               require-adobe-auth: false
               final: true
@@ -83,9 +83,9 @@ application:
               S2S_CLIENT_ID: $SERVICE_API_KEY
               S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
               S2S_SCOPES: $S2S_SCOPES
-              AIO_runtime_apihost: $AIO_runtime_apihost
-              AIO_runtime_auth: $AIO_runtime_auth
-              AIO_runtime_namespace: $AIO_runtime_namespace
+              AIO_RUNTIME_APIHOST: $AIO_runtime_apihost
+              AIO_RUNTIME_AUTH: $AIO_runtime_auth
+              AIO_RUNTIME_NAMESPACE: $AIO_runtime_namespace
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
               AEM_AUTH_TYPE: $AEM_AUTH_TYPE
               AEM_AUTH_CLIENT_ID: $AEM_AUTH_CLIENT_ID

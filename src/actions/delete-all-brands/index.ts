@@ -1,7 +1,7 @@
 /**
  * delete all brands
  */
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 
 export async function main(params: any): Promise<any> {
   const logger = aioLogger("delete-all-brands", { level: params.LOG_LEVEL || "info" });
@@ -15,7 +15,7 @@ export async function main(params: any): Promise<any> {
           logger.debug('File store initialized');
 
       } catch (error) {
-          this.logger.error(`Error initializing file store: ${error}`);
+          logger.error(`Error initializing file store: ${error}`);
           throw new Error(`Error initializing file store: ${error}`);
       }
 

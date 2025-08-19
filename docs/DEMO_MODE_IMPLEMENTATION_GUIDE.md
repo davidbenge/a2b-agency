@@ -18,15 +18,15 @@ Create a feature flag that automatically enables demo mode based on environment 
 
 ```typescript
 // Feature flag for demo mode - can be controlled via environment variable
-const ENABLE_DEMO_MODE = process.env.REACT_APP_ENABLE_DEMO_MODE === 'true' || 
-                        process.env.NODE_ENV === 'development' ||
-                        process.env.NODE_ENV !== 'production';
+const ENABLE_DEMO_MODE = process.env.AIO_ENABLE_DEMO_MODE === 'true' || 
+                        process.env.NODE_ENV === 'development';
 ```
 
 **Key Benefits:**
 - Automatic enablement in development environment
 - Manual control via environment variable
 - Production-safe (disabled by default in production)
+- **Override**: Can be forced ON with `AIO_ENABLE_DEMO_MODE=true`
 
 ### 2. Mock Data Structure
 
@@ -179,14 +179,13 @@ return (
 1. **Add environment variable support:**
    ```bash
    # In your .env file (for local development)
-   REACT_APP_ENABLE_DEMO_MODE=true
+   AIO_ENABLE_DEMO_MODE=true
    ```
 
 2. **Create the feature flag:**
    ```typescript
-   const ENABLE_DEMO_MODE = process.env.REACT_APP_ENABLE_DEMO_MODE === 'true' || 
-                           process.env.NODE_ENV === 'development' ||
-                           process.env.NODE_ENV !== 'production';
+   const ENABLE_DEMO_MODE = process.env.AIO_ENABLE_DEMO_MODE === 'true' || 
+                           process.env.NODE_ENV === 'development';
    ```
 
 ### Step 2: Mock Data Creation
@@ -315,9 +314,9 @@ const validateForm = (data: Partial<DataType>): string[] => {
 ```json
 {
   "scripts": {
-    "start": "REACT_APP_ENABLE_DEMO_MODE=true npm run dev",
-    "start:prod": "REACT_APP_ENABLE_DEMO_MODE=false npm run dev",
-    "demo": "REACT_APP_ENABLE_DEMO_MODE=true npm run build && npm run serve"
+    "start": "AIO_ENABLE_DEMO_MODE=true npm run dev",
+    "start:prod": "AIO_ENABLE_DEMO_MODE=false npm run dev",
+    "demo": "AIO_ENABLE_DEMO_MODE=true npm run build && npm run serve"
   }
 }
 ```
@@ -326,10 +325,10 @@ const validateForm = (data: Partial<DataType>): string[] => {
 
 ```bash
 # .env.development
-REACT_APP_ENABLE_DEMO_MODE=true
+AIO_ENABLE_DEMO_MODE=true
 
 # .env.production  
-REACT_APP_ENABLE_DEMO_MODE=false
+AIO_ENABLE_DEMO_MODE=false
 ```
 
 ## Integration with Adobe App Builder
@@ -359,7 +358,7 @@ useEffect(() => {
 ### Common Issues
 
 1. **Demo mode not activating:**
-   - Check environment variable spelling: `REACT_APP_ENABLE_DEMO_MODE`
+   - Check environment variable spelling: `AIO_ENABLE_DEMO_MODE`
    - Verify NODE_ENV is set correctly
    - Restart development server after environment changes
 

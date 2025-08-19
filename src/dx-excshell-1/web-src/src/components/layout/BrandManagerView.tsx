@@ -26,18 +26,14 @@ import Edit from '@spectrum-icons/workflow/Edit';
 import ViewDetail from '@spectrum-icons/workflow/ViewDetail';
 import Delete from '@spectrum-icons/workflow/Delete';
 import { v4 as uuidv4 } from 'uuid';
+import { apiService } from '../../services/api';
 
 type ViewMode = 'list' | 'add' | 'edit' | 'view';
-
-// Feature flag for demo mode - can be controlled via environment variable
-const ENABLE_DEMO_MODE = process.env.REACT_APP_ENABLE_DEMO_MODE === 'true' || 
-                        process.env.NODE_ENV === 'development' ||
-                        process.env.NODE_ENV !== 'production';
 
 // Mock data for testing (only used in demo mode)
 const mockBrands: Brand[] = [
     new Brand({
-        bid: '1',
+        brandId: '1',
         secret: 'mock-secret-1',
         name: 'Test Brand 1',
         endPointUrl: 'https://example1.com/api',
@@ -48,7 +44,7 @@ const mockBrands: Brand[] = [
         enabledAt: new Date('2024-01-01')
     }),
     new Brand({
-        bid: '2',
+        brandId: '2',
         secret: 'mock-secret-2',
         name: 'Test Brand 2',
         endPointUrl: 'https://example2.com/api',
@@ -61,13 +57,15 @@ const mockBrands: Brand[] = [
 ];
 
 const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps }) => {
-    const [brands, setBrands] = useState<Brand[]>(ENABLE_DEMO_MODE ? mockBrands : []);
-    const [loading, setLoading] = useState(!ENABLE_DEMO_MODE);
+    const [brands, setBrands] = useState<Brand[]>(viewProps.aioEnableDemoMode ? mockBrands : []);
+    const [loading, setLoading] = useState(!viewProps.aioEnableDemoMode);
     const [viewMode, setViewMode] = useState<ViewMode>('list');
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
     const [formLoading, setFormLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    console.debug('BrandManagerView: viewProps.aioEnableDemoMode', viewProps.aioEnableDemoMode);
+    console.debug('BrandManagerView: viewProps', viewProps);
 
     // Sorting and filtering state
     const [sortDescriptor, setSortDescriptor] = useState<any>(undefined);
@@ -81,12 +79,41 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
 
     // Load brands from API when not in demo mode
     useEffect(() => {
-        if (!ENABLE_DEMO_MODE) {
-            // TODO: Implement real API call here
-            // For now, just set loading to false
-            setLoading(false);
+        if (!viewProps.aioEnableDemoMode) {
+            const apiBaseUrl = `https://${viewProps.aioRuntimeNamespace}.adobeio-static.net/api/v1/web/${viewProps.aioActionPackageName}`;
+            apiService.initialize(apiBaseUrl, viewProps.imsToken, viewProps.imsOrg);
+            
+            const fetchBrands = async () => {
+                try {
+                    console.debug('BrandManagerView getting brands');
+                    const response = await apiService.getBrandList();
+                    console.debug('BrandManager View getting brands response', response);
+                    console.debug('BrandManager View getting brands response json', JSON.stringify(response, null, 2));
+                    
+                    console.debug('response statusCode', response.statusCode);
+                    console.debug('response body', response.body);
+                    console.debug('response body', response.body);
+                    console.debug('response body.data', response.body.data);
+                    if (response.body.data) {
+                        const items = response.body.data as any[];
+                        const mapped = items.map(item => new Brand(item).toJSON()).map(item => Brand.fromJSON(item));
+                        setBrands(mapped);
+                    }
+                } catch (error) {
+                    console.error('Error fetching brands:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            fetchBrands();
+
+            return () => {
+                apiService.clear();
+            };
         }
-    }, [ENABLE_DEMO_MODE]);
+    }, [viewProps.aioEnableDemoMode, viewProps.imsToken, viewProps.baseUrl]);
+    
 
     // Filter and sort brands
     const getFilteredAndSortedBrands = () => {
@@ -173,9 +200,9 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             return;
         }
 
-        if (ENABLE_DEMO_MODE) {
+        if (viewProps.aioEnableDemoMode) {
             // Demo mode: local state management
-            setBrands(brands.filter(brand => brand.bid !== brandId));
+            setBrands(brands.filter(brand => brand.brandId !== brandId));
             setSuccess('Brand deleted successfully');
         } else {
             // TODO: Implement real API call here
@@ -191,12 +218,12 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             setFormLoading(true);
             setError(null);
 
-            if (ENABLE_DEMO_MODE) {
+            if (viewProps.aioEnableDemoMode) {
                 // Demo mode: local state management
                 if (viewMode === 'add') {
                     const newBrand = new Brand({
                         ...brandData,
-                        bid: uuidv4(),
+                        brandId: uuidv4(),
                         secret: 'mock-secret-' + Math.random().toString(36).substr(2, 9),
                         createdAt: new Date(),
                         updatedAt: new Date(),
@@ -209,13 +236,13 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                     const updatedBrand = new Brand({
                         ...selectedBrand.toJSON(),
                         ...brandData,
-                        bid: selectedBrand.bid,
+                        brandId: selectedBrand.brandId,
                         updatedAt: new Date(),
                         enabledAt: brandData.enabled ? (selectedBrand.enabledAt || new Date()) : null
                     });
                     
                     setBrands(brands.map(brand => 
-                        brand.bid === selectedBrand.bid ? updatedBrand : brand
+                        brand.brandId === selectedBrand.brandId ? updatedBrand : brand
                     ));
                     setSuccess('Brand updated successfully');
                 }
@@ -251,7 +278,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                 <Flex justifyContent="space-between" alignItems="center" marginBottom="size-200">
                     <Heading level={1}>
                         Brand Manager
-                        {ENABLE_DEMO_MODE && ' (Demo Mode)'}
+                        {viewProps.aioEnableDemoMode && ' (Demo Mode)'}
                     </Heading>
                     <Button
                         variant="primary"
@@ -264,7 +291,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                 
                 <Text marginBottom="size-200">Welcome, {userEmail}</Text>
                 
-                {ENABLE_DEMO_MODE && (
+                {viewProps.aioEnableDemoMode && (
                     <StatusLight variant="info" marginBottom="size-200">
                         Running in demo mode with mock data
                     </StatusLight>
@@ -331,7 +358,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         </TableHeader>
                         <TableBody>
                             {filteredAndSortedBrands.map((brand) => (
-                                <Row key={brand.bid}>
+                                <Row key={brand.brandId}>
                                     <Cell>
                                         {brand.logo ? (
                                             <Image 
@@ -352,7 +379,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                             {brand.enabled ? 'Enabled' : 'Disabled'}
                                         </StatusLight>
                                     </Cell>
-                                    <Cell>{brand.createdAt.toLocaleDateString()}</Cell>
+                                    <Cell>{brand?.createdAt ? new Date(brand.createdAt as any).toLocaleDateString() : ''}</Cell>
                                     <Cell>
                                         <Flex gap="size-100">
                                             <Button 
@@ -369,7 +396,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                             </Button>
                                             <Button 
                                                 variant="negative" 
-                                                onPress={() => handleDeleteBrand(brand.bid)}
+                                                onPress={() => handleDeleteBrand(brand.brandId)}
                                             >
                                                 <Delete />
                                             </Button>
@@ -393,9 +420,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             loading={formLoading}
         />
     );
-
-    const isDeleting = (brandId: string) => deletingBrands.has(brandId);
-
+    
     return (
         <View>
             {viewMode === 'list' ? renderListView() : renderFormView()}

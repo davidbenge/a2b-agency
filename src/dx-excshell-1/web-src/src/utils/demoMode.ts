@@ -5,10 +5,7 @@
  * Demo mode allows the application to function with mock data and simulated API responses.
  */
 
-// Feature flag for demo mode - can be controlled via environment variable
-export const ENABLE_DEMO_MODE = process.env.REACT_APP_ENABLE_DEMO_MODE === 'true' || 
-                               process.env.NODE_ENV === 'development' ||
-                               process.env.NODE_ENV !== 'production';
+import { ViewPropsBase } from "../types/ViewPropsBase";
 
 /**
  * Interface for Company Registration mock data
@@ -121,8 +118,8 @@ export const createMockApiResponse = <T>(data: T, delay: number = 1000) => {
 /**
  * Utility to get safe ViewProps with fallbacks for demo mode
  */
-export const getSafeViewProps = (viewProps?: any) => {
-    if (ENABLE_DEMO_MODE && !viewProps) {
+export const getSafeViewProps = (viewProps: ViewPropsBase) => {
+    if (!viewProps && viewProps.aioEnableDemoMode) {
         return mockViewProps;
     }
     
@@ -139,8 +136,8 @@ export const getSafeViewProps = (viewProps?: any) => {
 /**
  * Debug logging for demo mode
  */
-export const logDemoMode = (message: string, data?: any) => {
-    if (ENABLE_DEMO_MODE) {
+export const logDemoMode = (viewProps: ViewPropsBase, message: string, data?: any) => {
+    if (viewProps.aioEnableDemoMode) {
         console.log(`[DEMO MODE] ${message}`, data || '');
     }
 };

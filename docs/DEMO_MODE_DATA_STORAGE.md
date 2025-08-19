@@ -12,7 +12,7 @@ The Brand Manager demo mode uses **in-memory state management** to store and man
 // Mock data defined as a constant array
 const mockBrands: Brand[] = [
     new Brand({
-        bid: '1',
+        brandId: '1',
         secret: 'mock-secret-1',
         name: 'Test Brand 1',
         endPointUrl: 'https://example1.com/api',
@@ -42,7 +42,7 @@ const [brands, setBrands] = useState<Brand[]>(ENABLE_DEMO_MODE ? mockBrands : []
 if (viewMode === 'add') {
     const newBrand = new Brand({
         ...brandData,
-        bid: uuidv4(), // Generate unique ID
+        brandId: uuidv4(), // Generate unique ID
         secret: 'mock-secret-' + Math.random().toString(36).substr(2, 9),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -66,13 +66,13 @@ if (viewMode === 'edit' && selectedBrand) {
     const updatedBrand = new Brand({
         ...selectedBrand.toJSON(),
         ...brandData,
-        bid: selectedBrand.bid, // Preserve original ID
+        brandId: selectedBrand.brandId, // Preserve original ID
         updatedAt: new Date(),
         enabledAt: brandData.enabled ? (selectedBrand.enabledAt || new Date()) : null
     });
     
     setBrands(brands.map(brand => 
-        brand.bid === selectedBrand.bid ? updatedBrand : brand
+        brand.brandId === selectedBrand.brandId ? updatedBrand : brand
     ));
 }
 ```
@@ -80,7 +80,7 @@ if (viewMode === 'edit' && selectedBrand) {
 #### **Delete (Remove Brand)**
 ```typescript
 if (ENABLE_DEMO_MODE) {
-    setBrands(brands.filter(brand => brand.bid !== brandId));
+    setBrands(brands.filter(brand => brand.brandId !== brandId));
 }
 ```
 

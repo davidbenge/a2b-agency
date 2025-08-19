@@ -69,8 +69,10 @@ function bootstrapInExcShell () {
       tenant: tenant,
       aioRuntimeNamespace: process.env.AIO_runtime_namespace,
       aioAppName: 'agency',
-      aioActionPackageName: process.env.AIO_ACTION_PACKAGE_NAME
+      aioActionPackageName: process.env.AIO_ACTION_PACKAGE_NAME,
+      aioEnableDemoMode: (process.env.AIO_ENABLE_DEMO_MODE === 'true')
     }
+    
     // render the actual react application and pass along the runtime and ims objects to make it available to the App
     ReactDOM.render(
       <App runtime={runtime} viewProps={viewProps} />,

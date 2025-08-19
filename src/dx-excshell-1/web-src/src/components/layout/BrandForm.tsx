@@ -153,7 +153,7 @@ const BrandForm: React.FC<BrandFormProps> = ({
             <Content>
                 {brand && mode === 'view' && (
                     <View marginBottom="size-200">
-                        <Text>Brand ID: {brand.bid}</Text>
+                        <Text>Brand ID: {brand.brandId}</Text>
                         <Text>Created: {brand.createdAt.toLocaleDateString()}</Text>
                         <Text>Last Updated: {brand.updatedAt.toLocaleDateString()}</Text>
                         {brand.enabledAt && (

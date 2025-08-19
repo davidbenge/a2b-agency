@@ -5,15 +5,15 @@
  * and routes them to the appropriate internal event handlers based on event type.
  */
 import { errorResponse, checkMissingRequestInputs } from "../utils/common";
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 const openwhisk = require("openwhisk");
 
 export async function main(params: any): Promise<any> {
   const logger = aioLogger("adobe-product-event-handler", { level: params.LOG_LEVEL || "info" });
 
   try {
-    const requiredParams = []
-    const requiredHeaders = [] // TODO: Add security required headers
+    const requiredParams: string[] = [];
+    const requiredHeaders: string[] = [];
     const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
     if (errorMessage) {
       // return and log client errors
@@ -56,19 +56,6 @@ export async function main(params: any): Promise<any> {
         routingResult = await routeToAssetSyncHandler(params, logger);
         break;
       
-      // TODO: Add more Adobe product event types as needed
-      // case 'creativecloud.file.created':
-      // case 'creativecloud.file.updated':
-      //   logger.info(`Routing Creative Cloud event to creative-cloud-handler: ${params.type}`);
-      //   routingResult = await routeToCreativeCloudHandler(params, logger);
-      //   break;
-      
-      // case 'documentcloud.document.created':
-      // case 'documentcloud.document.updated':
-      //   logger.info(`Routing Document Cloud event to document-cloud-handler: ${params.type}`);
-      //   routingResult = await routeToDocumentCloudHandler(params, logger);
-      //   break;
-      
       default:
         logger.warn(`Unhandled event type: ${params.type}`);
         return {
@@ -89,8 +76,8 @@ export async function main(params: any): Promise<any> {
         routingResult: routingResult
       }
     }
-  } catch (error) {
-    logger.error('Error processing Adobe product event', error);
+  } catch (error: unknown) {
+    logger.error('Error processing Adobe product event', error as any);
     return {
       statusCode: 500,
       body: {
@@ -136,8 +123,8 @@ async function routeToAssetSyncHandler(params: any, logger: any): Promise<any> {
       result: result
     };
 
-  } catch (error) {
-    logger.error('Error invoking agency-assetsync-internal-handler:', error);
+  } catch (error: unknown) {
+    logger.error('Error invoking agency-assetsync-internal-handler:', error as any);
     return {
       success: false,
       handler: 'adobe-product-event-handler agency-assetsync-internal-handler',

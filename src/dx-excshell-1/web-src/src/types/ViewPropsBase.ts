@@ -16,6 +16,7 @@ export abstract class ViewPropsBase implements IViewPropsBase {
     aioRuntimeNamespace: string;
     aioAppName: string;
     aioActionPackageName: string;
+    aioEnableDemoMode: boolean;
 
     constructor(props: IViewPropsBase) {
         this.baseUrl = props.baseUrl;
@@ -33,6 +34,7 @@ export abstract class ViewPropsBase implements IViewPropsBase {
         this.aioRuntimeNamespace = props.aioRuntimeNamespace;
         this.aioAppName = props.aioAppName;
         this.aioActionPackageName = props.aioActionPackageName;
+        this.aioEnableDemoMode = props.aioEnableDemoMode;
     }
 
     /**
@@ -52,7 +54,8 @@ export abstract class ViewPropsBase implements IViewPropsBase {
             this.tenant &&
             this.aioRuntimeNamespace &&
             this.aioAppName &&
-            this.aioActionPackageName
+            this.aioActionPackageName &&
+            this.aioEnableDemoMode
         );
     }
 
@@ -76,7 +79,8 @@ export abstract class ViewPropsBase implements IViewPropsBase {
             tenant: this.tenant,
             aioRuntimeNamespace: this.aioRuntimeNamespace,
             aioAppName: this.aioAppName,
-            aioActionPackageName: this.aioActionPackageName
+            aioActionPackageName: this.aioActionPackageName,
+            aioEnableDemoMode: this.aioEnableDemoMode
         };
     }
 } 

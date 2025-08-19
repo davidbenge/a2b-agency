@@ -1,43 +1,50 @@
-import { IoEventHandler } from '../IoEventHandler';
 import { IoCustomEventManager } from "../IoCustomEventManager";
 import { WorkfrontTaskCreatedEvent } from "../io_events/WorkfrontTaskCreatedEvent";
 import { WorkfrontTaskUpdatedEvent } from "../io_events/WorkfrontTaskUpdatedEvent";
 import { WorkfrontTaskCompletedEvent } from "../io_events/WorkfrontTaskCompletedEvent";
+import aioLogger from "@adobe/aio-lib-core-logging";
 
-export class WorkfrontEventHandler extends IoEventHandler {
-    /*******
-     * handleEvent - handle the Workfront event and determine appropriate action
-     * 
-     * @param event: any 
-     * @returns Promise<any>
-     *******/
+export class WorkfrontEventHandler {
     async handleEvent(event: any): Promise<any> {
-        this.logger.info("Workfront Event Handler called", event);
+        const logger = aioLogger("WorkfrontEventHandler", { level: event.LOG_LEVEL || "info" });
+        logger.info("Workfront Event Handler called", event);
+        const s2s = {
+            clientId: event.S2S_CLIENT_ID,
+            clientSecret: event.S2S_CLIENT_SECRET,
+            scopes: Array.isArray(event.S2S_SCOPES) ? event.S2S_SCOPES.join(',') : String(event.S2S_SCOPES),
+            orgId: event.ORG_ID
+        } as any;
+        const applicationRuntimeInfo = {
+            consoleId: '',
+            projectName: '',
+            workspace: '',
+            actionPackageName: event.AIO_ACTION_PACKAGE_NAME,
+            app_name: event.AIO_app_name
+        } as any;
         const ioCustomEventManager = new IoCustomEventManager(
-            event.AIO_AGENCY_EVENTS_WORKFRONT_PROVIDER_ID,
             event.LOG_LEVEL,
-            event
+            s2s,
+            applicationRuntimeInfo
         );
 
-        // Handle different Workfront event types
         switch (event.type) {
             case 'workfront.task.created':
-                this.logger.info("Workfront task created event", event);
+                logger.info("Workfront task created event", event);
                 await ioCustomEventManager.publishEvent(new WorkfrontTaskCreatedEvent(event.data));
                 break;
 
             case 'workfront.task.updated':
-                this.logger.info("Workfront task updated event", event);
+                logger.info("Workfront task updated event", event);
                 await ioCustomEventManager.publishEvent(new WorkfrontTaskUpdatedEvent(event.data));
                 break;
 
             case 'workfront.task.completed':
-                this.logger.info("Workfront task completed event", event);
+                logger.info("Workfront task completed event", event);
                 await ioCustomEventManager.publishEvent(new WorkfrontTaskCompletedEvent(event.data));
                 break;
 
             default:
-                this.logger.info("Workfront event not handled", event);
+                logger.info("Workfront event not handled", event);
         }
 
         return {

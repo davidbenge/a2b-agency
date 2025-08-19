@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import { IIoEvent, IS2SAuthenticationCredentials, IApplicationRuntimeInfo } from "../types";
 import { BrandManager } from "./BrandManager";
 import { IoCustomEventManager } from "./IoCustomEventManager";
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 
 export class EventManager {
     private s2sAuthenticationCredentials: IS2SAuthenticationCredentials;
@@ -14,9 +14,9 @@ export class EventManager {
     /****
      * @param logLevel - the log level to use
      * @param s2sAuthenticationCredentials - the s2s authentication credentials 
-     * @param applicationRuntimeInfo - the application runtime information
+     * @param applicationRuntimeInfo - the application runtime information (validated below)
      */
-    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, applicationRuntimeInfo: any) {
+    constructor(logLevel: string, s2sAuthenticationCredentials: IS2SAuthenticationCredentials, applicationRuntimeInfo: IApplicationRuntimeInfo) {
         this.logger = aioLogger("EventManager", { level: logLevel || "info" });
         if (s2sAuthenticationCredentials.clientId && s2sAuthenticationCredentials.clientSecret && s2sAuthenticationCredentials.scopes && s2sAuthenticationCredentials.orgId) {
             this.s2sAuthenticationCredentials = s2sAuthenticationCredentials;
@@ -67,35 +67,6 @@ export class EventManager {
         }catch(error){
             this.logger.error('EventManager:publishEvent: error publishing event', error);
             throw new Error('EventManager:publishEvent: error publishing event');
-        }
-       
-        // TODO: check and see if event needs to go to brand if so send it. some day that will be in the Brand config
-        // get brand data 
-        //this.logger.debug('EventManager:publishEvent: brandId pre getting the brand data for event call backs', event.data.brandId);
-        const brand = await this.brandManager.getBrand(event.data.brandId); // this is dumb on Reg events but lets fetch it anyway
-        this.logger.debug('EventManager:publishEvent: brand from get from brand manager', brand);
-
-        // if external get the Brand it needs to be sent to and the end point url and auth. use brand manager
-        if(brand.enabled){
-            if(brand.endPointUrl){
-                // route the event to the correct receivers. send the event to the correct receivers with the auth in the header
-                try {
-                    this.logger.error(`Sending event to brand at ${brand.endPointUrl}`);
-                    const response = await fetch(brand.endPointUrl, {
-                        method: 'POST',
-                        body: JSON.stringify(event),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    this.logger.error(`Sent event to brand at ${brand.endPointUrl}`, response);
-                } catch (error) {
-                    this.logger.error('EventManager:publishEvent: error sending event to brand', error);
-                }
-            }else{
-                this.logger.error('EventManager:publishEvent: brand is enabled but does not have an end point url', brand);
-                throw new Error('EventManager:publishEvent: brand is enabled but does not have an end point url');
-            }
         }
     }
 

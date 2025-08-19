@@ -2,7 +2,7 @@
  * Get a single brand by ID
  */
 import { errorResponse, checkMissingRequestInputs } from "../utils/common";
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "../classes/Brand";
 import { BrandManager } from "../classes/BrandManager";
 
@@ -11,8 +11,8 @@ export async function main(params: any): Promise<any> {
 
   try {
     logger.debug(JSON.stringify(params, null, 2));
-    const requiredParams = ['bid']
-    const requiredHeaders = []
+    const requiredParams: string[] = ['brandId']
+    const requiredHeaders: string[] = []
     const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
     if (errorMessage) {
       // return and log client errors
@@ -20,13 +20,13 @@ export async function main(params: any): Promise<any> {
     }
 
     const brandManager = new BrandManager(params.LOG_LEVEL);
-    const brand = await brandManager.getBrand(params.bid);
+    const brand = await brandManager.getBrand(params.brandId);
     logger.debug('Brand', JSON.stringify(brand, null, 2));
 
     return {
       statusCode: 200,
       body: {
-        "message": `Brand ${params.bid} fetched successfully`,
+        "message": `Brand ${params.brandId} fetched successfully`,
         "data": brand
       }
     }

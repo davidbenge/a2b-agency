@@ -7,13 +7,9 @@
  */
 
 import { WorkfrontEventHandler } from '../classes/event_handlers/WorkfrontEventHandler';
-import * as aioLogger from "@adobe/aio-lib-core-logging";
+import aioLogger from "@adobe/aio-lib-core-logging";
 
 export async function main(params: any): Promise<any> {
-    let config = {
-        logLevel: params.LOG_LEVEL || "info"
-    };
-
     // handle IO webhook challenge
     if (params.challenge) {
         const response = {
@@ -29,7 +25,7 @@ export async function main(params: any): Promise<any> {
         logger.debug("Received Workfront event", params);
 
         // Initialize and use the Workfront event handler
-        const workfrontHandler = new WorkfrontEventHandler(config);
+        const workfrontHandler = new WorkfrontEventHandler();
         const result = await workfrontHandler.handleEvent(params);
 
         return {

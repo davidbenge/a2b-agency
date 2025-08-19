@@ -1,4 +1,4 @@
-import { IBrand } from '../types';
+import { IBrand, IIoEvent } from '../types';
 
 export class Brand implements IBrand {
     brandId: string;
@@ -9,7 +9,7 @@ export class Brand implements IBrand {
     logo?: string;
     createdAt: Date;
     updatedAt: Date;
-    enabledAt: Date;
+    enabledAt: Date | null;
 
     constructor(params: Partial<IBrand> = {}) {
         this.brandId = params.brandId || '';
@@ -20,7 +20,7 @@ export class Brand implements IBrand {
         this.logo = params.logo;
         this.createdAt = params.createdAt || new Date();
         this.updatedAt = params.updatedAt || new Date();
-        this.enabledAt = params.enabledAt || null;
+        this.enabledAt = params.enabledAt ?? null;
     }
 
     /**
@@ -94,5 +94,40 @@ export class Brand implements IBrand {
             this.name &&
             this.endPointUrl
         );
+    }
+
+    /**
+     * Send an IO event payload to this brand's configured endpoint
+     * @param event - the IO event to send
+     * @param extraHeaders - optional additional headers to include
+     */
+    async sendIoEventToEndpoint(event: IIoEvent): Promise<Response> {
+        if (!this.enabled) {
+            throw new Error('Brand:sendIoEventToEndpoint: brand is disabled');
+        }
+        if (!this.endPointUrl) {
+            throw new Error('Brand:sendIoEventToEndpoint: endPointUrl is missing');
+        }
+
+        const validation = event.validate();
+        if (!validation.valid) {
+            const message = `Brand:sendIoEventToEndpoint: event is not valid ${validation.message ? ` - ${validation.message}` : ''}`;
+            throw new Error(message);
+        }
+
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-A2B-Brand-Id': this.brandId,
+            'X-A2B-Brand-Secret': this.secret
+        };
+
+        const response = await fetch(this.endPointUrl, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(event.toJSON())
+        });
+
+        return response;
     }
 } 

@@ -2,10 +2,9 @@
 * <license header>
 */
 
-import React from 'react'
 import { Heading, View, Content, Link, Text, Flex, Divider } from '@adobe/react-spectrum'
 
-export const About = () => (
+export const About = ({ viewProps }) => (
   <View maxWidth="size-6000">
     <Content>
       <Flex direction="column" gap="size-300">
