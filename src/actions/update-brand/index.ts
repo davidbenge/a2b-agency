@@ -25,6 +25,10 @@ export async function main(params: any): Promise<any> {
     const existingBrand = await brandManager.getBrand(params.brandId);
     
     // Update the brand with new data
+    if(!existingBrand){
+      return errorResponse(404, `Brand ${params.brandId} not found`, logger);
+    }
+
     const updatedBrand = new Brand({
       ...existingBrand.toJSON(),
       ...params,

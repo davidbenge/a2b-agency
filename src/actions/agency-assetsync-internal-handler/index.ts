@@ -13,6 +13,9 @@ import { EventManager } from '../classes/EventManager';
 import { getAemAssetData, getAemAuth } from '../utils/aemCscUtils';
 import { AssetSyncUpdateEvent } from '../classes/io_events/AssetSyncUpdateEvent';
 import { AssetSyncNewEvent } from '../classes/io_events/AssetSyncNewEvent';
+import { BrandManager } from "../classes/BrandManager";
+import { normalizeCustomersToArray } from "../utils/normalizers";
+
 
 export async function main(params: any): Promise<any> {
   const ACTION_NAME = 'agency:agency-assetsync-internal-handler';
@@ -91,59 +94,13 @@ export async function main(params: any): Promise<any> {
           // loop over brands and send an event for each brand
           const customers = metadata["a2b__customers"];
           const sourceProviderId = getAssetSyncProviderId();
-          const presignedUrlEndpoint = params.ADOBE_INTERNAL_URL_ENDPOINT + "/aem-getPresignedReadUrl";
-          const aemAuth = await getAemAuth(params, logger);
-          const adobeInternalCallHeaders = {
-            "Content-Type": "application/json",
-            "x-api-key": params.AEM_AUTH_CLIENT_ID,
-            "Authorization": `Bearer ${aemAuth}`,
-          }
-          let presignedUrl = "";
-          const presignedCallBody = JSON.stringify({
-            "host": aemHostHostOnly,
-            "path": aemAssetPath
-          });
-
-          logger.debug(`${ACTION_NAME}: presignedUrlEndpoint`, presignedUrlEndpoint);
-          logger.debug(`${ACTION_NAME}: presignedCallBody`, presignedCallBody);
-
-          // Get presigned URL for the asset using Adobe internal endpoint
-          try {
-            // need to pass in host and path to the asset
-            const response = await fetch(presignedUrlEndpoint, {
-              method: 'POST',
-              headers: adobeInternalCallHeaders,
-              body: presignedCallBody,
-              redirect: "follow"
-            });
-
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data: any = await response.json();
-            presignedUrl = data.data.presignedUrl as string;
-
-            logger.info(`${ACTION_NAME}: Getting presigned URL from Adobe internal endpoint: ${presignedUrlEndpoint} got presigned url: ${presignedUrl}`);
-
-          } catch (error: unknown) {
-            logger.error(`${ACTION_NAME}: Error getting presigned URL:`, error as any);
-            throw new Error(`${ACTION_NAME}: Error getting presigned URL: ${error instanceof Error ? error.message : String(error)}`);
-          }
+          const presignedUrl = await fetchPresignedReadUrl(aemHostHostOnly, aemAssetPath, params, logger, ACTION_NAME);
   
-          // Handle customers as either an array, object, or string
+          // Normalize customers to string[] using reusable utility
           let customersArray: string[] = [];
-
-          if (Array.isArray(customers)) {
-            // If it's already an array, use it directly
-            customersArray = customers.map(customer => String(customer));
-          } else if (typeof customers === 'object' && customers !== null) {
-            // If it's an object, extract values (assuming it's an object with customer IDs as keys or values)
-            customersArray = Object.values(customers).map(customer => String(customer));
-          } else if (typeof customers === 'string') {
-            // If it's a string, split by comma
-            customersArray = customers.split(",").map(customer => customer.trim());
-          } else {
+          try {
+            customersArray = normalizeCustomersToArray(customers);
+          } catch (e) {
             logger.warn("AssetSyncEventHandler customers is not in expected format", customers);
             return {
               statusCode: 400,
@@ -153,41 +110,43 @@ export async function main(params: any): Promise<any> {
             };
           }
 
-          let eventData: { asset_id: any; asset_path: any; metadata: any; asset_presigned_url: string; brandId?: string } = {
-            "asset_id": aemAssetData["jcr:uuid"],
-            "asset_path": aemAssetPath,
-            "metadata": metadata,
-            "asset_presigned_url": presignedUrl
-          };
-
           // loop over customers and send an event for each customer subscribed to the asset
           for (const customer of customersArray) {
             // set the brand id
             logger.info(`brand id ${customer} in customersArray`);
             const brandId = customer;
 
-            eventData["brandId"] = brandId;
-
             // has the asset been synced before?
             if (aemAssetData["jcr:content"].metadata["a2b__last_sync"]) {
               // update event
-              logger.info(`assetSyncEventUpdate`, eventData);
+              logger.info(`assetSyncEventUpdate`);
               //TODO: send out an update event
 
             } else {
               // new event  
-              logger.info(`assetSyncEventNew`, eventData.asset_id, eventData.asset_path, eventData.metadata, eventData.asset_presigned_url, brandId);
-              
               const assetSyncEventNew = new AssetSyncNewEvent(
-                eventData.asset_id,
-                eventData.asset_path,
-                eventData.metadata,
-                eventData.asset_presigned_url,
+                aemAssetData["jcr:uuid"],
+                aemAssetPath,
+                metadata,
+                presignedUrl,
                 brandId,
                 sourceProviderId
               );
-              await getEventManager().publishEvent(assetSyncEventNew);
-              logger.info(`assetSyncEventNew complete`);
+
+              //get the brand 
+              const brandManager = new BrandManager(params.LOG_LEVEL);
+              const brand = await brandManager.getBrand(brandId);
+              if(brand && brand.enabled){
+                //send the event to the brand
+                const brandSendResponse = await brand.sendIoEventToEndpoint(assetSyncEventNew);
+                logger.info(`assetSyncEventNew complete`, brandSendResponse);
+
+                //publish the event to the event manager
+                await getEventManager().publishEvent(assetSyncEventNew);
+                logger.info(`assetSyncEventNew complete`);
+              }else{
+                logger.warn(`${ACTION_NAME}: brand is not enabled or does not exist`, brandId);
+              }
 
               // update todo: the last sync date in AEM data
               //eventData.metadate["a2d__last_sync"] = new Date().toISOString();
@@ -222,4 +181,47 @@ export async function main(params: any): Promise<any> {
       }
     }
   }
+}
+
+/**
+ * Fetch a presigned read URL for an AEM asset using Adobe internal endpoint.
+ * Kept local to this handler for reuse and testability.
+ */
+async function fetchPresignedReadUrl(
+  aemHostHostOnly: string,
+  aemAssetPath: string,
+  params: any,
+  logger: any,
+  actionName: string
+): Promise<string> {
+  const presignedUrlEndpoint = params.ADOBE_INTERNAL_URL_ENDPOINT + "/aem-getPresignedReadUrl";
+  const aemAuth = await getAemAuth(params, logger);
+  const adobeInternalCallHeaders = {
+    "Content-Type": "application/json",
+    "x-api-key": params.AEM_AUTH_CLIENT_ID,
+    "Authorization": `Bearer ${aemAuth}`,
+  };
+  const presignedCallBody = JSON.stringify({
+    host: aemHostHostOnly,
+    path: aemAssetPath
+  });
+
+  logger.debug(`${actionName}: presignedUrlEndpoint`, presignedUrlEndpoint);
+  logger.debug(`${actionName}: presignedCallBody`, presignedCallBody);
+
+  const response = await fetch(presignedUrlEndpoint, {
+    method: 'POST',
+    headers: adobeInternalCallHeaders,
+    body: presignedCallBody,
+    redirect: 'follow'
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data: any = await response.json();
+  const presignedUrl = data.data.presignedUrl as string;
+  logger.info(`${actionName}: Getting presigned URL from Adobe internal endpoint: ${presignedUrlEndpoint} got presigned url: ${presignedUrl}`);
+  return presignedUrl;
 }

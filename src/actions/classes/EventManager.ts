@@ -68,35 +68,6 @@ export class EventManager {
             this.logger.error('EventManager:publishEvent: error publishing event', error);
             throw new Error('EventManager:publishEvent: error publishing event');
         }
-       
-        // TODO: check and see if event needs to go to brand if so send it. some day that will be in the Brand config
-        // get brand data 
-        //this.logger.debug('EventManager:publishEvent: brandId pre getting the brand data for event call backs', event.data.brandId);
-        const brand = await this.brandManager.getBrand(event.data.brandId); // this is dumb on Reg events but lets fetch it anyway
-        this.logger.debug('EventManager:publishEvent: brand from get from brand manager', brand);
-
-        // if external get the Brand it needs to be sent to and the end point url and auth. use brand manager
-        if(brand.enabled){
-            if(brand.endPointUrl){
-                // route the event to the correct receivers. send the event to the correct receivers with the auth in the header
-                try {
-                    this.logger.error(`Sending event to brand at ${brand.endPointUrl}`);
-                    const response = await fetch(brand.endPointUrl, {
-                        method: 'POST',
-                        body: JSON.stringify(event),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    this.logger.error(`Sent event to brand at ${brand.endPointUrl}`, response);
-                } catch (error) {
-                    this.logger.error('EventManager:publishEvent: error sending event to brand', error);
-                }
-            }else{
-                this.logger.error('EventManager:publishEvent: brand is enabled but does not have an end point url', brand);
-                throw new Error('EventManager:publishEvent: brand is enabled but does not have an end point url');
-            }
-        }
     }
 
     /***
