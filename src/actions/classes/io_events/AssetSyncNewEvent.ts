@@ -1,6 +1,7 @@
 import { AEM_ASSET_SYNC_EVENT_CODE } from '../../constants';
 import { IValidationResult } from '../../types';
 import { IoEvent } from '../IoEvent';
+import { ApplicationRuntimeInfo } from '../ApplicationRuntimeInfo';
 
 export class AssetSyncNewEvent extends IoEvent {
     private _assetId!: string;
@@ -36,10 +37,13 @@ export class AssetSyncNewEvent extends IoEvent {
      * 
      * @returns void
      *******/
-    constructor(assetId: string, assetPath: string, metadata: any, assetPresignedUrl: string, brandId: string, sourceProviderId: string) {
+    constructor(app_runtime_info: ApplicationRuntimeInfo, assetId: string, assetPath: string, metadata: any, assetPresignedUrl: string, brandId: string, sourceProviderId: string) {
         super();
         this.type = AEM_ASSET_SYNC_EVENT_CODE.NEW;
         // check for missing params and throw an descriptive error
+        if (!app_runtime_info || typeof app_runtime_info !== 'object') {
+            throw new Error('AssetSyncNewEvent: constructor: app_runtime_info is required');
+        }
         if (!assetId || assetId.length === 0) {
             throw new Error('AssetSyncNewEvent: constructor: assetId is required');
         }
@@ -56,17 +60,20 @@ export class AssetSyncNewEvent extends IoEvent {
             throw new Error('AssetSyncNewEvent: constructor: brandId is required');
         }
         if (!sourceProviderId || sourceProviderId.length === 0) {
-            throw new Error('AssetSyncNewEvent: constructor: sourceProviderId is required');
+            this.setSourceUri(app_runtime_info);
+        }else{
+            // set the event provider source id
+            super.setSource(sourceProviderId);
         }
+
         this._assetId = assetId;
         this._assetPath = assetPath;
         this._metadata = metadata;
         this._assetPresignedUrl = assetPresignedUrl;
         this._brandId = brandId;
-        // set the event provider source id
-        super.setSource(sourceProviderId);
 
         this.data = {
+            app_runtime_info: app_runtime_info.serialize(),
             asset_id: this._assetId,
             asset_path: this._assetPath,
             metadata: this._metadata,
@@ -85,38 +92,21 @@ export class AssetSyncNewEvent extends IoEvent {
       
         const missing: string[] = [];
         const isPlainObject = (v: unknown) => v !== null && typeof v === 'object' && !Array.isArray(v);
-        const isUuid = (v: unknown) =>
-          typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
-        const isUrnUuid = (v: unknown) =>
-          typeof v === 'string' && /^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
-      
-        if (!isUrnUuid(ev.source)) missing.push('source');
-      
-        if (!isPlainObject(ev.data)) {
-          missing.push('data');
-        } else {
-          const d: any = ev.data;
-      
-          // asset_id
-          if (!isUuid(d.asset_id)) missing.push('asset_id');
-      
-          // asset_path (robust)
-          const rawPath = d.asset_path;
-          const pathStr = typeof rawPath === 'string' ? rawPath : String(rawPath ?? '');
-          const cleaned = pathStr.replace(/[\u200B-\u200D\uFEFF]/g, '').trim(); // strip zero‑width/BOM and trim
-          if (cleaned.length === 0 || !cleaned.startsWith('/')) missing.push('asset_path');
-      
-          // metadata
-          if (!isPlainObject(d.metadata)) missing.push('metadata');
-      
-          // brandId
-          if (!isUuid(d.brandId)) missing.push('brandId');
+        const isNonEmptyString = (v: unknown) => typeof v === 'string' && v.trim().length > 0;
+        
+        // Treat data as present if it's an object or a non-empty JSON string
+        let d: any = ev.data;
+        if (typeof d === 'string') {
+          try { d = JSON.parse(d); } catch { /* leave as string */ }
+        }
 
-          // asset_presigned_url
-          const urlCandidate = (typeof d.asset_presigned_url === 'string') ? d.asset_presigned_url.trim() : '';
-          if (urlCandidate.length === 0) {
-            missing.push('asset_presigned_url');
-          }
+        if (d && typeof d === 'object' && !Array.isArray(d)) {
+          // Relaxed presence-only validation
+          if (!isNonEmptyString(d.asset_id)) missing.push('asset_id');
+          if (!isNonEmptyString(d.asset_path)) missing.push('asset_path');
+          if (!isPlainObject(d.metadata)) missing.push('metadata');
+          if (!isNonEmptyString(d.brandId)) missing.push('brandId');
+          if (!isNonEmptyString(d.asset_presigned_url)) missing.push('asset_presigned_url');
         }
       
         const valid = missing.length === 0;

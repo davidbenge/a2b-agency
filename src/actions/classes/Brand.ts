@@ -1,4 +1,5 @@
-import { IBrand, IIoEvent } from '../types';
+import { IBrand, IIoEvent, IBrandEventPostResponse } from '../types';
+import axios from 'axios';
 
 export class Brand implements IBrand {
     brandId: string;
@@ -97,11 +98,15 @@ export class Brand implements IBrand {
     }
 
     /**
-     * Send an IO event payload to this brand's configured endpoint
+     * Send an Cloud event payload to this brand's configured endpoint
      * @param event - the IO event to send
-     * @param extraHeaders - optional additional headers to include
+     * @returns the response from the brand endpoint
+     * @throws Error if the brand is disabled or the endPointUrl is missing
+     * @throws Error if the event is not valid
+     * @throws Error if the response from the brand endpoint is not valid
+     * @throws Error if the response from the brand endpoint is not a valid IBrandEventPostResponse
      */
-    async sendIoEventToEndpoint(event: IIoEvent): Promise<Response> {
+    async sendCloudEventToEndpoint(event: IIoEvent): Promise<IBrandEventPostResponse> {
         if (!this.enabled) {
             throw new Error('Brand:sendIoEventToEndpoint: brand is disabled');
         }
@@ -117,17 +122,59 @@ export class Brand implements IBrand {
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
             'X-A2B-Brand-Id': this.brandId,
             'X-A2B-Brand-Secret': this.secret
         };
 
-        const response = await fetch(this.endPointUrl, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(event.toJSON())
-        });
+        const cloudEvent = event.toCloudEvent();
+        const requestPayload = (typeof (cloudEvent as any).toJSON === 'function')
+            ? (cloudEvent as any).toJSON()
+            : cloudEvent;
+        
+        try {
+            const response = await axios.post(this.endPointUrl, requestPayload, { headers });
+            const data: unknown = response?.data;
 
-        return response;
+            // Basic shape validation; keep it simple and debuggable
+            const valid = data && typeof data === 'object' &&
+              typeof (data as any).eventType === 'string' &&
+              (data as any).routingResult && typeof (data as any).routingResult === 'object';
+
+            if (!valid) {
+                const summary = {
+                    status: typeof response?.status === 'number' ? response.status : undefined,
+                    endpoint: this.endPointUrl,
+                    requestHeaders: {
+                        ...headers,
+                        'X-A2B-Brand-Secret': headers['X-A2B-Brand-Secret'].replace(/.(?=.{4})/g, '*')
+                    },
+                    requestBody: requestPayload,
+                    responseData: data
+                };
+                throw new Error(`invalid response from brand endpoint: ${JSON.stringify(summary)}`);
+            }
+
+            return data as IBrandEventPostResponse;
+
+        } catch (unknownError: unknown) {
+            const axiosErr = unknownError as any;
+            const summary = {
+                endpoint: this.endPointUrl,
+                requestHeaders: {
+                    ...headers,
+                    'X-A2B-Brand-Secret': headers['X-A2B-Brand-Secret'].replace(/.(?=.{4})/g, '*')
+                },
+                requestBody: requestPayload,
+                status: axiosErr?.response?.status,
+                statusText: axiosErr?.response?.statusText,
+                responseHeaders: axiosErr?.response?.headers,
+                responseData: axiosErr?.response?.data,
+                axiosMessage: axiosErr?.message,
+                axiosName: axiosErr?.name
+            };
+            const wrapped = new Error(`Brand:sendIoEventToEndpoint failed: ${JSON.stringify(summary)}`);
+            wrapped.name = 'BrandSendIoEventError';
+            throw wrapped;
+        }
     }
 } 
