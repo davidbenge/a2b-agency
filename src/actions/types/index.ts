@@ -18,7 +18,7 @@ export interface IBrand {
     /**
      * Send an IO event payload to this brand's target endpoint
      */
-    sendIoEventToEndpoint?: (event: IIoEvent) => Promise<Response>;
+    sendIoEventToEndpoint?: (event: IIoEvent) => Promise<any>;
 }
 
 export interface IApplicationRuntimeInfo {
@@ -44,6 +44,11 @@ export interface IIoEvent {
     validate(): IValidationResult;
     toJSON(): any;
     toCloudEvent(): CloudEvent;
+}
+
+export interface IBrandEventPostResponse {
+    eventType: string;
+    message: string;
 }
 
 export interface IS2SAuthenticationCredentials {

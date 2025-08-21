@@ -15,6 +15,8 @@ import { AssetSyncUpdateEvent } from '../classes/io_events/AssetSyncUpdateEvent'
 import { AssetSyncNewEvent } from '../classes/io_events/AssetSyncNewEvent';
 import { BrandManager } from "../classes/BrandManager";
 import { normalizeCustomersToArray } from "../utils/normalizers";
+import { IApplicationRuntimeInfo, IBrandEventPostResponse } from "../types";
+import { ApplicationRuntimeInfo } from "../classes/ApplicationRuntimeInfo";
 
 
 export async function main(params: any): Promise<any> {
@@ -65,7 +67,7 @@ export async function main(params: any): Promise<any> {
 
       // Publish the event to the Adobe Event Hub
       //await ioCustomEventManager.publishEvent(new AssetSyncDeleteEvent({}));
-    } else if (params.type === 'aem.assets.asset.metadata_updated') {
+    } else if (params.type === 'aem.assets.asset.metadata_updated' || params.type === 'aem.assets.asset.processing_completed') {
       logger.info(`${ACTION_NAME}:Asset metadata updated event`, params);
 
       /*  Import and use the AemCscUtils class
@@ -124,7 +126,11 @@ export async function main(params: any): Promise<any> {
 
             } else {
               // new event  
+              // todo: almost think a factory would be better here to build Events easier
+              const appRtInfo = ApplicationRuntimeInfo.getApplicationRuntimeInfo(params);
+              if (!appRtInfo) throw new Error('Missing APPLICATION_RUNTIME_INFO');
               const assetSyncEventNew = new AssetSyncNewEvent(
+                appRtInfo,
                 aemAssetData["jcr:uuid"],
                 aemAssetPath,
                 metadata,
@@ -136,14 +142,38 @@ export async function main(params: any): Promise<any> {
               //get the brand 
               const brandManager = new BrandManager(params.LOG_LEVEL);
               const brand = await brandManager.getBrand(brandId);
+              let brandSendResponse: IBrandEventPostResponse;
               if(brand && brand.enabled){
-                //send the event to the brand
-                const brandSendResponse = await brand.sendIoEventToEndpoint(assetSyncEventNew);
-                logger.info(`assetSyncEventNew complete`, brandSendResponse);
 
-                //publish the event to the event manager
-                await getEventManager().publishEvent(assetSyncEventNew);
-                logger.info(`assetSyncEventNew complete`);
+                try{
+                  //send the event to the brand
+                  logger.info(`${ACTION_NAME}: sending event to brand url <${brand.endPointUrl}>`);
+                  logger.info(`${ACTION_NAME}: sending event to brand this cloud event <${assetSyncEventNew.toCloudEvent()}>`);
+                  brandSendResponse = await brand.sendCloudEventToEndpoint(assetSyncEventNew);
+                  logger.info(`${ACTION_NAME}: brandSendResponse`, JSON.stringify(brandSendResponse, null, 2));
+
+                  //publish the event to the event manager
+                  assetSyncEventNew.setSource(getAssetSyncProviderId()); // update to IO event provider id
+                  await getEventManager().publishEvent(assetSyncEventNew);
+                  logger.info(`assetSyncEventNew complete`);
+                }catch(error){
+                  // Error objects stringify to {}, so extract meaningful fields and any embedded JSON details
+                  const safeError: any = (error instanceof Error)
+                    ? { name: error.name, message: error.message, stack: error.stack }
+                    : error;
+                  let embeddedDetails: any = undefined;
+                  if (safeError && typeof safeError.message === 'string') {
+                    const msg: string = safeError.message;
+                    const jsonStart = msg.indexOf('{');
+                    if (jsonStart >= 0) {
+                      try { embeddedDetails = JSON.parse(msg.slice(jsonStart)); } catch { /* ignore parse issues */ }
+                    }
+                  }
+                  logger.error(
+                    `${ACTION_NAME}: error sending event to brand url <${brand.endPointUrl}>`,
+                    { error: safeError, details: embeddedDetails }
+                  );
+                }
               }else{
                 logger.warn(`${ACTION_NAME}: brand is not enabled or does not exist`, brandId);
               }
