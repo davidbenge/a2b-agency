@@ -481,6 +481,27 @@ aio event eventmetadata create <id>
 
 The Brand Manager is a comprehensive web application for managing brand registrations and configurations within the Adobe Experience Cloud Shell environment. It provides a modern, intuitive interface for brand administrators to register, view, edit, and manage brand information.
 
+### Demo Mode
+
+The Brand Manager includes a powerful demo mode for development and testing:
+
+> 📖 **For detailed demo mode instructions, see the [Demo Mode Guide](./docs/DEMO_MODE_INSTRUCTIONS.md)**
+
+**Key Features:**
+- **Full CRUD Operations**: Create, read, update, delete brands with mock data
+- **No Backend Required**: Complete functionality without authentication or API setup
+- **Real-time Development**: Hot reload with instant feedback
+- **Safe Testing**: No risk of affecting production data
+
+**Quick Start:**
+```bash
+# Enable demo mode
+REACT_APP_ENABLE_DEMO_MODE=true
+
+# Start the application
+aio app run -e dx/excshell/1 --no-actions
+```
+
 ### Features
 
 #### Core Brand Management
@@ -635,6 +656,10 @@ AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=5c3431a2-bd91-4eff-a356-26b747d0aad4
 
 ## Asset Sync Events
 
+AssetSync is a comprehensive system that handles synchronization of AEM assets between Adobe Experience Manager (AEM) and brand systems. It processes asset events, validates metadata, and distributes asset data to registered brands.
+
+> 📖 **For detailed AssetSync implementation, configuration, and troubleshooting, see the [AssetSync Detailed Guide](./docs/events/aem/AssetSync.md)**
+
 ### Event Provider Setup
 
 ```bash
@@ -647,20 +672,17 @@ Label: "a2b Asset Sync Event Provider"
 1. **New Asset Published**
    - Label: "a2b New Asset Published"
    - Code: `com.adobe.a2b.assetsync.new`
-- Description: "Asset that has never been synced before is coming over for the first time"
-   - Event body: TODO
+   - Description: "Asset that has never been synced before is coming over for the first time"
 
 2. **Asset Updated**
    - Label: "a2b Asset Updated"
    - Code: `com.adobe.a2b.assetsync.update`
-- Description: "Asset that has been synced before has changed"
-   - Event body: TODO
+   - Description: "Asset that has been synced before has changed"
 
 3. **Asset Deleted**
    - Label: "a2b Asset Deleted"
    - Code: `com.adobe.a2b.assetsync.delete`
-- Description: "Asset that has been synced before has been deleted"
-   - Event body: TODO
+   - Description: "Asset that has been synced before has been deleted"
 
 ### Asset Sync Setup
 
@@ -674,6 +696,13 @@ Events to subscribe to:
 - Asset metadata updated event: `aem.assets.asset.metadata_updated`
 
 These events will be published to the BRAND and also echoed locally for secondary in-house systems use.
+
+### Quick Reference
+
+- **Main Handler**: `agency-assetsync-internal-handler`
+- **Environment Variable**: `AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID`
+- **AEM Metadata Required**: `a2b__sync_on_change`, `a2b__customers`
+- **Brand Requirements**: Enabled status, valid endpoint URL
 
 ## Troubleshooting
 removing all your runtime actions 
