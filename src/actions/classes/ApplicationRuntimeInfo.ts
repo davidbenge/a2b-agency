@@ -26,7 +26,6 @@ export class ApplicationRuntimeInfo implements IApplicationRuntimeInfo {
    */
   static getApplicationRuntimeInfo(params: any): ApplicationRuntimeInfo | undefined {
     // Parse and process APPLICATION_RUNTIME_INFO if provided
-    let parsed: ApplicationRuntimeInfo | undefined;
     if (params.APPLICATION_RUNTIME_INFO) {
       try {
           const runtimeInfo = JSON.parse(params.APPLICATION_RUNTIME_INFO);
@@ -47,8 +46,19 @@ export class ApplicationRuntimeInfo implements IApplicationRuntimeInfo {
       } catch (error) {
           console.warn('Failed to parse APPLICATION_RUNTIME_INFO:', error);
       }
-    }else if( params.data && params.data.app_runtime_info ){
-      return new ApplicationRuntimeInfo(params.app_runtime_info);
+    }
+    return undefined;
+  }
+
+  /**
+   * Build getAppRuntimeInfoFromEventData from action params using existing logic.
+   * Returns undefined if params do not contain a valid ApplicationRuntimeInfo.
+   * @param params - The parameters object agency to brand or brand to agency event.
+   * @returns ApplicationRuntimeInfo | undefined
+   */
+  static getAppRuntimeInfoFromEventData(params: any): ApplicationRuntimeInfo | undefined {
+    if( params.data && params.data.app_runtime_info ){
+      return new ApplicationRuntimeInfo(params.data.app_runtime_info);
     }
     return undefined;
   }
