@@ -1,0 +1,112 @@
+{
+    "source": "urn:uuid:af5c4d93-e1e0-4985-ad33-80fde3837aaa",
+    "S2S_API_KEY": "FAKEe1d50176486a8521d82da35fFAKE",
+    "S2S_CLIENT_SECRET": "p8e-FAKEHx1jaXJe82sH5L34A--hVJHlFAKE",
+    "data": {
+        "app_runtime_info": {
+            "actionPackageName": "a2b-agency",
+            "appName": "agency",
+            "consoleId": "27200",
+            "projectName": "a2b",
+            "workspace": "benge"
+        },
+        "asset_id": "8327388d-d9e3-47c5-9280-a426c5dcb3b1",
+        "asset_path": "/content/dam/agency_work_for_BRAND_A/Screenshot 2025-05-28 at 5.38.13 PM.png",
+        "asset_presigned_url": "https://author-p142461-e1463137.adobeaemcloud.com/aem-blob-ns-team-aem-cm-prd-n136729-cm-p142461-e1463137/1fa7-df02-6e77-4f82-FAKE-97497c5e839a-1756351804571?sig=z%2FhdEY0gptpMpCTl7QZMW16XTD1uEDwQjXAfZg4ltrk%3D&se=2025-08-28T18%3A24%3A17Z&sv=2019-02-02&rscc=private%2C%20max-age%3D43200%2C%20immutable&rsct=image%2Fpng&rscd=attachment%3B%20filename%3D%22Screenshot%202025-05-28%20at%205.38.13%3FPM.png%22%3B%20filename*%3DUTF-8%27%27Screenshot%25202025-05-28%2520at%25205.38.13%25E2%2580%25AFPM.png&sp=r&sr=b",
+        "brandId": "c6409c52-9295-4d15-94e6-7bd39d04360c",
+        "metadata": {
+            "a2b__customers": [
+                "c6409c52-9295-4d15-94e6-7bd39d04360c",
+                "7e93f18f-261a-4175-b58b-f21fc80767b9"
+            ],
+            "a2b__sync_on_change": "true",
+            "cq:tags": [
+                "properties:orientation/landscape"
+            ],
+            "dam:Bitsperpixel": 32,
+            "dam:Comments": "XML:com.adobe.xmp: <x:xmpmeta xmlns:x=\"adobe:ns:meta/\" x:xmptk=\"XMP Core 6.0.0\"> <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"> <rdf:Description rdf:about=\"\" xmlns:exif=\"http://ns.adobe.com/exif/1.0/\"> <exif:PixelYDimension>982</exif:PixelYDimension> <exif:PixelXDimension>1734</exif:PixelXDimension> <exif:UserComment>Screenshot</exif:UserComment> </rdf:Description> </rdf:RDF> </x:xmpmeta> ",
+            "dam:Fileformat": "PNG",
+            "dam:MIMEtype": "image/png",
+            "dam:Numberofimages": 1,
+            "dam:Numberoftextualcomments": 1,
+            "dam:Physicalheightindpi": 144,
+            "dam:Physicalheightininches": "6.81979513168335",
+            "dam:Physicalwidthindpi": 144,
+            "dam:Physicalwidthininches": "12.042285919189453",
+            "dam:Progressive": "no",
+            "dam:colorDistribution": {
+                "jcr:primaryType": "nt:unstructured"
+            },
+            "dam:extracted": "Thu Aug 28 2025 03:30:39 GMT+0000",
+            "dam:predictedColors": [
+                12100
+            ],
+            "dam:sha1": "f00854258d7c0b114272668f4924b9c4954ef13e",
+            "dam:size": 797926,
+            "dc:format": "image/png",
+            "dc:title": "catalyze 7",
+            "exif:PixelXDimension": 1734,
+            "exif:PixelYDimension": 982,
+            "exif:UserComment": [
+                "Screenshot"
+            ],
+            "exif:UserComment_xmpArrayType": "rdf:Alt",
+            "imageFeatures": {
+                ":haystack0": 8192,
+                "jcr:lastModified": "Thu Aug 28 2025 03:30:39 GMT+0000",
+                "jcr:primaryType": "nt:unstructured"
+            },
+            "jcr:mixinTypes": [
+                "cq:Taggable"
+            ],
+            "jcr:primaryType": "nt:unstructured",
+            "photoshop:ColorMode": 3,
+            "photoshop:ICCProfile": "Display",
+            "predictedTags": {
+                "jcr:primaryType": "nt:unstructured"
+            },
+            "tiff:BitsPerSample": [
+                8,
+                8,
+                8,
+                8
+            ],
+            "tiff:BitsPerSample_xmpArrayType": "rdf:Seq",
+            "tiff:ImageLength": 982,
+            "tiff:ImageWidth": 1734
+        }
+    },
+    "__ow_method": "post",
+    "AIO_runtime_namespace": "27200-brand2agency-benge",
+    "id": "75d44a0b-7c74-4892-b435-47dbd422eec5",
+    "__ow_headers": {
+        "accept-encoding": "gzip, compress, deflate, br",
+        "connection": "close",
+        "content-type": "application/json",
+        "host": "controller-ns-team-ethos651prodva6-runtime-prod-a",
+        "perf-br-req-in": "1756366169.832",
+        "user-agent": "Amazon CloudFront",
+        "via": "1.1 1e14f05fcabcaf0bb797410b0eab65c8.cloudfront.net (CloudFront), 1.1 798436e3040e2ba4f1a3ccb2e7b3f806.cloudfront.net (CloudFront)",
+        "x-a2b-brand-id": "c6409c52-9295-4d15-94e6-7bd39d04360c",
+        "x-a2b-brand-secret": "CbEslXO4Voq8VqwiV6gaI22FlMsFFAKE",
+        "x-amz-cf-id": "A0VcMoggYw_UmiFRpP5Qy7xjcJ-e3u9Q4KXgnj-dHiJ_0RVgy8M0EQ==",
+        "x-envoy-external-address": "130.176.179.208",
+        "x-forwarded-for": "54.234.136.160, 18.205.26.207, 130.176.179.208, 10.152.171.66",
+        "x-forwarded-host": "27200-brand2agency-benge.adobeioruntime.net",
+        "x-forwarded-port": "80",
+        "x-forwarded-proto": "https",
+        "x-real-ip": "10.152.171.66",
+        "x-request-id": "pbWEXslcCm0dC9WILD8dNoqd0VI79iGa"
+    },
+    "AIO_runtime_auth": "6f93ee7e-FAKE-4a5c-8457-358e73838812:YYq1C7hm2T3NIs0y1eKEyO4RfV25A4F2AkG3N3G6ncMUFw68ec67M2PMg3F3FAKE",
+    "type": "com.adobe.a2b.assetsync.new",
+    "LOG_LEVEL": "debug",
+    "datacontenttype": "application/json",
+    "__ow_path": "",
+    "ORG_ID": "33C1401053CF76370A490D4C@AdobeOrg",
+    "APPLICATION_RUNTIME_INFO": "{\"namespace\":\"27200-brand2agency-benge\",\"app_name\":\"brand\",\"action_package_name\":\"a2b-brand\"}",
+    "AIO_runtime_apihost": "https://adobeioruntime.net",
+    "time": "2025-08-28T07:29:29.728Z",
+    "S2S_SCOPES": "[\"AdobeID\",\"openid\",\"read_organizations\",\"additional_info.projectedProductContext\",\"additional_info.roles\",\"adobeio_api\",\"read_client_secret\",\"manage_client_secrets\",\"event_receiver_api\"]",
+    "specversion": "1.0"
+}

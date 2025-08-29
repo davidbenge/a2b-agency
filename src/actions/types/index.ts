@@ -26,7 +26,7 @@ export interface IApplicationRuntimeInfo {
     projectName: string;
     workspace: string;
     actionPackageName: string;
-    app_name: string;
+    appName: string;
 }
 
 export interface IValidationResult {

@@ -12,7 +12,8 @@ import * as randomstring from 'randomstring';
 import { v4 as uuidv4 } from 'uuid';
 import { NewBrandRegistrationEvent } from "../classes/io_events/NewBrandRegistrationEvent";
 import { EventManager } from "../classes/EventManager";
-import { IS2SAuthenticationCredentials } from "../types";
+import { IApplicationRuntimeInfo, IS2SAuthenticationCredentials } from "../types";
+import { ApplicationRuntimeInfo } from "../classes/ApplicationRuntimeInfo";
 
 export async function main(params: any): Promise<any> {
   const logger = aioLogger("new-brand-registration", { level: params.LOG_LEVEL || "info" });
@@ -55,14 +56,20 @@ export async function main(params: any): Promise<any> {
       logger.debug('new-brand-registration params keys', Object.keys(params));
       const currentS2sAuthenticationCredentials = EventManager.getS2sAuthenticationCredentials(params);
       const registrationProviderId = EventManager.getRegistrationProviderId(params);
-      const applicationRuntimeInfo = EventManager.getApplicationRuntimeInfo(params);
-      if (!applicationRuntimeInfo) {
-        throw new Error('Missing APPLICATION_RUNTIME_INFO');
+      const applicationRuntimeInfoLocal = ApplicationRuntimeInfo.getApplicationRuntimeInfoFromActionParams(params);
+      const applicationRuntimeInfoEvent = ApplicationRuntimeInfo.getAppRuntimeInfoFromEventData(params);
+      
+      if (!applicationRuntimeInfoLocal) {
+        throw new Error('Missing APPLICATION_RUNTIME_INFO Local');
       }
-      const eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, applicationRuntimeInfo);
-
+      if (!applicationRuntimeInfoEvent) {
+        throw new Error('Missing APPLICATION_RUNTIME_INFO Event');
+      }
+      
+      const eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, applicationRuntimeInfoLocal);
+      
       // publish the event
-      await eventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand,registrationProviderId));
+      await eventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand, registrationProviderId));
 
     } catch (error: unknown) {
       logger.error('Error sending event', error as any);

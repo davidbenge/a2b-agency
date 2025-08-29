@@ -134,37 +134,4 @@ export class EventManager {
         }
         return value;
     }
-
-    /***
-     * getApplicationRuntimeInfo
-     * 
-     * @param params - the parameters object from an action invoke
-     * 
-     * @returns the application runtime information or undefined
-     */
-    static getApplicationRuntimeInfo(params: any): IApplicationRuntimeInfo | undefined {
-        // Parse and process APPLICATION_RUNTIME_INFO if provided
-        if (params.APPLICATION_RUNTIME_INFO) {
-            try {
-                const runtimeInfo = JSON.parse(params.APPLICATION_RUNTIME_INFO);
-                if (runtimeInfo.namespace && runtimeInfo.app_name) {
-                    // Split namespace into consoleId, projectName, and workspace (expected format: consoleId-projectName-workspace)
-                    const namespaceParts = String(runtimeInfo.namespace).split('-');
-                    if (namespaceParts.length >= 3) {
-                        const applicationRuntimeInfo: IApplicationRuntimeInfo = {
-                            consoleId: namespaceParts[0],
-                            projectName: namespaceParts[1],
-                            workspace: namespaceParts[2],
-                            actionPackageName: runtimeInfo.action_package_name,
-                            app_name: runtimeInfo.app_name
-                        };
-                        return applicationRuntimeInfo;
-                    }
-                }
-            } catch (error) {
-                console.warn('Failed to parse APPLICATION_RUNTIME_INFO:', error);
-            }
-        }
-        return undefined;
-    }
 }

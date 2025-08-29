@@ -10,35 +10,35 @@ export class ApplicationRuntimeInfo implements IApplicationRuntimeInfo {
   projectName: string;
   workspace: string;
   actionPackageName: string;
-  app_name: string;
+  appName: string;
 
   constructor(params: IApplicationRuntimeInfo) {
     this.consoleId = params.consoleId;
     this.projectName = params.projectName;
     this.workspace = params.workspace;
     this.actionPackageName = params.actionPackageName;
-    this.app_name = params.app_name;
+    this.appName = params.appName;
   }
 
   /**
    * Build ApplicationRuntimeInfo from action params using existing logic.
    * Returns undefined if params do not contain a valid APPLICATION_RUNTIME_INFO.
    */
-  static getApplicationRuntimeInfo(params: any): ApplicationRuntimeInfo | undefined {
+  static getApplicationRuntimeInfoFromActionParams(params: any): ApplicationRuntimeInfo | undefined {
     // Parse and process APPLICATION_RUNTIME_INFO if provided
-    if (params.APPLICATION_RUNTIME_INFO) {
+    if (params && params.APPLICATION_RUNTIME_INFO) {
       try {
           const runtimeInfo = JSON.parse(params.APPLICATION_RUNTIME_INFO);
           if (runtimeInfo.namespace && runtimeInfo.app_name) {
               // Split namespace into consoleId, projectName, and workspace (expected format: consoleId-projectName-workspace)
               const namespaceParts = String(runtimeInfo.namespace).split('-');
-              if (namespaceParts.length >= 3) {
+              if (namespaceParts.length === 3) {
                   const applicationRuntimeInfo: IApplicationRuntimeInfo = {
                       consoleId: namespaceParts[0],
                       projectName: namespaceParts[1],
                       workspace: namespaceParts[2],
                       actionPackageName: runtimeInfo.action_package_name,
-                      app_name: runtimeInfo.app_name
+                      appName: runtimeInfo.app_name
                   };
                   return new ApplicationRuntimeInfo(applicationRuntimeInfo);
               }
@@ -57,7 +57,7 @@ export class ApplicationRuntimeInfo implements IApplicationRuntimeInfo {
    * @returns ApplicationRuntimeInfo | undefined
    */
   static getAppRuntimeInfoFromEventData(params: any): ApplicationRuntimeInfo | undefined {
-    if( params.data && params.data.app_runtime_info ){
+    if( params && params.data && params.data.app_runtime_info ){
       return new ApplicationRuntimeInfo(params.data.app_runtime_info);
     }
     return undefined;
@@ -70,15 +70,15 @@ export class ApplicationRuntimeInfo implements IApplicationRuntimeInfo {
     consoleId: string;
     projectName: string;
     workspace: string;
-    app_name: string;
-    action_package_name: string;
+    appName: string;
+    actionPackageName: string;
   } {
     return {
       consoleId: this.consoleId,
       projectName: this.projectName,
       workspace: this.workspace,
-      app_name: this.app_name,
-      action_package_name: this.actionPackageName,
+      appName: this.appName,
+      actionPackageName: this.actionPackageName,
     };
   }
 }
