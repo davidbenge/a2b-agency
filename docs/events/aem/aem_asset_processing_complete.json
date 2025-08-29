@@ -1,7 +1,7 @@
 {
     "source": "acct:aem-p142461-e1463137@adobe.com",
     "S2S_API_KEY": "4ab33463139e4f96b851589286cdfake",
-    "S2S_CLIENT_SECRET": "p8e-F38k22HS5OnABf0Y9AlxdsYnpjPfake",
+    "S2S_CLIENT_SECRET": "fake",
     "data": {
     "assetId": "urn:aaid:aem:20fec14a-b5b8-4c7d-85f4-e619d66281dc",
     "assetMetadata": {
