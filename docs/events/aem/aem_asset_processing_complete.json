@@ -1,7 +1,7 @@
 {
     "source": "acct:aem-p142461-e1463137@adobe.com",
-    "S2S_API_KEY": "4ab33463139e4f96b851589286cd46e4",
-    "S2S_CLIENT_SECRET": "p8e-F38k22HS5OnABf0Y9AlxdsYnpjPKnbpu",
+    "S2S_API_KEY": "4ab33463139e4f96b851589286cdfake",
+    "S2S_CLIENT_SECRET": "p8e-F38k22HS5OnABf0Y9AlxdsYnpjPfake",
     "data": {
     "assetId": "urn:aaid:aem:20fec14a-b5b8-4c7d-85f4-e619d66281dc",
     "assetMetadata": {
@@ -49,13 +49,13 @@
     "AEM_AUTH_TECH_ACCOUNT_ID": "B150222D684839A20A49fake@techacct.adobe.com",
     "id": "712375d8-0464-489b-ac3e-6b0eb77d2932",
     "AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID": "af5c4d93-e1e0-4985-ad33-80fde3837aaa",
-    "AIO_RUNTIME_AUTH": "97d7c0f6-4171-fake-bbe3-41a76dd8395b:M4J1kmJLyJjj84KOD5IjvI35ev3LwqKEhg0n7uxYN5f8S7nHnT8hUiQtsD44fake",
+    "AIO_RUNTIME_AUTH": "97d7c0f6-fake-fake-bbe3-41a76dd8395b:M4J1kmJLyJjj84KOD5IjvI35ev3LwqKEhg0n7uxYN5f8S7nHnT8hUiQtsD44fake",
     "type": "aem.assets.asset.processing_completed",
     "LOG_LEVEL": "debug",
     "datacontenttype": "application/json",
     "recipient_client_id": "4ab33463139e4f96b851589286cd46e4",
     "AIO_RUNTIME_APIHOST": "https://adobeioruntime.net",
-    "AEM_AUTH_CLIENT_SECRET": "p8e-3ly5DXm3UPusjEjIU3vguN0J2U4Yfake",
+    "AEM_AUTH_CLIENT_SECRET": "fak-3ly5DXm3UfakeEjIU3vguN0J2U4Yfake",
     "ORG_ID": "33C1401053CF76370A490D4C@AdobeOrg",
     "APPLICATION_RUNTIME_INFO": "{\"namespace\":\"27200-a2b-benge\",\"app_name\":\"agency\",\"action_package_name\":\"a2b-agency\"}",
     "AEM_AUTH_CLIENT_ID": "cm-p142461-e1463137-integration-1",
