@@ -1,0 +1,61 @@
+# Gitleaks configuration for AEM_AUTH_CLIENT_SECRET and other Adobe secrets allowlist
+version = "8.16.4"
+
+[allowlist]
+description = "Allow AEM_AUTH_CLIENT_SECRET and other Adobe secrets with empty or FAKE values"
+
+# Allow empty AEM_AUTH_CLIENT_SECRET values
+[[allowlist.rules]]
+id = "aem-auth-client-secret-empty"
+description = "Allow empty AEM_AUTH_CLIENT_SECRET values"
+regex = '''AEM_AUTH_CLIENT_SECRET\s*=\s*["']?["']?\s*$'''
+
+# Allow AEM_AUTH_CLIENT_SECRET with FAKE values
+[[allowlist.rules]]
+id = "aem-auth-client-secret-fake"
+description = "Allow AEM_AUTH_CLIENT_SECRET with FAKE values"
+regex = '''AEM_AUTH_CLIENT_SECRET\s*=\s*["']?.*FAKE.*["']?\s*$'''
+
+# Allow AEM_AUTH_CLIENT_SECRET in JSON with empty values
+[[allowlist.rules]]
+id = "aem-auth-client-secret-json-empty"
+description = "Allow AEM_AUTH_CLIENT_SECRET in JSON with empty values"
+regex = '''"AEM_AUTH_CLIENT_SECRET"\s*:\s*["']?["']?\s*[,}]'''
+
+# Allow AEM_AUTH_CLIENT_SECRET in JSON with FAKE values
+[[allowlist.rules]]
+id = "aem-auth-client-secret-json-fake"
+description = "Allow AEM_AUTH_CLIENT_SECRET in JSON with FAKE values"
+regex = '''"AEM_AUTH_CLIENT_SECRET"\s*:\s*["']?.*FAKE.*["']?\s*[,}]'''
+
+# Allow S2S_API_KEY with FAKE values
+[[allowlist.rules]]
+id = "s2s-api-key-fake"
+description = "Allow S2S_API_KEY with FAKE values"
+regex = '''"S2S_API_KEY"\s*:\s*["']?.*fake.*["']?\s*[,}]'''
+
+# Allow S2S_CLIENT_SECRET with FAKE values
+[[allowlist.rules]]
+id = "s2s-client-secret-fake"
+description = "Allow S2S_CLIENT_SECRET with FAKE values"
+regex = '''"S2S_CLIENT_SECRET"\s*:\s*["']?.*fake.*["']?\s*[,}]'''
+
+# Allow AEM_AUTH_PRIVATE_KEY with FAKE values
+[[allowlist.rules]]
+id = "aem-auth-private-key-fake"
+description = "Allow AEM_AUTH_PRIVATE_KEY with FAKE values"
+regex = '''"AEM_AUTH_PRIVATE_KEY"\s*:\s*["']?.*fake.*["']?\s*[,}]'''
+
+# Allow documentation and example files
+paths = [
+    "docs/",
+    "**/*.md",
+    "**/*.json",
+    "**/*.env*",
+    "**/*.yaml",
+    "**/*.yml",
+    "**/*.config.*",
+    "**/*test*",
+    "**/*example*",
+    "**/*sample*"
+]
