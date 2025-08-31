@@ -59,3 +59,15 @@ paths = [
     "**/*example*",
     "**/*sample*"
 ]
+
+# Allow FAKE values for testing
+[[allowlist.rules]]
+id = "fake-testing-values"
+description = "Allow FAKE values for testing purposes"
+regex = '''["']?.*FAKE.*_FOR_TESTING_ONLY["']?\s*[,}]'''
+
+# Allow specific test patterns
+[[allowlist.rules]]
+id = "test-patterns"
+description = "Allow test patterns"
+regex = '''["']?.*(FAKE|TEST|EXAMPLE|SAMPLE).*["']?\s*[,}]'''
