@@ -15,8 +15,7 @@ const SpectrumHeader: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps }) =
     const navItems = [
         { label: 'Home', path: '/' },
         { label: 'Brand Manager', path: '/brand_manager' },
-        { label: 'Rules Manager', path: '/assets' },
-        { label: 'Events', path: '/sync' },
+        { label: 'Rules Manager', path: '/rules_manager' },
         { label: 'About', path: '/about' }
     ];
 

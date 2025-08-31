@@ -31,7 +31,7 @@ export async function main(params: any): Promise<any> {
   // Lazily compute inputs independently so each is only created when needed
   const getS2sAuthenticationCredentials = createLazy(() => EventManager.getS2sAuthenticationCredentials(params));
   const getAssetSyncProviderId = createLazy(() => EventManager.getAssetSyncProviderId(params));
-  const getApplicationRuntimeInfo = createLazy(() => EventManager.getApplicationRuntimeInfo(params));
+  const getApplicationRuntimeInfo = createLazy(() => ApplicationRuntimeInfo.getApplicationRuntimeInfoFromActionParams(params));
 
   const getEventManager = createLazy(() => {
     const currentS2sAuthenticationCredentials = getS2sAuthenticationCredentials();
@@ -127,7 +127,7 @@ export async function main(params: any): Promise<any> {
             } else {
               // new event  
               // todo: almost think a factory would be better here to build Events easier
-              const appRtInfo = ApplicationRuntimeInfo.getApplicationRuntimeInfo(params);
+              const appRtInfo = ApplicationRuntimeInfo.getApplicationRuntimeInfoFromActionParams(params);
               if (!appRtInfo) throw new Error('Missing APPLICATION_RUNTIME_INFO');
               const assetSyncEventNew = new AssetSyncNewEvent(
                 appRtInfo,
