@@ -55,7 +55,7 @@
     "datacontenttype": "application/json",
     "recipient_client_id": "4ab33463139e4f96b851589286cd46e4",
     "AIO_RUNTIME_APIHOST": "https://adobeioruntime.net",
-    "AEM_AUTH_CLIENT_SECRET": "fake",
+    "AEM_AUTH_CLIENT_SECRET": "",
     "ORG_ID": "33C1401053CF76370A490D4C@AdobeOrg",
     "APPLICATION_RUNTIME_INFO": "{\"namespace\":\"27200-a2b-benge\",\"app_name\":\"agency\",\"action_package_name\":\"a2b-agency\"}",
     "AEM_AUTH_CLIENT_ID": "cm-p142461-e1463137-integration-1",
