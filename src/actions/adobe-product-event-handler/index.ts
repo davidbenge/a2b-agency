@@ -6,9 +6,8 @@
  */
 import { errorResponse, checkMissingRequestInputs } from "../utils/common";
 import aioLogger from "@adobe/aio-lib-core-logging";
-const openwhisk = require("openwhisk");
 
-export async function main(params: any): Promise<any> {
+export async function main(params: any, openwhiskClient?: any): Promise<any> {
   const logger = aioLogger("adobe-product-event-handler", { level: params.LOG_LEVEL || "info" });
 
   try {
@@ -53,7 +52,7 @@ export async function main(params: any): Promise<any> {
       case 'aem.assets.asset.deleted':
       case 'aem.assets.asset.metadata_updated':
         logger.info(`Routing AEM asset event to agency-assetsync-event-handler: ${params.type}`);
-        routingResult = await routeToAssetSyncHandler(params, logger);
+        routingResult = await routeToAssetSyncHandler(params, logger, openwhiskClient);
         break;
       
       default:
@@ -91,10 +90,10 @@ export async function main(params: any): Promise<any> {
 /**
  * Route AEM asset events to the agency-assetsync-event-handler
  */
-async function routeToAssetSyncHandler(params: any, logger: any): Promise<any> {
+async function routeToAssetSyncHandler(params: any, logger: any, openwhiskClient?: any): Promise<any> {
   try {
     // Initialize OpenWhisk client
-    const ow = openwhisk();
+    const ow = openwhiskClient || require("openwhisk")();
 
     logger.debug('routeToAssetSyncHandler incoming params', JSON.stringify(params, null, 2));
     

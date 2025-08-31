@@ -17,7 +17,7 @@ This POC establishes a repeatable pattern that can be shared with agencies and p
 
 ## Prerequisites
 
-- Node.js = 20
+- Node.js = 22
 - Adobe I/O CLI (`aio`)
 - Adobe Developer Console access
 
@@ -92,7 +92,25 @@ This POC establishes a repeatable pattern that can be shared with agencies and p
 
 ## Testing & Coverage
 
+This project includes comprehensive testing with automated CI/CD pipelines. For detailed testing information, see [Testing and CI/CD Setup](docs/cursor/TESTING_AND_CI.md).
 
+### Quick Test Commands
+```bash
+# Run all tests
+npm test
+
+# Run tests with Adobe I/O CLI
+aio app test
+
+# Run specific test suites
+npm test -- --testPathPattern=BrandManager.test.ts
+```
+
+### Test Requirements
+- ✅ All tests must pass before merging to main
+- ✅ Automated testing on every PR
+- ✅ Branch protection rules enforced
+- ✅ Security scans prevent vulnerabilities
 ## Deployment & Cleanup
 
 - `aio app deploy` to build and deploy all actions on Runtime and static files to CDN

@@ -81,12 +81,12 @@ export class BrandManager {
                     await this.storeBrandInStateStore(brand);
                     return brand;
                 }else{
-                    this.logger.error(`Brand not found in state store or file store for brandId ${brandId}`);
-                    throw new Error(`Brand not found in state store or file store for brandId ${brandId}`);
+                    this.logger.debug(`Brand not found in state store or file store for brandId ${brandId}`);
+                    return undefined;
                 }
             } catch (error) {
                 this.logger.error(`Brand not found in state store or file store for brandId ${brandId}: ${error}`);
-                throw new Error(`Brand not found in state store or file store for brandId ${brandId}: ${error}`);
+                return undefined;
             }
         }else{
             return brandStateFetch;
@@ -181,7 +181,7 @@ export class BrandManager {
      * @param brandId - The brand id to get
      * @returns Promise<Brand> - The brand
      */
-    async getBrandFromFileStoreByBrandId(brandId: string): Promise<Brand> {
+    async getBrandFromFileStoreByBrandId(brandId: string): Promise<Brand | undefined> {
         const fileDataName = `${BRAND_FILE_STORE_DIR}/${brandId}.json`;
         const brand = await this.getBrandFromFileStoreByFileName(fileDataName);
         return brand;
@@ -192,7 +192,7 @@ export class BrandManager {
      * @param fileDataName - The file name to get
      * @returns Promise<Brand> - The brand
      */
-    async getBrandFromFileStoreByFileName(fileDataName: string): Promise<Brand> {
+    async getBrandFromFileStoreByFileName(fileDataName: string): Promise<Brand | undefined> {
         var buffer: any;
         try {
             const fileStore = await this.getFileStore();
@@ -201,6 +201,12 @@ export class BrandManager {
             this.logger.debug(`Brand found in file store ${fileDataName}: ${buffer.toString()}`);
         } catch (error) {
             this.logger.warn(`Error reading brand from file store ${fileDataName}: ${error}`);
+            return undefined;
+        }
+
+        if (!buffer) {
+            this.logger.warn(`No buffer returned from file store for ${fileDataName}`);
+            return undefined;
         }
 
         var brandJson: any;
@@ -209,6 +215,7 @@ export class BrandManager {
             this.logger.debug(`Brand JSON imported from file store ${fileDataName}`,brandJson);
         } catch (error) {
             this.logger.warn(`Error parsing brand from file store ${fileDataName}: ${error}`);
+            return undefined;
         }
 
         try {
@@ -216,7 +223,7 @@ export class BrandManager {
             return brand;
         } catch (error) {
             this.logger.warn(`Error parsing brand from file store ${fileDataName}: ${error}`);
-            throw new Error(`Error parsing brand from file store ${fileDataName}: ${error}`);
+            return undefined;
         }
     }
 
