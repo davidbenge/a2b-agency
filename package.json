@@ -39,7 +39,7 @@
     "dotenv": "^16.5.0",
     "eslint": "^8",
     "eslint-plugin-jest": "^27.2.3",
-    "jest": "^29",
+    "jest": "^29.7.0",
     "rimraf": "^6.0.1",
     "ts-jest": "^29.4.1",
     "ts-loader": "^9.5.2",
@@ -52,7 +52,10 @@
     "test": "jest --passWithNoTests ./test",
     "e2e": "jest --collectCoverage=false --testRegex ./e2e",
     "lint": "eslint --ignore-pattern web-src --no-error-on-unmatched-pattern test src actions",
-    "lint:fix": "npm run lint -- --fix"
+    "lint:fix": "npm run lint -- --fix",
+    "security:check": "gitleaks detect --config .gitleaks.toml --verbose",
+    "security:scan-history": "gitleaks detect --config .gitleaks.toml --source . --verbose",
+    "precommit": "npm run security:check && npm run lint && npm run test"
   },
   "engines": {
     "node": ">=18"
