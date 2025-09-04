@@ -2,10 +2,15 @@
   "jcr:created": "Fri Oct 25 2024 18:11:41 GMT+0000",
   "jcr:createdBy": "DBENGE@ADOBE.COM",
   "jcr:uuid": "e8cc4fc5-ea72-49ed-9cd2-c71d6f2fa9b1",
-  "jcr:predecessors": ["adf67d51-72f7-42da-a522-676bdd1a2306"],
+  "jcr:predecessors": [
+    "adf67d51-72f7-42da-a522-676bdd1a2306"
+  ],
   "jcr:versionHistory": "e4f3250f-bda8-4cce-ac7b-23ceef79c3f6",
   "jcr:isCheckedOut": true,
-  "jcr:mixinTypes": ["mix:referenceable", "mix:versionable"],
+  "jcr:mixinTypes": [
+    "mix:referenceable",
+    "mix:versionable"
+  ],
   "jcr:primaryType": "dam:Asset",
   "jcr:baseVersion": "adf67d51-72f7-42da-a522-676bdd1a2306",
   "jcr:content": {
@@ -55,7 +60,7 @@
       "dam:hasC2PAManifest": true,
       "dam:activationTarget": "delivery",
       "dam:status": "approved",
-      "a2d__customers": [],
+      "a2b__customers": [],
       "dam:predictedColors": [],
       "dam:size": 268812,
       "a2b__sync_on_change": true,

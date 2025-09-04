@@ -47,10 +47,14 @@ export async function main(params: any, openwhiskClient?: any): Promise<any> {
     // Route events to appropriate internal handlers based on event type
     let routingResult;
     switch(params.type) {
-      case 'aem.assets.asset.created':
-      case 'aem.assets.asset.updated':
-      case 'aem.assets.asset.deleted':
+      //case 'aem.assets.asset.created':
+      //case 'aem.assets.asset.updated':
+      //case 'aem.assets.asset.deleted':
       case 'aem.assets.asset.metadata_updated':
+        logger.info(`Routing AEM UPDATE asset event to agency-assetsync-event-handler: ${params.type}`);
+        routingResult = await routeToAssetSyncHandler(params, logger, openwhiskClient);
+        break;
+      case 'aem.assets.asset.processing_completed':
         logger.info(`Routing AEM asset event to agency-assetsync-event-handler: ${params.type}`);
         routingResult = await routeToAssetSyncHandler(params, logger, openwhiskClient);
         break;

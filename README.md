@@ -227,7 +227,7 @@ The `AEM_AUTH_PRIVATE_KEY` requires special handling:
 
 Example:
 ```bash
-AEM_AUTH_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEAyvm41fmvihTKPVhRDWWHFeZP7UjwPElofsnn8IxkXI3SKvqt\nDOQj7cTMt0mNtp40TtsYXNrRiLn4w3rqF0CgYEAlczUQJJQRjcAqWEUKBDzOVh2TL61aRU3cixHiVj/w0EgaN07EE7Y\n5ffeGxvk+N0zSJeJFppBmePtMpGSO0CTsQh8hJ9Kpc31vWv2+x8VwGBLaoIyV9qY\n74SVLtYBabOtWOhQ7+ZWmV9wlF6cFfBB/O2Q+t5ZLZD859apHzsbvu0=\n-----END RSA PRIVATE KEY-----"
+AEM_AUTH_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nFAKE\n-----END RSA PRIVATE KEY-----"
 ```
 
 #### 4. Event Provider IDs
@@ -807,3 +807,33 @@ removing all your runtime actions
 
 5. Deploy
    - `aio app deploy`
+
+## 🛡️ Security
+
+### Secret Detection
+
+This repository uses [Gitleaks](https://github.com/gitleaks/gitleaks) for comprehensive secret detection:
+
+```bash
+# Install Gitleaks (recommended)
+brew install gitleaks  # macOS
+# Or download from: https://github.com/gitleaks/gitleaks/releases
+
+# Security commands
+npm run security:check          # Check current changes
+npm run security:scan-history   # Scan entire git history
+npm run precommit              # Full pre-commit check (security + lint + test)
+```
+
+### Critical Security Rules
+
+**❌ NEVER commit real private keys or secrets!**
+
+**✅ ALWAYS use this exact format for testing:**
+```
+-----BEGIN RSA PRIVATE KEY-----
+FAKE
+-----END RSA PRIVATE KEY-----
+```
+
+**For more details**: See `docs/SECURITY_GUIDELINES.md`

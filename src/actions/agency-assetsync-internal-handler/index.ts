@@ -59,7 +59,7 @@ export async function main(params: any): Promise<any> {
   // Any errors during lazy initialization will be caught at call sites below
   
   try {
-    logger.info(`${ACTION_NAME}:Asset Sync Event Handler called`);
+    logger.info(`${ACTION_NAME}:Asset ${params.type} Event Handler called`);
 
     // todo:// look to see if we need to handle the event 
     if (params.type === 'aem.assets.asset.deleted') {
@@ -68,7 +68,7 @@ export async function main(params: any): Promise<any> {
       // Publish the event to the Adobe Event Hub
       //await ioCustomEventManager.publishEvent(new AssetSyncDeleteEvent({}));
     } else if (params.type === 'aem.assets.asset.metadata_updated' || params.type === 'aem.assets.asset.processing_completed') {
-      logger.info(`${ACTION_NAME}:Asset metadata updated event`, params);
+      logger.info(`${ACTION_NAME}:${params.type} event being handled`, params);
 
       /*  Import and use the AemCscUtils class
       * @param {string} aemHost aem host
@@ -122,7 +122,46 @@ export async function main(params: any): Promise<any> {
             if (aemAssetData["jcr:content"].metadata["a2b__last_sync"]) {
               // update event
               logger.info(`assetSyncEventUpdate`);
-              //TODO: send out an update event
+              
+              // Get application runtime info
+              const appRtInfo = ApplicationRuntimeInfo.getApplicationRuntimeInfoFromActionParams(params);
+              if (!appRtInfo) throw new Error('Missing APPLICATION_RUNTIME_INFO');
+              
+              // Create update event data
+              const updateEventData = {
+                app_runtime_info: appRtInfo.serialize(),
+                asset_id: aemAssetData["jcr:uuid"],
+                asset_path: aemAssetPath,
+                metadata: metadata,
+                brandId: brandId,
+                asset_presigned_url: presignedUrl
+              };
+              
+              const assetSyncEventUpdate = new AssetSyncUpdateEvent(updateEventData);
+              
+              // Get the brand 
+              const brandManager = new BrandManager(params.LOG_LEVEL);
+              const brand = await brandManager.getBrand(brandId);
+              let brandSendResponse: IBrandEventPostResponse;
+              if(brand && brand.enabled){
+                try{
+                  // Send the event to the brand
+                  logger.info(`${ACTION_NAME}: sending update event to brand url <${brand.endPointUrl}>`);
+                  logger.info(`${ACTION_NAME}: sending update event to brand this cloud event <${assetSyncEventUpdate.toCloudEvent()}>`);
+                  brandSendResponse = await brand.sendCloudEventToEndpoint(assetSyncEventUpdate);
+                  logger.info(`${ACTION_NAME}: brandSendResponse`, JSON.stringify(brandSendResponse, null, 2));
+
+                  // Publish the event to the event manager
+                  assetSyncEventUpdate.setSource(getAssetSyncProviderId()); // update to IO event provider id
+                  await getEventManager().publishEvent(assetSyncEventUpdate);
+                  logger.info(`assetSyncEventUpdate complete`);
+                }catch(error: unknown){
+                  logger.error(`${ACTION_NAME}: error sending update event to brand`, error as string);
+                  //don't fail the action if the brand endpoint fails
+                }
+              } else {
+                logger.info(`${ACTION_NAME}: brand not found or not enabled for brandId: ${brandId}`);
+              }
 
             } else {
               // new event  
@@ -156,7 +195,7 @@ export async function main(params: any): Promise<any> {
                   assetSyncEventNew.setSource(getAssetSyncProviderId()); // update to IO event provider id
                   await getEventManager().publishEvent(assetSyncEventNew);
                   logger.info(`assetSyncEventNew complete`);
-                }catch(error){
+                }catch(error: unknown){
                   // Error objects stringify to {}, so extract meaningful fields and any embedded JSON details
                   const safeError: any = (error instanceof Error)
                     ? { name: error.name, message: error.message, stack: error.stack }
