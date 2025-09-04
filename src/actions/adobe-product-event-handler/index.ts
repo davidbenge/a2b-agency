@@ -51,12 +51,12 @@ export async function main(params: any, openwhiskClient?: any): Promise<any> {
       //case 'aem.assets.asset.updated':
       //case 'aem.assets.asset.deleted':
       case 'aem.assets.asset.metadata_updated':
-        logger.info(`Routing AEM UPDATE asset event to agency-assetsync-event-handler: ${params.type}`);
-        routingResult = await routeToAssetSyncHandler(params, logger, openwhiskClient);
+        logger.info(`Routing AEM metadata update event to agency-assetsync-internal-handler-metadata-updated: ${params.type}`);
+        routingResult = await routeToMetadataUpdateHandler(params, logger, openwhiskClient);
         break;
       case 'aem.assets.asset.processing_completed':
-        logger.info(`Routing AEM asset event to agency-assetsync-event-handler: ${params.type}`);
-        routingResult = await routeToAssetSyncHandler(params, logger, openwhiskClient);
+        logger.info(`Routing AEM processing completed event to agency-assetsync-internal-handler-process-complete: ${params.type}`);
+        routingResult = await routeToProcessCompleteHandler(params, logger, openwhiskClient);
         break;
       
       default:
@@ -92,26 +92,26 @@ export async function main(params: any, openwhiskClient?: any): Promise<any> {
 }
 
 /**
- * Route AEM asset events to the agency-assetsync-event-handler
+ * Route AEM processing completed events to the agency-assetsync-internal-handler-process-complete
  */
-async function routeToAssetSyncHandler(params: any, logger: any, openwhiskClient?: any): Promise<any> {
+async function routeToProcessCompleteHandler(params: any, logger: any, openwhiskClient?: any): Promise<any> {
   try {
     // Initialize OpenWhisk client
     const ow = openwhiskClient || require("openwhisk")();
 
-    logger.debug('routeToAssetSyncHandler incoming params', JSON.stringify(params, null, 2));
+    logger.debug('routeToProcessCompleteHandler incoming params', JSON.stringify(params, null, 2));
     
     // Prepare the parameters for the asset sync handler
     //const assetSyncParams = stripOpenWhiskParams(params);
 
-    logger.debug('Invoking agency-assetsync-internal-handler with params:', JSON.stringify(params, null, 2));
+    logger.debug('Invoking agency-assetsync-internal-handler-process-complete with params:', JSON.stringify(params, null, 2));
 
-    // Invoke the agency-assetsync-internal-handler action
+    // Invoke the agency-assetsync-internal-handler-process-complete action
     // we pass in the params as a single object so that the internal handler can access the params and we label it routerParams so on the internal handler we can access the params as routerParams.routerParams
     // if we see params.routerParams we know that the params are coming from the adobe-product-event-handler and we can merge down. this way the internal handler can access the params and we can access the params as routerParams.routerParams
     // can stand as standalone or as part of a larger orchestration
     const result = await ow.actions.invoke({
-      name: 'a2b-agency/agency-assetsync-internal-handler',
+      name: 'a2b-agency/agency-assetsync-internal-handler-process-complete',
       params: {
         routerParams: params
       },
@@ -119,18 +119,63 @@ async function routeToAssetSyncHandler(params: any, logger: any, openwhiskClient
       result: true
     });
 
-    logger.info('agency-assetsync-internal-handler invocation successful:', result);
+    logger.info('agency-assetsync-internal-handler-process-complete invocation successful:', result);
     return {
       success: true,
-      handler: 'adobe-product-event-handler agency-assetsync-internal-handler',
+      handler: 'adobe-product-event-handler agency-assetsync-internal-handler-process-complete',
       result: result
     };
 
   } catch (error: unknown) {
-    logger.error('Error invoking agency-assetsync-internal-handler:', error as any);
+    logger.error('Error invoking agency-assetsync-internal-handler-process-complete:', error as any);
     return {
       success: false,
-      handler: 'adobe-product-event-handler agency-assetsync-internal-handler',
+      handler: 'adobe-product-event-handler agency-assetsync-internal-handler-process-complete',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+/**
+ * Route AEM metadata updated events to the agency-assetsync-internal-handler-metadata-updated
+ */
+async function routeToMetadataUpdateHandler(params: any, logger: any, openwhiskClient?: any): Promise<any> {
+  try {
+    // Initialize OpenWhisk client
+    const ow = openwhiskClient || require("openwhisk")();
+
+    logger.debug('routeToMetadataUpdateHandler incoming params', JSON.stringify(params, null, 2));
+    
+    // Prepare the parameters for the asset sync handler
+    //const assetSyncParams = stripOpenWhiskParams(params);
+
+    logger.debug('Invoking agency-assetsync-internal-handler-metadata-updated with params:', JSON.stringify(params, null, 2));
+
+    // Invoke the agency-assetsync-internal-handler-metadata-updated action
+    // we pass in the params as a single object so that the internal handler can access the params and we label it routerParams so on the internal handler we can access the params as routerParams.routerParams
+    // if we see params.routerParams we know that the params are coming from the adobe-product-event-handler and we can merge down. this way the internal handler can access the params and we can access the params as routerParams.routerParams
+    // can stand as standalone or as part of a larger orchestration
+    const result = await ow.actions.invoke({
+      name: 'a2b-agency/agency-assetsync-internal-handler-metadata-updated',
+      params: {
+        routerParams: params
+      },
+      blocking: true,
+      result: true
+    });
+
+    logger.info('agency-assetsync-internal-handler-metadata-updated invocation successful:', result);
+    return {
+      success: true,
+      handler: 'adobe-product-event-handler agency-assetsync-internal-handler-metadata-updated',
+      result: result
+    };
+
+  } catch (error: unknown) {
+    logger.error('Error invoking agency-assetsync-internal-handler-metadata-updated:', error as any);
+    return {
+      success: false,
+      handler: 'adobe-product-event-handler agency-assetsync-internal-handler-metadata-updated',
       error: error instanceof Error ? error.message : 'Unknown error'
     };
   }

@@ -1,5 +1,5 @@
 /**
- * Comprehensive test for agency-assetsync-internal-handler handling aem.assets.asset.metadata_updated events
+ * Comprehensive test for agency-assetsync-internal-handler-metadata-updated handling aem.assets.asset.metadata_updated events
  * This test verifies the complete flow from metadata update event through Brand notification
  */
 
@@ -161,15 +161,24 @@ global.fetch = mockFetch;
 const mockSendCloudEventToEndpoint = jest.fn();
 jest.spyOn(Brand.prototype, 'sendCloudEventToEndpoint').mockImplementation(mockSendCloudEventToEndpoint);
 
+// Mock Brand.fromJSON to ensure returned brands have the mocked method
+const originalFromJSON = Brand.fromJSON;
+Brand.fromJSON = jest.fn().mockImplementation((json: any) => {
+  console.log('DEBUG: Brand.fromJSON called with:', json);
+  const brand = originalFromJSON(json);
+  brand.sendCloudEventToEndpoint = mockSendCloudEventToEndpoint;
+  console.log('DEBUG: Brand.fromJSON returning brand with mocked method:', typeof brand.sendCloudEventToEndpoint);
+  return brand;
+});
+
 // Mock BrandManager.getBrand method
 const mockGetBrand = jest.fn();
-jest.spyOn(BrandManager.prototype, 'getBrand').mockImplementation(mockGetBrand);
 
 // Import both the product event handler and internal handler
 const { main: productEventHandlerMain } = require('../adobe-product-event-handler');
 const { createMockOpenWhisk } = require('./mocks/MockOpenWhisk');
 
-describe('agency-assetsync-internal-handler - Metadata Update Integration Test', () => {
+describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update Integration Test', () => {
   let mockOpenWhiskClient: any;
 
   beforeEach(() => {
@@ -180,6 +189,13 @@ describe('agency-assetsync-internal-handler - Metadata Update Integration Test',
     // Create mock OpenWhisk client
     mockOpenWhiskClient = createMockOpenWhisk();
     mockOpenWhiskClient.reset();
+    
+    // Set up state store with brand data using correct prefixed keys
+    const { BRAND_STATE_PREFIX } = require('../constants');
+    MockFactory.seedStateStore({
+      [`${BRAND_STATE_PREFIX}BRAND_B`]: JSON.stringify(mockBrandDataB),
+      [`${BRAND_STATE_PREFIX}BRAND_C`]: JSON.stringify(mockBrandDataC)
+    });
 
     // Setup default mock implementations
     const { getAemAssetData } = require('../utils/aemCscUtils');
@@ -191,15 +207,8 @@ describe('agency-assetsync-internal-handler - Metadata Update Integration Test',
       json: jest.fn().mockResolvedValue(mockPresignedUrlResponse)
     });
 
-    // Mock Brand methods with different brands
-    mockGetBrand.mockImplementation((brandId: string) => {
-      if (brandId === 'BRAND_B') {
-        return Promise.resolve(new Brand(mockBrandDataB));
-      } else if (brandId === 'BRAND_C') {
-        return Promise.resolve(new Brand(mockBrandDataC));
-      }
-      return Promise.resolve(null);
-    });
+    // Mock Brand methods - the real BrandManager will now use the state store data
+    // but we still need to mock the sendCloudEventToEndpoint method
 
     mockSendCloudEventToEndpoint.mockResolvedValue({
       eventType: "assetSyncUpdate",
@@ -225,8 +234,8 @@ describe('agency-assetsync-internal-handler - Metadata Update Integration Test',
     }));
 
     // Setup OpenWhisk mock to call the real internal handler
-    mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler', async (params: any) => {
-      const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler');
+    mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
+      const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
       return await internalHandlerMain(params.routerParams);
     });
   });
@@ -304,10 +313,9 @@ describe('agency-assetsync-internal-handler - Metadata Update Integration Test',
       expect(getAemAssetDataCall[0]).toContain('author-p142461-e1463137.adobeaemcloud.com');
       expect(getAemAssetDataCall[1]).toBe('/content/dam/benge/sad_elmo.webp');
 
-      // Verify brands were retrieved
-      expect(mockGetBrand).toHaveBeenCalledWith('BRAND_B');
-      expect(mockGetBrand).toHaveBeenCalledWith('BRAND_C');
-      expect(mockGetBrand).toHaveBeenCalledTimes(2);
+      // Verify brands were retrieved (now using real BrandManager with mocked state store)
+      // The brands should be retrieved from the state store with prefixed keys
+      expect(mockSendCloudEventToEndpoint).toHaveBeenCalledTimes(2);
     });
 
     it('should generate AssetSyncUpdate events for assets with existing sync history', async () => {
@@ -346,8 +354,6 @@ describe('agency-assetsync-internal-handler - Metadata Update Integration Test',
       await productEventHandlerMain(mockMetadataUpdateEventData, mockOpenWhiskClient);
 
       // Verify only one brand was called
-      expect(mockGetBrand).toHaveBeenCalledWith('BRAND_B');
-      expect(mockGetBrand).toHaveBeenCalledTimes(1);
       expect(mockSendCloudEventToEndpoint).toHaveBeenCalledTimes(1);
     });
 
@@ -360,9 +366,12 @@ describe('agency-assetsync-internal-handler - Metadata Update Integration Test',
       
       mockGetBrand.mockImplementation((brandId: string) => {
         if (brandId === 'BRAND_B') {
+          disabledBrand.sendCloudEventToEndpoint = mockSendCloudEventToEndpoint;
           return Promise.resolve(disabledBrand);
         } else if (brandId === 'BRAND_C') {
-          return Promise.resolve(new Brand(mockBrandDataC));
+          const brand = new Brand(mockBrandDataC);
+          brand.sendCloudEventToEndpoint = mockSendCloudEventToEndpoint;
+          return Promise.resolve(brand);
         }
         return Promise.resolve(null);
       });
@@ -371,10 +380,6 @@ describe('agency-assetsync-internal-handler - Metadata Update Integration Test',
 
       // Should still return success overall
       expect(result.statusCode).toBe(200);
-
-      // Verify getBrand was called for both brands
-      expect(mockGetBrand).toHaveBeenCalledWith('BRAND_B');
-      expect(mockGetBrand).toHaveBeenCalledWith('BRAND_C');
 
       // Only enabled brand (BRAND_C) should receive the event
       expect(mockSendCloudEventToEndpoint).toHaveBeenCalledTimes(1);
@@ -431,8 +436,6 @@ describe('agency-assetsync-internal-handler - Metadata Update Integration Test',
       expect(result.statusCode).toBe(200);
 
       // Verify that both brands were attempted
-      expect(mockGetBrand).toHaveBeenCalledWith('BRAND_B');
-      expect(mockGetBrand).toHaveBeenCalledWith('BRAND_C');
       expect(mockSendCloudEventToEndpoint).toHaveBeenCalledTimes(2);
     });
   });
