@@ -248,8 +248,8 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                     enabledAt: brandData.enabled ? (selectedBrand.enabledAt || new Date()) : null
                 });
 
-                const response = await apiService.updateBrand(updatedBrand)
-                
+                const response = await apiService.updateBrand(updatedBrand);
+
                 if (response.statusCode === 200) {
                     setBrands(brands.map(brand =>
                         brand.brandId === selectedBrand.brandId ? updatedBrand : brand

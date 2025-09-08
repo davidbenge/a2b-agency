@@ -130,7 +130,7 @@ const BrandForm: React.FC<BrandFormProps> = ({
         }
 
         try {
-            // await onSubmit(formData);
+            await onSubmit(formData);
         } catch (error) {
             console.error('Error submitting brand:', error);
         }
