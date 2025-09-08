@@ -28,12 +28,18 @@ interface BrandFormProps {
     loading?: boolean;
 }
 
-const BrandForm: React.FC<BrandFormProps> = ({ 
-    brand, 
-    mode, 
-    onSubmit, 
-    onCancel, 
-    loading = false 
+const titleMap = {
+    add: 'Register New Brand',
+    edit: 'Edit Brand',
+    view: 'Brand Details'
+};
+
+const BrandForm: React.FC<BrandFormProps> = ({
+    brand,
+    mode,
+    onSubmit,
+    onCancel,
+    loading = false
 }) => {
     const [formData, setFormData] = useState<Partial<Brand>>({
         name: '',
@@ -43,7 +49,6 @@ const BrandForm: React.FC<BrandFormProps> = ({
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
-    const [logoFile, setLogoFile] = useState<File | null>(null);
 
     useEffect(() => {
         if (brand) {
@@ -86,6 +91,7 @@ const BrandForm: React.FC<BrandFormProps> = ({
     };
 
     const handleLogoUpload = (files: FileList | null) => {
+
         const file = files?.[0];
         if (file) {
             // Validate file type
@@ -94,20 +100,18 @@ const BrandForm: React.FC<BrandFormProps> = ({
                 return;
             }
 
-            // Validate file size (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                setErrors({ ...errors, logo: 'Logo file size must be less than 5MB' });
+            if (file.size > 1024 * 1024) {
+                setErrors({ ...errors, logo: 'Logo file size must be less than 1MB' });
                 return;
             }
 
-            setLogoFile(file);
             setErrors({ ...errors, logo: undefined });
-
             // Create preview
             const reader = new FileReader();
             reader.onload = (e) => {
                 const result = e.target?.result as string;
                 setLogoPreview(result);
+
                 setFormData({ ...formData, logo: result });
             };
             reader.readAsDataURL(file);
@@ -115,7 +119,6 @@ const BrandForm: React.FC<BrandFormProps> = ({
     };
 
     const removeLogo = () => {
-        setLogoFile(null);
         setLogoPreview(null);
         setFormData({ ...formData, logo: undefined });
         setErrors({ ...errors, logo: undefined });
@@ -127,18 +130,9 @@ const BrandForm: React.FC<BrandFormProps> = ({
         }
 
         try {
-            await onSubmit(formData);
+            // await onSubmit(formData);
         } catch (error) {
             console.error('Error submitting brand:', error);
-        }
-    };
-
-    const getTitle = () => {
-        switch (mode) {
-            case 'add': return 'Register New Brand';
-            case 'edit': return 'Edit Brand';
-            case 'view': return 'Brand Details';
-            default: return 'Brand';
         }
     };
 
@@ -147,9 +141,9 @@ const BrandForm: React.FC<BrandFormProps> = ({
     return (
         <View padding="size-200" maxWidth="size-5000">
             <Header>
-                <Heading level={2}>{getTitle()}</Heading>
+                <Heading level={2}>{titleMap[mode] || 'Brand'}</Heading>
             </Header>
-            
+
             <Content>
                 {brand && mode === 'view' && (
                     <View marginBottom="size-200">
@@ -188,9 +182,9 @@ const BrandForm: React.FC<BrandFormProps> = ({
                     <Well>
                         <Heading level={4}>Brand Logo</Heading>
                         <Text marginBottom="size-100">
-                            Upload a logo for your brand (PNG, JPG, GIF - max 5MB)
+                            Upload a logo for your brand (PNG, JPG, GIF - max 1MB as Base64 string)
                         </Text>
-                        
+
                         {logoPreview && (
                             <View marginBottom="size-200">
                                 <Image
@@ -211,7 +205,7 @@ const BrandForm: React.FC<BrandFormProps> = ({
                                 )}
                             </View>
                         )}
-                        
+
                         {!logoPreview && !isViewMode && (
                             <View>
                                 <DropZone

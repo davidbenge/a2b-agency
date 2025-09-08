@@ -2,7 +2,7 @@
 * <license header>
 */
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Provider, defaultTheme, Grid, View } from '@adobe/react-spectrum'
 import ErrorBoundary from 'react-error-boundary'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
@@ -12,8 +12,9 @@ import { Home } from './Home'
 import { About } from './About'
 import BrandManagerView from './layout/BrandManagerView'
 import RulesManagerView from './RulesManagerView'
+import { apiService } from '../services/api'
 
-function App (props) {
+function App(props) {
   console.log('runtime object:', props.runtime)
   console.log('viewProps object:', props.viewProps)
 
@@ -33,6 +34,14 @@ function App (props) {
     console.log('history change', { type, path })
   })
 
+  useEffect(() => {
+    const apiBaseUrl = `https://${safeViewProps.aioRuntimeNamespace}.adobeio-static.net/api/v1/web/${safeViewProps.aioActionPackageName}`;
+    apiService.initialize(apiBaseUrl, safeViewProps.imsToken, safeViewProps.imsOrg);
+    return () => {
+      apiService.clear();
+    };
+  }, [])
+
   return (
     <ErrorBoundary onError={onError} FallbackComponent={fallbackComponent}>
       <Router>
@@ -50,9 +59,9 @@ function App (props) {
             <View gridArea='content' padding='size-200'>
               <Routes>
                 <Route path='/' element={<Home viewProps={safeViewProps} />} />
-                <Route path='/brand_manager' element={<BrandManagerView viewProps={safeViewProps} />}/>
-                <Route path='/rules_manager' element={<RulesManagerView viewProps={safeViewProps} />}/>
-                <Route path='/about' element={<About viewProps={safeViewProps} />}/>
+                <Route path='/brand_manager' element={<BrandManagerView viewProps={safeViewProps} />} />
+                <Route path='/rules_manager' element={<RulesManagerView viewProps={safeViewProps} />} />
+                <Route path='/about' element={<About viewProps={safeViewProps} />} />
               </Routes>
             </View>
           </Grid>
@@ -64,10 +73,10 @@ function App (props) {
   // Methods
 
   // error handler on UI rendering failure
-  function onError (e, componentStack) { }
+  function onError(e, componentStack) { }
 
   // component to show if UI fails rendering
-  function fallbackComponent ({ componentStack, error }) {
+  function fallbackComponent({ componentStack, error }) {
     return (
       <React.Fragment>
         <h1 style={{ textAlign: 'center', marginTop: '20px' }}>
