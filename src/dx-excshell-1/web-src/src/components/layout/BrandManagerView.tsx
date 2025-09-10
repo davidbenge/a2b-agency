@@ -2,17 +2,17 @@ import { useEffect, useState } from 'react';
 import { ViewPropsBase } from '../../types/ViewPropsBase';
 import { Brand } from '../../../../../actions/classes/Brand';
 import BrandForm from './BrandForm';
-import { 
-    TableView, 
-    TableHeader, 
-    TableBody, 
-    Column, 
-    Row, 
-    Cell, 
-    View, 
-    Text, 
-    Heading, 
-    Button, 
+import {
+    TableView,
+    TableHeader,
+    TableBody,
+    Column,
+    Row,
+    Cell,
+    View,
+    Text,
+    Heading,
+    Button,
     Flex,
     StatusLight,
     ProgressCircle,
@@ -80,18 +80,14 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
     // Load brands from API when not in demo mode
     useEffect(() => {
         if (!viewProps.aioEnableDemoMode) {
-            const apiBaseUrl = `https://${viewProps.aioRuntimeNamespace}.adobeio-static.net/api/v1/web/${viewProps.aioActionPackageName}`;
-            apiService.initialize(apiBaseUrl, viewProps.imsToken, viewProps.imsOrg);
-            
             const fetchBrands = async () => {
                 try {
                     console.debug('BrandManagerView getting brands');
                     const response = await apiService.getBrandList();
                     console.debug('BrandManager View getting brands response', response);
                     console.debug('BrandManager View getting brands response json', JSON.stringify(response, null, 2));
-                    
+
                     console.debug('response statusCode', response.statusCode);
-                    console.debug('response body', response.body);
                     console.debug('response body', response.body);
                     console.debug('response body.data', response.body.data);
                     if (response.body.data) {
@@ -107,13 +103,9 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             };
 
             fetchBrands();
-
-            return () => {
-                apiService.clear();
-            };
         }
     }, [viewProps.aioEnableDemoMode, viewProps.imsToken, viewProps.baseUrl]);
-    
+
 
     // Filter and sort brands
     const getFilteredAndSortedBrands = () => {
@@ -208,7 +200,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             // TODO: Implement real API call here
             setError('Delete functionality not implemented in production mode');
         }
-        
+
         // Clear success message after 3 seconds
         setTimeout(() => setSuccess(null), 3000);
     };
@@ -229,7 +221,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         updatedAt: new Date(),
                         enabledAt: brandData.enabled ? new Date() : null
                     });
-                    
+
                     setBrands([...brands, newBrand]);
                     setSuccess('Brand created successfully');
                 } else if (viewMode === 'edit' && selectedBrand) {
@@ -240,24 +232,43 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         updatedAt: new Date(),
                         enabledAt: brandData.enabled ? (selectedBrand.enabledAt || new Date()) : null
                     });
-                    
-                    setBrands(brands.map(brand => 
+
+                    setBrands(brands.map(brand =>
                         brand.brandId === selectedBrand.brandId ? updatedBrand : brand
                     ));
                     setSuccess('Brand updated successfully');
                 }
+            } else if (viewMode === 'edit' && selectedBrand) {
+
+                const updatedBrand = new Brand({
+                    ...selectedBrand.toJSON(),
+                    ...brandData,
+                    brandId: selectedBrand.brandId,
+                    updatedAt: new Date(),
+                    enabledAt: brandData.enabled ? (selectedBrand.enabledAt || new Date()) : null
+                });
+
+                const response = await apiService.updateBrand(updatedBrand);
+
+                if (response.statusCode === 200) {
+                    setBrands(brands.map(brand =>
+                        brand.brandId === selectedBrand.brandId ? updatedBrand : brand
+                    ));
+                    setSuccess('Brand updated successfully');
+                }
+
             } else {
                 // TODO: Implement real API calls here
                 setError('Save functionality not implemented in production mode');
             }
-
+            console.debug('BrandManagerView: handleFormSubmit: setViewMode to list');
             setViewMode('list');
         } catch (error) {
             console.error('Error saving brand:', error);
             setError('Error saving brand');
         } finally {
             setFormLoading(false);
-            
+
             // Clear success message after 3 seconds
             setTimeout(() => setSuccess(null), 3000);
         }
@@ -288,21 +299,21 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         <Text>Register Brand</Text>
                     </Button>
                 </Flex>
-                
+
                 <Text marginBottom="size-200">Welcome, {userEmail}</Text>
-                
+
                 {viewProps.aioEnableDemoMode && (
                     <StatusLight variant="info" marginBottom="size-200">
                         Running in demo mode with mock data
                     </StatusLight>
                 )}
-                
+
                 {error && (
                     <StatusLight variant="negative" marginBottom="size-200">
                         {error}
                     </StatusLight>
                 )}
-                
+
                 {success && (
                     <StatusLight variant="positive" marginBottom="size-200">
                         {success}
@@ -332,7 +343,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         Showing {filteredAndSortedBrands.length} of {brands.length} brands
                     </Text>
                 </Flex>
-                
+
                 {loading ? (
                     <Flex justifyContent="center" alignItems="center" height="size-2000">
                         <ProgressCircle aria-label="Loading brands" />
@@ -361,10 +372,10 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                 <Row key={brand.brandId}>
                                     <Cell>
                                         {brand.logo ? (
-                                            <Image 
-                                                src={brand.logo} 
-                                                alt={brand.name} 
-                                                width="size-400" 
+                                            <Image
+                                                src={brand.logo}
+                                                alt={brand.name}
+                                                width="size-400"
                                                 height="size-400"
                                                 objectFit="contain"
                                             />
@@ -382,20 +393,20 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                     <Cell>{brand?.createdAt ? new Date(brand.createdAt as any).toLocaleDateString() : ''}</Cell>
                                     <Cell>
                                         <Flex gap="size-100">
-                                            <Button 
-                                                variant="primary" 
+                                            <Button
+                                                variant="primary"
                                                 onPress={() => handleViewBrand(brand)}
                                             >
                                                 <ViewDetail />
                                             </Button>
-                                            <Button 
-                                                variant="primary" 
+                                            <Button
+                                                variant="primary"
                                                 onPress={() => handleEditBrand(brand)}
                                             >
                                                 <Edit />
                                             </Button>
-                                            <Button 
-                                                variant="negative" 
+                                            <Button
+                                                variant="negative"
                                                 onPress={() => handleDeleteBrand(brand.brandId)}
                                             >
                                                 <Delete />
@@ -420,7 +431,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             loading={formLoading}
         />
     );
-    
+
     return (
         <View>
             {viewMode === 'list' ? renderListView() : renderFormView()}

@@ -6,7 +6,8 @@ import { Brand } from '../../../../actions/classes/Brand';
 const API_CONFIG = {
     ENDPOINTS: {
         BRAND_GET_LIST: '/get-brands',
-        BRAND_DELETE: '/delete-brand'
+        BRAND_DELETE: '/delete-brand',
+        BRAND_UPDATE: '/update-brand'
     }
 };
 
@@ -105,7 +106,7 @@ export class ApiService {
             const data = await response.json();
             console.debug('API call response', data);
             console.debug('API call response json', JSON.stringify(data, null, 2));
-            
+
             // Transform the response to match our interface
             return {
                 statusCode: response.status,
@@ -138,9 +139,18 @@ export class ApiService {
     /**
      * delete brand
      */
-    async deleteBrand(brandId:string): Promise<ApiResponse<any>> {
+    async deleteBrand(brandId: string): Promise<ApiResponse<any>> {
         return this.callApi<any>(
-            `${API_CONFIG.ENDPOINTS.BRAND_DELETE}`, 'POST',{"brandId":brandId}
+            `${API_CONFIG.ENDPOINTS.BRAND_DELETE}`, 'POST', { "brandId": brandId }
+        );
+    }
+
+    /**
+     * Update brand
+     */
+    async updateBrand(brand: Brand): Promise<ApiResponse<Brand>> {
+        return this.callApi<Brand>(
+            `${API_CONFIG.ENDPOINTS.BRAND_UPDATE}`, 'POST', brand
         );
     }
 }
