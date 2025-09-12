@@ -126,10 +126,11 @@ export async function main(params: any): Promise<any> {
         // loop over customers and send an event for each customer subscribed to the asset
         console.log(`${ACTION_NAME}: DEBUG - Starting brand loop with customers:`, customersArray);
         for (const customer of customersArray) {
-          // set the brand id
-          console.log(`${ACTION_NAME}: DEBUG - Processing brand: ${customer}`);
-          logger.info(`brand id ${customer} in customersArray`);
-          const brandId = customer;
+          try {
+            // set the brand id
+            console.log(`${ACTION_NAME}: DEBUG - Processing brand: ${customer}`);
+            logger.info(`brand id ${customer} in customersArray`);
+            const brandId = customer;
 
           // has the asset been synced before?
           console.log(`${ACTION_NAME}: DEBUG - Checking if asset has been synced before:`, !!aemAssetData["jcr:content"].metadata["a2b__last_sync"]);
@@ -152,7 +153,9 @@ export async function main(params: any): Promise<any> {
               asset_presigned_url: presignedUrl
             };
             
+            console.log(`${ACTION_NAME}: DEBUG - Creating AssetSyncUpdateEvent for brand ${brandId}`);
             const assetSyncEventUpdate = new AssetSyncUpdateEvent(updateEventData);
+            console.log(`${ACTION_NAME}: DEBUG - AssetSyncUpdateEvent created successfully for brand ${brandId}`);
             
             // Get the brand 
             const brandManager = new BrandManager(params.LOG_LEVEL);
@@ -165,9 +168,16 @@ export async function main(params: any): Promise<any> {
                 // Send the event to the brand
                 console.log(`${ACTION_NAME}: DEBUG - About to call sendCloudEventToEndpoint for brand ${brandId}`);
                 console.log(`${ACTION_NAME}: DEBUG - Brand sendCloudEventToEndpoint method:`, typeof brand.sendCloudEventToEndpoint);
+                console.log(`${ACTION_NAME}: DEBUG - Brand sendCloudEventToEndpoint is mock:`, (brand.sendCloudEventToEndpoint as any).mock);
                 logger.info(`${ACTION_NAME}: sending update event to brand url <${brand.endPointUrl}>`);
                 logger.info(`${ACTION_NAME}: sending update event to brand this cloud event <${assetSyncEventUpdate.toCloudEvent()}>`);
-                brandSendResponse = await brand.sendCloudEventToEndpoint(assetSyncEventUpdate);
+                try {
+                  brandSendResponse = await brand.sendCloudEventToEndpoint(assetSyncEventUpdate);
+                  console.log(`${ACTION_NAME}: DEBUG - sendCloudEventToEndpoint completed successfully for brand ${brandId}`);
+                } catch (error) {
+                  console.log(`${ACTION_NAME}: DEBUG - sendCloudEventToEndpoint failed for brand ${brandId}:`, error);
+                  throw error;
+                }
                 logger.info(`${ACTION_NAME}: brandSendResponse`, JSON.stringify(brandSendResponse, null, 2));
 
                 // Publish the event to the event manager
@@ -241,6 +251,11 @@ export async function main(params: any): Promise<any> {
           }
 
           // TODO: delete handle 
+          } catch (error: unknown) {
+            console.log(`${ACTION_NAME}: DEBUG - Error processing brand ${customer}:`, error);
+            logger.error(`${ACTION_NAME}: Error processing brand ${customer}:`, error instanceof Error ? error.message : String(error));
+            // Continue with next brand
+          }
         }
 
       } else {
