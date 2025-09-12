@@ -12,6 +12,8 @@ export interface RoutingRule {
     name: string;
     description: string;
     eventType: string;
+    direction: 'inbound' | 'outbound' | 'both';
+    targetBrands: string[]; // Array of brand IDs this rule applies to
     conditions: RuleCondition[];
     actions: RuleAction[];
     enabled: boolean;
@@ -64,17 +66,33 @@ export class RulesManager {
     /**
      * Get all rules for a specific event type
      */
-    getRulesForEventType(eventType: string): RoutingRule[] {
+    getRulesForEventType(eventType: string, direction?: 'inbound' | 'outbound', brandId?: string): RoutingRule[] {
         return Array.from(this.rules.values())
-            .filter(rule => rule.eventType === eventType && rule.enabled)
+            .filter(rule => {
+                if (rule.eventType !== eventType || !rule.enabled) {
+                    return false;
+                }
+                
+                // Filter by direction if specified
+                if (direction && rule.direction !== 'both' && rule.direction !== direction) {
+                    return false;
+                }
+                
+                // Filter by brand if specified
+                if (brandId && rule.targetBrands.length > 0 && !rule.targetBrands.includes(brandId)) {
+                    return false;
+                }
+                
+                return true;
+            })
             .sort((a, b) => b.priority - a.priority); // Higher priority first
     }
 
     /**
      * Evaluate rules for an event
      */
-    evaluateRules(eventType: string, eventData: any): RuleEvaluationResult[] {
-        const rules = this.getRulesForEventType(eventType);
+    evaluateRules(eventType: string, eventData: any, direction?: 'inbound' | 'outbound', brandId?: string): RuleEvaluationResult[] {
+        const rules = this.getRulesForEventType(eventType, direction, brandId);
         const results: RuleEvaluationResult[] = [];
 
         for (const rule of rules) {
@@ -167,12 +185,12 @@ export class RulesManager {
     /**
      * Get all available event types with their routing rules
      */
-    getEventTypesWithRules(): Array<EventTypeMetadata & { rules: RoutingRule[] }> {
+    getEventTypesWithRules(direction?: 'inbound' | 'outbound', brandId?: string): Array<EventTypeMetadata & { rules: RoutingRule[] }> {
         const eventTypes = EventTypeRegistry.getAllEventTypes();
         
         return eventTypes.map(eventType => ({
             ...eventType,
-            rules: this.getRulesForEventType(eventType.type)
+            rules: this.getRulesForEventType(eventType.type, direction, brandId)
         }));
     }
 
@@ -189,6 +207,8 @@ export class RulesManager {
                 name: `Default rule for ${eventType.type}`,
                 description: `Default routing rule for ${eventType.type} events`,
                 eventType: eventType.type,
+                direction: 'both',
+                targetBrands: [], // Empty means applies to all brands
                 conditions: [],
                 actions: [{
                     type: 'route',
@@ -229,5 +249,51 @@ export class RulesManager {
         }
 
         this.logger.info(`Imported ${config.rules.length} routing rules`);
+    }
+
+    /**
+     * Get rules that apply to a specific brand
+     */
+    getRulesForBrand(brandId: string): RoutingRule[] {
+        return Array.from(this.rules.values())
+            .filter(rule => rule.enabled && (rule.targetBrands.length === 0 || rule.targetBrands.includes(brandId)))
+            .sort((a, b) => b.priority - a.priority);
+    }
+
+    /**
+     * Get rules by direction (inbound/outbound)
+     */
+    getRulesByDirection(direction: 'inbound' | 'outbound'): RoutingRule[] {
+        return Array.from(this.rules.values())
+            .filter(rule => rule.enabled && (rule.direction === 'both' || rule.direction === direction))
+            .sort((a, b) => b.priority - a.priority);
+    }
+
+    /**
+     * Update rule target brands
+     */
+    updateRuleBrands(ruleId: string, targetBrands: string[]): boolean {
+        const rule = this.rules.get(ruleId);
+        if (rule) {
+            rule.targetBrands = targetBrands;
+            rule.updatedAt = new Date();
+            this.logger.info(`Updated target brands for rule ${ruleId}: ${targetBrands.join(', ')}`);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Update rule direction
+     */
+    updateRuleDirection(ruleId: string, direction: 'inbound' | 'outbound' | 'both'): boolean {
+        const rule = this.rules.get(ruleId);
+        if (rule) {
+            rule.direction = direction;
+            rule.updatedAt = new Date();
+            this.logger.info(`Updated direction for rule ${ruleId}: ${direction}`);
+            return true;
+        }
+        return false;
     }
 }
