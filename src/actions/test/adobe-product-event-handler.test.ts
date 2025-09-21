@@ -163,7 +163,7 @@ describe('adobe-product-event-handler', () => {
 
     it('should handle errors gracefully', async () => {
       const params = {
-        type: 'aem.assets.asset.created',
+        type: 'aem.assets.asset.metadata_updated',
         LOG_LEVEL: 'debug',
         source: 'test-source',
         data: { assetId: 'test-asset-error' }
@@ -196,13 +196,13 @@ describe('adobe-product-event-handler', () => {
       await main(params, mockOpenWhisk);
 
       // Verify that the action was invoked
-      expect(mockOpenWhiskClient.wasActionInvoked('a2b-agency/agency-assetsync-internal-handler-metadata-updated-metadata-updated')).toBe(true);
-      expect(mockOpenWhiskClient.getInvocationCount('a2b-agency/agency-assetsync-internal-handler-metadata-updated-metadata-updated')).toBe(1);
+      expect(mockOpenWhiskClient.wasActionInvoked('a2b-agency/agency-assetsync-internal-handler-metadata-updated')).toBe(true);
+      expect(mockOpenWhiskClient.getInvocationCount('a2b-agency/agency-assetsync-internal-handler-metadata-updated')).toBe(1);
 
       // Get the invocation details
       const invocation = mockOpenWhiskClient.getLastInvocation();
       expect(invocation).toBeDefined();
-      expect(invocation!.name).toBe('a2b-agency/agency-assetsync-internal-handler-metadata-updated-metadata-updated');
+      expect(invocation!.name).toBe('a2b-agency/agency-assetsync-internal-handler-metadata-updated');
       expect(invocation!.blocking).toBe(true);
       expect(invocation!.result).toBe(true);
       expect(invocation!.params.routerParams).toBeDefined();
@@ -252,11 +252,11 @@ describe('adobe-product-event-handler', () => {
       }
 
       // Verify all invocations
-      expect(mockOpenWhiskClient.getInvocationCount('a2b-agency/agency-assetsync-internal-handler-metadata-updated-metadata-updated')).toBe(2);
-      expect(mockOpenWhiskClient.getInvocationCount('a2b-agency/agency-assetsync-internal-handler-metadata-updated-process-complete')).toBe(1);
+      expect(mockOpenWhiskClient.getInvocationCount('a2b-agency/agency-assetsync-internal-handler-metadata-updated')).toBe(2);
+      expect(mockOpenWhiskClient.getInvocationCount('a2b-agency/agency-assetsync-internal-handler-process-complete')).toBe(1);
       
-      const metadataInvocations = mockOpenWhiskClient.getInvocationsForAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated-metadata-updated');
-      const processCompleteInvocations = mockOpenWhiskClient.getInvocationsForAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated-process-complete');
+      const metadataInvocations = mockOpenWhiskClient.getInvocationsForAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated');
+      const processCompleteInvocations = mockOpenWhiskClient.getInvocationsForAction('a2b-agency/agency-assetsync-internal-handler-process-complete');
       
       expect(metadataInvocations).toHaveLength(2);
       expect(processCompleteInvocations).toHaveLength(1);
@@ -285,7 +285,7 @@ describe('adobe-product-event-handler', () => {
       mockOpenWhiskClient.setMockResult('a2b-agency/agency-assetsync-internal-handler-metadata-updated', customResult);
 
       const params = {
-        type: 'aem.assets.asset.created',
+        type: 'aem.assets.asset.metadata_updated',
         LOG_LEVEL: 'debug',
         source: 'test-source',
         data: { assetId: 'test-asset-custom' }
@@ -302,7 +302,7 @@ describe('adobe-product-event-handler', () => {
   describe('Error handling', () => {
     it('should handle OpenWhisk invocation errors', async () => {
       const params = {
-        type: 'aem.assets.asset.created',
+        type: 'aem.assets.asset.metadata_updated',
         LOG_LEVEL: 'debug',
         source: 'test-source',
         data: { assetId: 'test-asset-error' }
@@ -322,7 +322,7 @@ describe('adobe-product-event-handler', () => {
 
     it('should handle malformed event data', async () => {
       const params = {
-        type: 'aem.assets.asset.created',
+        type: 'aem.assets.asset.metadata_updated',
         LOG_LEVEL: 'debug',
         source: 'test-source',
         data: null // Malformed data

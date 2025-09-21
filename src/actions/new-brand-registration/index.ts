@@ -37,7 +37,7 @@ export async function main(params: any): Promise<any> {
 
     let savedBrand: Brand;
     try{
-      const brand = Brand.fromJSON(params);
+      const brand = BrandManager.getBrandFromJson(params);
       logger.debug('Brand',JSON.stringify(brand, null, 2));
       logger.debug('Brand stringify',brand.toJSON());
 

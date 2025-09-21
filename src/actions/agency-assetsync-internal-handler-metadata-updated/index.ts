@@ -108,6 +108,7 @@ export async function main(params: any): Promise<any> {
         const customers = metadata["a2b__customers"];
         const sourceProviderId = getAssetSyncProviderId();
         const presignedUrl = await fetchPresignedReadUrl(aemHostHostOnly, aemAssetPath, params, logger, ACTION_NAME);
+        const brandManager = new BrandManager(params.LOG_LEVEL);
 
         // Normalize customers to string[] using reusable utility
         let customersArray: string[] = [];
@@ -158,7 +159,6 @@ export async function main(params: any): Promise<any> {
             console.log(`${ACTION_NAME}: DEBUG - AssetSyncUpdateEvent created successfully for brand ${brandId}`);
             
             // Get the brand 
-            const brandManager = new BrandManager(params.LOG_LEVEL);
             const brand = await brandManager.getBrand(brandId);
             console.log(`${ACTION_NAME}: DEBUG - Retrieved brand for ${brandId}:`, { brand: !!brand, enabled: brand?.enabled });
             let brandSendResponse: IBrandEventPostResponse;
@@ -169,9 +169,15 @@ export async function main(params: any): Promise<any> {
                 console.log(`${ACTION_NAME}: DEBUG - About to call sendCloudEventToEndpoint for brand ${brandId}`);
                 console.log(`${ACTION_NAME}: DEBUG - Brand sendCloudEventToEndpoint method:`, typeof brand.sendCloudEventToEndpoint);
                 console.log(`${ACTION_NAME}: DEBUG - Brand sendCloudEventToEndpoint is mock:`, (brand.sendCloudEventToEndpoint as any).mock);
+                console.log(`${ACTION_NAME}: DEBUG - About to log brand URL: ${brand.endPointUrl}`);
                 logger.info(`${ACTION_NAME}: sending update event to brand url <${brand.endPointUrl}>`);
+                console.log(`${ACTION_NAME}: DEBUG - About to set source for event`);
+                assetSyncEventUpdate.setSource(getAssetSyncProviderId()); // set source before toCloudEvent()
+                console.log(`${ACTION_NAME}: DEBUG - About to call toCloudEvent()`);
                 logger.info(`${ACTION_NAME}: sending update event to brand this cloud event <${assetSyncEventUpdate.toCloudEvent()}>`);
+                console.log(`${ACTION_NAME}: DEBUG - toCloudEvent() completed successfully`);
                 try {
+                  console.log(`${ACTION_NAME}: DEBUG - About to await sendCloudEventToEndpoint for brand ${brandId}`);
                   brandSendResponse = await brand.sendCloudEventToEndpoint(assetSyncEventUpdate);
                   console.log(`${ACTION_NAME}: DEBUG - sendCloudEventToEndpoint completed successfully for brand ${brandId}`);
                 } catch (error) {
@@ -181,7 +187,6 @@ export async function main(params: any): Promise<any> {
                 logger.info(`${ACTION_NAME}: brandSendResponse`, JSON.stringify(brandSendResponse, null, 2));
 
                 // Publish the event to the event manager
-                assetSyncEventUpdate.setSource(getAssetSyncProviderId()); // update to IO event provider id
                 await getEventManager().publishEvent(assetSyncEventUpdate);
                 logger.info(`assetSyncEventUpdate complete`);
               }catch(error: unknown){
@@ -209,7 +214,6 @@ export async function main(params: any): Promise<any> {
             );
 
             //get the brand 
-            const brandManager = new BrandManager(params.LOG_LEVEL);
             const brand = await brandManager.getBrand(brandId);
             let brandSendResponse: IBrandEventPostResponse;
             if(brand && brand.enabled){

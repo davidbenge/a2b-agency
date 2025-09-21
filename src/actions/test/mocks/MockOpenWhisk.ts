@@ -160,11 +160,11 @@ export class MockOpenWhiskClient {
   private getActionPath(actionName: string): string | null {
     try {
       // Convert action name to file path
-      // e.g., 'a2b-agency/agency-assetsync-internal-handler-metadata-updated' -> '../agency-assetsync-internal-handler-metadata-updated/index'
+      // e.g., 'a2b-agency/agency-assetsync-internal-handler-metadata-updated' -> '../../agency-assetsync-internal-handler-metadata-updated/index'
       const parts = actionName.split('/');
       if (parts.length === 2) {
         const actionDir = parts[1];
-        return `../${actionDir}/index`;
+        return `../../${actionDir}/index`;
       }
       return null;
     } catch (error) {

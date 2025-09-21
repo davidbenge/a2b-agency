@@ -1,5 +1,6 @@
 import aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "./Brand";
+import { IBrand } from "../types";
 import { BRAND_STATE_PREFIX, BRAND_FILE_STORE_DIR } from "../constants";
 
 export class BrandManager {
@@ -9,6 +10,68 @@ export class BrandManager {
 
     constructor(logLevel: string) {
         this.logger = aioLogger("BrandManager", { level: logLevel || "info" });
+    }
+
+    /**
+     * Factory method to create a Brand from JSON data
+     * @param json JSON object containing brand data
+     * @returns new Brand instance
+     * @throws Error if JSON is invalid or missing required properties
+     */
+    static getBrandFromJson(json: any): Brand {
+        if (!json || typeof json !== 'object') {
+            throw new Error('Invalid JSON: Input must be a valid JSON object');
+        }
+
+        const missingProps: string[] = [];
+        if (!json.brandId) missingProps.push('brandId');
+        if (!json.secret) missingProps.push('secret');
+        if (!json.name) missingProps.push('name');
+        if (!json.endPointUrl) missingProps.push('endPointUrl');
+
+        if (missingProps.length > 0) {
+            throw new Error(`Invalid Brand data: Missing required properties: ${missingProps.join(', ')}`);
+        }
+
+        return new Brand({
+            brandId: json.brandId,
+            secret: json.secret,
+            name: json.name,
+            endPointUrl: json.endPointUrl,
+            enabled: json.enabled,
+            logo: json.logo,
+            createdAt: json.createdAt ? new Date(json.createdAt) : new Date(),
+            updatedAt: json.updatedAt ? new Date(json.updatedAt) : new Date(),
+            enabledAt: json.enabledAt ? new Date(json.enabledAt) : null
+        });
+    }
+
+    /**
+     * Factory method to create a new Brand
+     * @param data Partial brand data
+     * @returns new Brand instance
+     */
+    static createBrand(data: Partial<IBrand>): Brand {
+        const now = new Date();
+        return new Brand({
+            brandId: data.brandId || this.generateBrandId(),
+            secret: data.secret || this.generateSecret(),
+            name: data.name || '',
+            endPointUrl: data.endPointUrl || '',
+            enabled: data.enabled ?? false,
+            logo: data.logo,
+            createdAt: data.createdAt ?? now,
+            updatedAt: data.updatedAt ?? now,
+            enabledAt: data.enabledAt ?? null
+        });
+    }
+
+    private static generateBrandId(): string {
+        return `brand-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    private static generateSecret(): string {
+        return Math.random().toString(36).substr(2, 15) + Math.random().toString(36).substr(2, 15);
     }
 
     /****
@@ -219,7 +282,7 @@ export class BrandManager {
         }
 
         try {
-            const brand = Brand.fromJSON(brandJson);
+            const brand = BrandManager.getBrandFromJson(brandJson);
             return brand;
         } catch (error) {
             this.logger.warn(`Error parsing brand from file store ${fileDataName}: ${error}`);
@@ -259,7 +322,7 @@ export class BrandManager {
             }else{
                 this.logger.debug(`brand ${brandId} found in state store`);
                 const brandJson = JSON.parse(brandString);
-                const brand = Brand.fromJSON(brandJson);
+                const brand = BrandManager.getBrandFromJson(brandJson);
                 return brand;
             }
         }catch(error){

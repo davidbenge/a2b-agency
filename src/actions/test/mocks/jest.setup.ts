@@ -46,6 +46,8 @@ jest.doMock('@adobe/aio-lib-state', () => ({
   init: jest.fn().mockImplementation(async () => MockFactory.getStateStore())
 }));
 
+// Note: Brand.sendCloudEventToEndpoint mocking is handled by jest.spyOn in individual test files
+
 // Global test setup and teardown
 beforeEach(() => {
   // Clear all mocks before each test

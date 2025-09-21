@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ViewPropsBase } from '../../types/ViewPropsBase';
 import { Brand } from '../../../../../actions/classes/Brand';
+import { DemoBrandManager } from '../../utils/DemoBrandManager';
 import BrandForm from './BrandForm';
 import { 
     TableView, 
@@ -32,7 +33,7 @@ type ViewMode = 'list' | 'add' | 'edit' | 'view';
 
 // Mock data for testing (only used in demo mode)
 const mockBrands: Brand[] = [
-    new Brand({
+    DemoBrandManager.createBrand({
         brandId: '1',
         secret: 'mock-secret-1',
         name: 'Test Brand 1',
@@ -43,7 +44,7 @@ const mockBrands: Brand[] = [
         updatedAt: new Date('2024-01-01'),
         enabledAt: new Date('2024-01-01')
     }),
-    new Brand({
+    DemoBrandManager.createBrand({
         brandId: '2',
         secret: 'mock-secret-2',
         name: 'Test Brand 2',
@@ -96,7 +97,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                     console.debug('response body.data', response.body.data);
                     if (response.body.data) {
                         const items = response.body.data as any[];
-                        const mapped = items.map(item => new Brand(item).toJSON()).map(item => Brand.fromJSON(item));
+                        const mapped = items.map(item => new Brand(item).toJSON()).map(item => DemoBrandManager.getBrandFromJson(item));
                         setBrands(mapped);
                     }
                 } catch (error) {
@@ -221,7 +222,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             if (viewProps.aioEnableDemoMode) {
                 // Demo mode: local state management
                 if (viewMode === 'add') {
-                    const newBrand = new Brand({
+                    const newBrand = DemoBrandManager.createBrand({
                         ...brandData,
                         brandId: uuidv4(),
                         secret: 'mock-secret-' + Math.random().toString(36).substr(2, 9),
@@ -233,7 +234,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                     setBrands([...brands, newBrand]);
                     setSuccess('Brand created successfully');
                 } else if (viewMode === 'edit' && selectedBrand) {
-                    const updatedBrand = new Brand({
+                    const updatedBrand = DemoBrandManager.createBrand({
                         ...selectedBrand.toJSON(),
                         ...brandData,
                         brandId: selectedBrand.brandId,

@@ -58,7 +58,7 @@ describe('BrandManager', () => {
 
   describe('saveBrand', () => {
     it('should save brand to both state store and file store', async () => {
-      const testBrand = new Brand({
+      const testBrand = BrandManager.createBrand({
         brandId: 'test-brand-1',
         secret: 'test-secret-123',
         name: 'Test Brand One',
@@ -86,7 +86,7 @@ describe('BrandManager', () => {
 
   describe('getBrand', () => {
     it('should retrieve brand from state store when available', async () => {
-      const testBrand = new Brand({
+      const testBrand = BrandManager.createBrand({
         brandId: 'test-brand-2',
         secret: 'test-secret-456',
         name: 'Test Brand Two',
@@ -107,7 +107,7 @@ describe('BrandManager', () => {
     });
 
     it('should retrieve brand from file store when not in state store', async () => {
-      const testBrand = new Brand({
+      const testBrand = BrandManager.createBrand({
         brandId: 'test-brand-3',
         secret: 'test-secret-789',
         name: 'Test Brand Three',
@@ -135,7 +135,7 @@ describe('BrandManager', () => {
 
   describe('deleteBrand', () => {
     it('should delete brand from both state store and file store', async () => {
-      const testBrand = new Brand({
+      const testBrand = BrandManager.createBrand({
         brandId: 'test-brand-4',
         secret: 'test-secret-101',
         name: 'Test Brand Four',
@@ -169,7 +169,7 @@ describe('BrandManager', () => {
   describe('getAllBrands', () => {
     it('should return all brands from file store', async () => {
       const testBrands = [
-        new Brand({
+        BrandManager.createBrand({
           brandId: 'test-brand-5',
           secret: 'test-secret-202',
           name: 'Test Brand Five',
@@ -179,7 +179,7 @@ describe('BrandManager', () => {
           updatedAt: new Date(),
           enabledAt: new Date()
         }),
-        new Brand({
+        BrandManager.createBrand({
           brandId: 'test-brand-6',
           secret: 'test-secret-303',
           name: 'Test Brand Six',

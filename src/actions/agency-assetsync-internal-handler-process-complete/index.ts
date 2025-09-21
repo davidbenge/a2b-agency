@@ -95,6 +95,7 @@ export async function main(params: any): Promise<any> {
         const customers = metadata["a2b__customers"];
         const sourceProviderId = getAssetSyncProviderId();
         const presignedUrl = await fetchPresignedReadUrl(aemHostHostOnly, aemAssetPath, params, logger, ACTION_NAME);
+        const brandManager = new BrandManager(params.LOG_LEVEL);
 
         // Normalize customers to string[] using reusable utility
         let customersArray: string[] = [];
@@ -138,7 +139,6 @@ export async function main(params: any): Promise<any> {
             const assetSyncEventUpdate = new AssetSyncUpdateEvent(updateEventData);
             
             // Get the brand 
-            const brandManager = new BrandManager(params.LOG_LEVEL);
             const brand = await brandManager.getBrand(brandId);
             let brandSendResponse: IBrandEventPostResponse;
             if(brand && brand.enabled){
@@ -177,7 +177,6 @@ export async function main(params: any): Promise<any> {
             );
 
             //get the brand 
-            const brandManager = new BrandManager(params.LOG_LEVEL);
             const brand = await brandManager.getBrand(brandId);
             let brandSendResponse: IBrandEventPostResponse;
             if(brand && brand.enabled){

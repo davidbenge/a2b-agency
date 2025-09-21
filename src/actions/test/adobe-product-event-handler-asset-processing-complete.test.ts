@@ -120,13 +120,13 @@ jest.mock('../utils/aemCscUtils', () => ({
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
-// Mock the Brand class sendCloudEventToEndpoint method
-const mockSendCloudEventToEndpoint = jest.fn();
-jest.spyOn(Brand.prototype, 'sendCloudEventToEndpoint').mockImplementation(mockSendCloudEventToEndpoint);
-
 // Mock BrandManager.getBrand method
 const mockGetBrand = jest.fn();
 jest.spyOn(BrandManager.prototype, 'getBrand').mockImplementation(mockGetBrand);
+
+// Mock Brand.sendCloudEventToEndpoint method
+const mockSendCloudEventToEndpoint = jest.fn();
+jest.spyOn(Brand.prototype, 'sendCloudEventToEndpoint').mockImplementation(mockSendCloudEventToEndpoint);
 
 // Create a mock OpenWhisk client for testing
 const mockOpenWhisk = createMockOpenWhisk();
@@ -158,8 +158,8 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
       json: jest.fn().mockResolvedValue(mockPresignedUrlResponse)
     });
 
-    // Mock Brand methods
-    mockGetBrand.mockResolvedValue(new Brand(mockBrandData));
+    // Mock Brand methods - use BrandManager.getBrandFromJson to get mocked instance
+    mockGetBrand.mockResolvedValue(BrandManager.getBrandFromJson(mockBrandData));
     mockSendCloudEventToEndpoint.mockResolvedValue({
       eventType: "assetSyncNew",
       message: "Event processed successfully"
@@ -301,17 +301,21 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
 
       // Verify Brand.sendCloudEventToEndpoint was called for both brands
       expect(mockSendCloudEventToEndpoint).toHaveBeenCalledTimes(2);
-      expect(mockSendCloudEventToEndpoint).toHaveBeenNthCalledWith(1, expect.objectContaining({
-        data: expect.objectContaining({ brandId: 'BRAND_A' })
-      }));
-      expect(mockSendCloudEventToEndpoint).toHaveBeenNthCalledWith(2, expect.objectContaining({
-        data: expect.objectContaining({ brandId: 'BRAND_B' })
-      }));
+      expect(mockSendCloudEventToEndpoint).toHaveBeenNthCalledWith(1,
+        expect.objectContaining({
+          data: expect.objectContaining({ brandId: 'BRAND_A' })
+        })
+      );
+      expect(mockSendCloudEventToEndpoint).toHaveBeenNthCalledWith(2,
+        expect.objectContaining({
+          data: expect.objectContaining({ brandId: 'BRAND_B' })
+        })
+      );
     });
 
     it('should handle disabled brand gracefully', async () => {
-      // Mock a disabled brand
-      const disabledBrand = new Brand({
+      // Mock a disabled brand - use BrandManager.getBrandFromJson to get mocked instance
+      const disabledBrand = BrandManager.getBrandFromJson({
         ...mockBrandData,
         enabled: false
       });
@@ -380,7 +384,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
 
       // Verify that the methods were called despite the error
       expect(mockGetBrand).toHaveBeenCalledWith('BRAND_A');
-      expect(mockSendCloudEventToEndpoint).toHaveBeenCalled();
+      expect(mockSendCloudEventToEndpoint).toHaveBeenCalledTimes(1);
     });
   });
 
