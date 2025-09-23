@@ -29,7 +29,7 @@ export async function main(params: any): Promise<any> {
       return errorResponse(404, `Brand ${params.brandId} not found`, logger);
     }
 
-    const updatedBrand = new Brand({
+    const updatedBrand = BrandManager.createBrand({
       ...existingBrand.toJSON(),
       ...params,
       brandId: params.brandId, // Ensure brandId doesn't change

@@ -64,15 +64,42 @@ application:
               final: true
           adobe-product-event-handler:
             function: src/actions/adobe-product-event-handler/index.ts
-            web: 'yes'
+            web: 'no'
             runtime: nodejs:22
             inputs:
               LOG_LEVEL: debug
             annotations:
               require-adobe-auth: false
               final: true
-          agency-assetsync-internal-handler:
-            function: src/actions/agency-assetsync-internal-handler/index.ts
+          agency-assetsync-internal-handler-process-complete:
+            function: src/actions/agency-assetsync-internal-handler-process-complete/index.ts
+            web: 'no'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+              ADOBE_INTERNAL_URL_ENDPOINT: $ADOBE_INTERNAL_URL_ENDPOINT
+              ORG_ID: $ORG_ID
+              S2S_API_KEY: $SERVICE_API_KEY
+              S2S_CLIENT_ID: $SERVICE_API_KEY
+              S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
+              S2S_SCOPES: $S2S_SCOPES
+              AIO_RUNTIME_APIHOST: $AIO_runtime_apihost
+              AIO_RUNTIME_AUTH: $AIO_runtime_auth
+              AIO_RUNTIME_NAMESPACE: $AIO_runtime_namespace
+              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
+              AEM_AUTH_TYPE: $AEM_AUTH_TYPE
+              AEM_AUTH_CLIENT_ID: $AEM_AUTH_CLIENT_ID
+              AEM_AUTH_CLIENT_SECRET: $AEM_AUTH_CLIENT_SECRET
+              AEM_AUTH_TECH_ACCOUNT_ID: $AEM_AUTH_TECH_ACCOUNT_ID
+              AEM_AUTH_SCOPES: $AEM_AUTH_SCOPES
+              AEM_AUTH_PRIVATE_KEY: $AEM_AUTH_PRIVATE_KEY
+              AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID: $AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID
+              AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID: $AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID
+            annotations:
+              require-adobe-auth: false
+              final: true
+          agency-assetsync-internal-handler-metadata-updated:
+            function: src/actions/agency-assetsync-internal-handler-metadata-updated/index.ts
             web: 'no'
             runtime: nodejs:22
             inputs:
