@@ -1,7 +1,7 @@
 import { IoCustomEventManager } from "../IoCustomEventManager";
-import { WorkfrontTaskCreatedEvent } from "../io_events/WorkfrontTaskCreatedEvent";
-import { WorkfrontTaskUpdatedEvent } from "../io_events/WorkfrontTaskUpdatedEvent";
-import { WorkfrontTaskCompletedEvent } from "../io_events/WorkfrontTaskCompletedEvent";
+import { WorkfrontTaskCreatedEvent } from "../a2b_events/WorkfrontTaskCreatedEvent";
+import { WorkfrontTaskUpdatedEvent } from "../a2b_events/WorkfrontTaskUpdatedEvent";
+import { WorkfrontTaskCompletedEvent } from "../a2b_events/WorkfrontTaskCompletedEvent";
 import aioLogger from "@adobe/aio-lib-core-logging";
 
 export class WorkfrontEventHandler {

@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { IIoEvent, IS2SAuthenticationCredentials, IApplicationRuntimeInfo } from "../types";
+import { Ia2bEvent, IS2SAuthenticationCredentials, IApplicationRuntimeInfo } from "../types";
 import { BrandManager } from "./BrandManager";
 import { IoCustomEventManager } from "./IoCustomEventManager";
 import aioLogger from "@adobe/aio-lib-core-logging";
@@ -46,11 +46,11 @@ export class EventManager {
     }
 
     /****
-     * @param event - the IIoEvent to publish
+     * @param event - the Ia2bEvent to publish
      * 
      * @returns void
      */
-    async publishEvent(event: IIoEvent): Promise<void> {
+    async publishEvent(event: Ia2bEvent): Promise<void> {
         this.logger.debug('EventManager:publishEvent: event', event.toJSON());
 
         // Validate event with informative response

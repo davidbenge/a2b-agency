@@ -10,7 +10,7 @@ import { BRAND_STATE_PREFIX } from "../constants";
 import { BrandManager } from "../classes/BrandManager";
 import * as randomstring from 'randomstring';
 import { v4 as uuidv4 } from 'uuid';
-import { NewBrandRegistrationEvent } from "../classes/io_events/NewBrandRegistrationEvent";
+import { NewBrandRegistrationEvent } from "../classes/a2b_events/NewBrandRegistrationEvent";
 import { EventManager } from "../classes/EventManager";
 import { IApplicationRuntimeInfo, IS2SAuthenticationCredentials } from "../types";
 import { ApplicationRuntimeInfo } from "../classes/ApplicationRuntimeInfo";
