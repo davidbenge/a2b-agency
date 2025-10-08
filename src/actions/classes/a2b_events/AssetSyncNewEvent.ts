@@ -1,9 +1,9 @@
 import { AEM_ASSET_SYNC_EVENT_CODE } from '../../constants';
 import { IValidationResult } from '../../types';
-import { IoEvent } from '../IoEvent';
+import { a2bEvent } from '../A2bEvent';
 import { ApplicationRuntimeInfo } from '../ApplicationRuntimeInfo';
 
-export class AssetSyncNewEvent extends IoEvent {
+export class AssetSyncNewEvent extends a2bEvent {
     private _assetId!: string;
     private _assetPath!: string;
     private _metadata!: any;
@@ -116,4 +116,4 @@ export class AssetSyncNewEvent extends IoEvent {
           missing: valid ? undefined : missing
         };
     }
-} 
+}

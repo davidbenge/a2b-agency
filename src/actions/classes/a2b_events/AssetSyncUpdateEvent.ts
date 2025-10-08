@@ -1,16 +1,14 @@
-import { IoEvent } from '../IoEvent';
 import { AEM_ASSET_SYNC_EVENT_CODE } from '../../constants';
-import { IValidationResult } from '../../types';
+import { a2bEvent } from '../A2bEvent';
 
-export class AssetSyncDeleteEvent extends IoEvent {
+export class AssetSyncUpdateEvent extends a2bEvent {
     constructor(assetData: any) {
         super();
-        this.type = AEM_ASSET_SYNC_EVENT_CODE.DELETE;
+        this.type = AEM_ASSET_SYNC_EVENT_CODE.UPDATE;
         this.data = assetData;
     }
 
-    validate(): IValidationResult {
-        console.log(`AssetSyncNewEvent: validate: assetData`, JSON.stringify(this, null, 2));
+    validate() {
         const missing: string[] = [];
         if (this.data.asset_id === undefined) missing.push('asset_id');
         if (this.data.asset_path === undefined) missing.push('asset_path');
@@ -19,8 +17,8 @@ export class AssetSyncDeleteEvent extends IoEvent {
         const valid = missing.length === 0;
         return {
             valid,
-            message: valid ? undefined : `AssetSyncNewEvent validation failed: missing field(s): ${missing.join(', ')}`,
+            message: valid ? undefined : `AssetSyncUpdateEvent validation failed: missing field(s): ${missing.join(', ')}`,
             missing: valid ? undefined : missing
         };
     }
-} 
+}

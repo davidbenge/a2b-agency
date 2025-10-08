@@ -1,4 +1,4 @@
-import { IBrand, IIoEvent, IBrandEventPostResponse } from '../types';
+import { IBrand, Ia2bEvent, IBrandEventPostResponse } from '../types';
 import axios from 'axios';
 
 export class Brand implements IBrand {
@@ -79,17 +79,17 @@ export class Brand implements IBrand {
      * @throws Error if the response from the brand endpoint is not valid
      * @throws Error if the response from the brand endpoint is not a valid IBrandEventPostResponse
      */
-    async sendCloudEventToEndpoint(event: IIoEvent): Promise<IBrandEventPostResponse> {
+    async sendCloudEventToEndpoint(event: Ia2bEvent): Promise<IBrandEventPostResponse> {
         if (!this.enabled) {
-            throw new Error('Brand:sendIoEventToEndpoint: brand is disabled');
+            throw new Error('Brand:sendCloudEventToEndpoint: brand is disabled');
         }
         if (!this.endPointUrl) {
-            throw new Error('Brand:sendIoEventToEndpoint: endPointUrl is missing');
+            throw new Error('Brand:sendCloudEventToEndpoint: endPointUrl is missing');
         }
 
         const validation = event.validate();
         if (!validation.valid) {
-            const message = `Brand:sendIoEventToEndpoint: event is not valid ${validation.message ? ` - ${validation.message}` : ''}`;
+            const message = `Brand:sendCloudEventToEndpoint: event is not valid ${validation.message ? ` - ${validation.message}` : ''}`;
             throw new Error(message);
         }
 
@@ -154,8 +154,8 @@ export class Brand implements IBrand {
                 axiosMessage: axiosErr?.message,
                 axiosName: axiosErr?.name
             };
-            const wrapped = new Error(`Brand:sendIoEventToEndpoint failed: ${JSON.stringify(summary)}`);
-            wrapped.name = 'BrandSendIoEventError';
+            const wrapped = new Error(`Brand:sendCloudEventToEndpoint failed: ${JSON.stringify(summary)}`);
+            wrapped.name = 'BrandSendCloudEventError';
             throw wrapped;
         }
     }

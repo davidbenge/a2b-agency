@@ -64,7 +64,7 @@ export class ApplicationRuntimeInfo implements IApplicationRuntimeInfo {
   }
 
   /**
-   * Serialize to the exact shape we include on IoEvent.data.app_runtime_info.
+   * Serialize to the exact shape we include on a2bEvent.data.app_runtime_info.
    */
   serialize(): {
     consoleId: string;

@@ -1,6 +1,6 @@
 import { CloudEvent } from "cloudevents";
 
-export interface IIoEventHandler {
+export interface Ia2bEventHandler {
     logger: any;
     handleEvent(event: any): Promise<any>;
 }
@@ -18,7 +18,7 @@ export interface IBrand {
     /**
      * Send an IO event payload to this brand's target endpoint
      */
-    sendIoEventToEndpoint?: (event: IIoEvent) => Promise<any>;
+    sendA2bEventToEndpoint?: (event: Ia2bEvent) => Promise<any>;
 }
 
 export interface IApplicationRuntimeInfo {
@@ -35,7 +35,7 @@ export interface IValidationResult {
     missing?: string[];
 }
 
-export interface IIoEvent {
+export interface Ia2bEvent {
     source: string;
     type: string;
     datacontenttype: string;

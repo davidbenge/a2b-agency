@@ -11,8 +11,8 @@ import { checkMissingRequestInputs, errorResponse, mergeRouterParams } from '../
 import { createLazy } from '../utils/lazy';
 import { EventManager } from '../classes/EventManager';
 import { getAemAssetData, getAemAuth } from '../utils/aemCscUtils';
-import { AssetSyncUpdateEvent } from '../classes/io_events/AssetSyncUpdateEvent';
-import { AssetSyncNewEvent } from '../classes/io_events/AssetSyncNewEvent';
+import { AssetSyncUpdateEvent } from '../classes/a2b_events/AssetSyncUpdateEvent';
+import { AssetSyncNewEvent } from '../classes/a2b_events/AssetSyncNewEvent';
 import { BrandManager } from "../classes/BrandManager";
 import { normalizeCustomersToArray } from "../utils/normalizers";
 import { IApplicationRuntimeInfo, IBrandEventPostResponse } from "../types";
