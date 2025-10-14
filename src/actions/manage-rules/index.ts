@@ -8,6 +8,7 @@ import { errorResponse, checkMissingRequestInputs } from "../utils/common";
 import aioLogger from "@adobe/aio-lib-core-logging";
 import { RulesManager, RoutingRule } from "../classes/RulesManager";
 import { EventTypeRegistry, initializeEventRegistry } from "../classes/EventTypeRegistry";
+import { randomUUID } from "crypto";
 
 export async function main(params: any): Promise<any> {
     const logger = aioLogger("manage-rules", { level: params.LOG_LEVEL || "info" });
@@ -93,7 +94,7 @@ async function handleGetRules(params: any, rulesManager: RulesManager, logger: a
 }
 
 async function handleCreateRule(params: any, rulesManager: RulesManager, logger: any): Promise<any> {
-    const requiredFields = ['id', 'name', 'eventType', 'conditions', 'actions'];
+    const requiredFields = ['name', 'eventType', 'conditions', 'actions'];
     const missingFields = requiredFields.filter(field => !params[field]);
 
     if (missingFields.length > 0) {
@@ -101,7 +102,7 @@ async function handleCreateRule(params: any, rulesManager: RulesManager, logger:
     }
 
     const rule: RoutingRule = {
-        id: params.id,
+        id: params.id || randomUUID(),
         name: params.name,
         description: params.description || '',
         eventType: params.eventType,
@@ -109,6 +110,8 @@ async function handleCreateRule(params: any, rulesManager: RulesManager, logger:
         actions: params.actions,
         enabled: params.enabled !== false, // Default to true
         priority: params.priority || 10,
+        direction: params.direction || 'inbound',
+        targetBrands: params.targetBrands || ['*'],
         createdAt: new Date(),
         updatedAt: new Date()
     };
