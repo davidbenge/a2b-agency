@@ -14,7 +14,7 @@ module.exports = {
     '!src/actions/**/*.d.ts',
     '!src/actions/test/**',
   ],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js', '<rootDir>/src/actions/test/mocks/jest.setup.ts'],
   testPathIgnorePatterns: ['/node_modules/'],
   transformIgnorePatterns: [
     'node_modules/(?!(ts-jest)/)'

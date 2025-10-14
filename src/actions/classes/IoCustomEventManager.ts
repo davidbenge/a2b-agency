@@ -1,7 +1,7 @@
 import aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "./Brand";
 import { BRAND_FILE_STORE_DIR } from "../constants";
-import { IApplicationRuntimeInfo, IIoEvent, IS2SAuthenticationCredentials } from "../types";
+import { IApplicationRuntimeInfo, Ia2bEvent, IS2SAuthenticationCredentials } from "../types";
 import { v4 as uuidv4 } from 'uuid';
 import { getServer2ServerToken } from "../utils/adobeAuthUtils";
 
@@ -53,10 +53,10 @@ export class IoCustomEventManager {
     /*******
      * publishEvent - publish the event to the Adobe Event Hub
      * 
-     * @param event: IIoEvent
+     * @param event: Ia2bEvent
      * @returns Promise<void>
      *******/
-    async publishEvent(event: IIoEvent): Promise<void> {
+    async publishEvent(event: Ia2bEvent): Promise<void> {
         this.logger.debug('IoCustomEventManager:publishEvent starting');
 
         // add the application runtime info to the event data

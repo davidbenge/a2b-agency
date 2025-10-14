@@ -1,8 +1,8 @@
-import { IoEvent } from '../IoEvent';
+import { a2bEvent } from '../A2bEvent';
 import { IBrand } from '../../types/index';
 import { AGENCY_BRAND_REGISTRATION_EVENT_CODE } from '../../constants';
 
-export class NewBrandRegistrationEvent extends IoEvent {
+export class NewBrandRegistrationEvent extends a2bEvent {
     constructor(brand: IBrand, sourceProviderId: string) {
         super();
         this.type = AGENCY_BRAND_REGISTRATION_EVENT_CODE.RECEIVED;
@@ -14,4 +14,4 @@ export class NewBrandRegistrationEvent extends IoEvent {
         // set the event provider source id
         super.setSource(sourceProviderId);
     }
-} 
+}

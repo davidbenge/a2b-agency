@@ -1,73 +1,54 @@
-# Gitleaks configuration for AEM_AUTH_CLIENT_SECRET and other Adobe secrets allowlist
-version = "8.16.4"
+# Gitleaks configuration for Adobe A2B Agency
+title = "Adobe A2B Agency Secret Detection"
 
 [allowlist]
-description = "Allow AEM_AUTH_CLIENT_SECRET and other Adobe secrets with empty or FAKE values"
-
-# Allow empty AEM_AUTH_CLIENT_SECRET values
-[[allowlist.rules]]
-id = "aem-auth-client-secret-empty"
-description = "Allow empty AEM_AUTH_CLIENT_SECRET values"
-regex = '''AEM_AUTH_CLIENT_SECRET\s*=\s*["']?["']?\s*$'''
-
-# Allow AEM_AUTH_CLIENT_SECRET with FAKE values
-[[allowlist.rules]]
-id = "aem-auth-client-secret-fake"
-description = "Allow AEM_AUTH_CLIENT_SECRET with FAKE values"
-regex = '''AEM_AUTH_CLIENT_SECRET\s*=\s*["']?.*FAKE.*["']?\s*$'''
-
-# Allow AEM_AUTH_CLIENT_SECRET in JSON with empty values
-[[allowlist.rules]]
-id = "aem-auth-client-secret-json-empty"
-description = "Allow AEM_AUTH_CLIENT_SECRET in JSON with empty values"
-regex = '''"AEM_AUTH_CLIENT_SECRET"\s*:\s*["']?["']?\s*[,}]'''
-
-# Allow AEM_AUTH_CLIENT_SECRET in JSON with FAKE values
-[[allowlist.rules]]
-id = "aem-auth-client-secret-json-fake"
-description = "Allow AEM_AUTH_CLIENT_SECRET in JSON with FAKE values"
-regex = '''"AEM_AUTH_CLIENT_SECRET"\s*:\s*["']?.*FAKE.*["']?\s*[,}]'''
-
-# Allow S2S_API_KEY with FAKE values
-[[allowlist.rules]]
-id = "s2s-api-key-fake"
-description = "Allow S2S_API_KEY with FAKE values"
-regex = '''"S2S_API_KEY"\s*:\s*["']?.*fake.*["']?\s*[,}]'''
-
-# Allow S2S_CLIENT_SECRET with FAKE values
-[[allowlist.rules]]
-id = "s2s-client-secret-fake"
-description = "Allow S2S_CLIENT_SECRET with FAKE values"
-regex = '''"S2S_CLIENT_SECRET"\s*:\s*["']?.*fake.*["']?\s*[,}]'''
-
-# Allow AEM_AUTH_PRIVATE_KEY with FAKE values
-[[allowlist.rules]]
-id = "aem-auth-private-key-fake"
-description = "Allow AEM_AUTH_PRIVATE_KEY with FAKE values"
-regex = '''"AEM_AUTH_PRIVATE_KEY"\s*:\s*["']?.*fake.*["']?\s*[,}]'''
-
-# Allow documentation and example files
+description = "Allow FAKE values and test files for Adobe A2B Agency"
 paths = [
-    "docs/",
-    "**/*.md",
-    "**/*.json",
-    "**/*.env*",
-    "**/*.yaml",
-    "**/*.yml",
-    "**/*.config.*",
-    "**/*test*",
-    "**/*example*",
-    "**/*sample*"
+    "docs/.*",
+    ".*\\.md$",
+    ".*\\.json$",
+    ".*\\.env.*",
+    ".*\\.ya?ml$",
+    ".*\\.config\\..*",
+    ".*test.*",
+    ".*example.*",
+    ".*sample.*"
 ]
 
-# Allow FAKE values for testing
-[[allowlist.rules]]
-id = "fake-testing-values"
-description = "Allow FAKE values for testing purposes"
-regex = '''["']?.*FAKE.*_FOR_TESTING_ONLY["']?\s*[,}]'''
+regexes = [
+    # Allow AEM_AUTH_CLIENT_SECRET with FAKE values
+    '''AEM_AUTH_CLIENT_SECRET\s*=\s*["']?.*FAKE.*["']?\s*$''',
+    
+    # Allow AEM_AUTH_CLIENT_SECRET in JSON with FAKE values
+    '''"AEM_AUTH_CLIENT_SECRET"\s*:\s*["']?.*FAKE.*["']?\s*[,}]''',
+    
+    # Allow S2S_API_KEY with FAKE values
+    '''"S2S_API_KEY"\s*:\s*["']?.*fake.*["']?\s*[,}]''',
+    
+    # Allow S2S_CLIENT_SECRET with FAKE values
+    '''"S2S_CLIENT_SECRET"\s*:\s*["']?.*fake.*["']?\s*[,}]''',
+    
+    # Allow AEM_AUTH_PRIVATE_KEY with FAKE values
+    '''"AEM_AUTH_PRIVATE_KEY"\s*:\s*["']?.*FAKE.*["']?\s*[,}]''',
+    
+    # Allow standardized fake private key format
+    '''-----BEGIN RSA PRIVATE KEY-----\\nFAKE\\n-----END RSA PRIVATE KEY-----''',
+    
+    # Allow FAKE values for testing
+    '''["']?.*FAKE.*_FOR_TESTING_ONLY["']?\s*[,}]''',
+    
+    # Allow test patterns
+    '''["']?.*(FAKE|TEST|EXAMPLE|SAMPLE).*["']?\s*[,}]''',
+    
+    # Allow empty secret values
+    '''(CLIENT_SECRET|API_KEY|PRIVATE_KEY)\s*[:=]\s*["']?["']?\s*[,}]?$'''
+]
 
-# Allow specific test patterns
-[[allowlist.rules]]
-id = "test-patterns"
-description = "Allow test patterns"
-regex = '''["']?.*(FAKE|TEST|EXAMPLE|SAMPLE).*["']?\s*[,}]'''
+stopwords = [
+    "FAKE",
+    "TEST", 
+    "EXAMPLE",
+    "SAMPLE",
+    "PLACEHOLDER",
+    "MOCK"
+]

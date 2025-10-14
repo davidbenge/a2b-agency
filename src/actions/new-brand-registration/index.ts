@@ -10,7 +10,7 @@ import { BRAND_STATE_PREFIX } from "../constants";
 import { BrandManager } from "../classes/BrandManager";
 import * as randomstring from 'randomstring';
 import { v4 as uuidv4 } from 'uuid';
-import { NewBrandRegistrationEvent } from "../classes/io_events/NewBrandRegistrationEvent";
+import { NewBrandRegistrationEvent } from "../classes/a2b_events/NewBrandRegistrationEvent";
 import { EventManager } from "../classes/EventManager";
 import { IApplicationRuntimeInfo, IS2SAuthenticationCredentials } from "../types";
 import { ApplicationRuntimeInfo } from "../classes/ApplicationRuntimeInfo";
@@ -37,7 +37,7 @@ export async function main(params: any): Promise<any> {
 
     let savedBrand: Brand;
     try{
-      const brand = Brand.fromJSON(params);
+      const brand = BrandManager.getBrandFromJson(params);
       logger.debug('Brand',JSON.stringify(brand, null, 2));
       logger.debug('Brand stringify',brand.toJSON());
 
