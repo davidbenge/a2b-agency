@@ -41,7 +41,13 @@ regexes = [
     '''["']?.*(FAKE|TEST|EXAMPLE|SAMPLE).*["']?\s*[,}]''',
     
     # Allow empty secret values
-    '''(CLIENT_SECRET|API_KEY|PRIVATE_KEY)\s*[:=]\s*["']?["']?\s*[,}]?$'''
+    '''(CLIENT_SECRET|API_KEY|PRIVATE_KEY)\s*[:=]\s*["']?["']?\s*[,}]?$''',
+    
+    # Allow "secret" as a field name in JSON documentation
+    '''"(optional|required)Fields"\s*:\s*\[[^\]]*"secret"[^\]]*\]''',
+    
+    # Allow field name "secret" in JSON arrays
+    '''["']secret["']\s*[,\]]'''
 ]
 
 stopwords = [
