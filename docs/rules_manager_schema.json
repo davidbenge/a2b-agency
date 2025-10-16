@@ -1,0 +1,184 @@
+{
+  "_comment": "Rules Manager Schema for A2B Agency Application",
+  "_purpose": "This schema defines the supported rule types for the Rules Manager component in the Agency-to-Brand (A2B) integration. The Rules Manager allows users to configure business logic rules that respond to events from AEM and Workfront systems.",
+  "_architecture": "The Rules Manager is built on top of the existing event handling system with EventTypeRegistry and RulesManager classes. It processes events from adobe-product-event-handler and agency-assetsync-internal-handler actions.",
+  "_target_audience": "Developers working on the Rules Manager UI, backend rule processing, and event handling system",
+  "_last_updated": "2024-01-XX",
+  "_version": "1.0.0",
+  
+  "rules_by_type": {
+    "asset_event_triggers": {
+      "_comment": "Core rule type for asset lifecycle management - handles the most common use cases",
+      "_implementation_notes": "These rules are processed by the agency-assetsync-internal-handler action. The handler already implements basic asset sync logic based on a2b__sync_on_change metadata.",
+      "_ui_considerations": "This should be the primary rule type shown in the Rules Manager UI as it's the most commonly used and easiest to understand.",
+      "definition": "Rules that respond to lifecycle events of assets (e.g., creation, approval, deletion) in either AEM or Workfront. These rules initiate synchronization or notifications based on asset status changes.",
+      "complexity": "low",
+      "supported_events": [
+        "aem.assets.asset.created",
+        "aem.assets.asset.updated", 
+        "aem.assets.asset.deleted",
+        "aem.assets.asset.metadata_updated",
+        "workfront.task.created",
+        "workfront.task.updated",
+        "workfront.task.completed"
+      ],
+      "_event_source_mapping": {
+        "aem.assets.asset.*": "Processed by adobe-product-event-handler -> agency-assetsync-internal-handler",
+        "workfront.task.*": "Processed by workfront-event-handler (future implementation)"
+      },
+      "examples": [
+        "IF asset.created in AEM THEN create linked document in Workfront",
+        "IF asset.updated in AEM THEN sync changes to brand systems",
+        "IF asset.deleted in AEM THEN cleanup brand references",
+        "IF asset.metadata_updated in AEM THEN trigger brand sync",
+        "IF workfront.task.completed THEN mark AEM asset as approved"
+      ]
+    },
+    "metadata_sync": {
+      "_comment": "Advanced rule type for metadata transformation and synchronization between systems",
+      "_implementation_notes": "Requires metadata transformation logic in the RulesManager class. The agency-assetsync-internal-handler already processes a2b__sync_on_change and a2d__customers metadata fields.",
+      "_ui_considerations": "This rule type should include a metadata field selector and transformation mapping interface in the UI.",
+      "definition": "Rules that manage the transfer and transformation of metadata between AEM and Workfront. They ensure that descriptive data (e.g., tags, campaign info, priority) remains consistent across platforms.",
+      "complexity": "medium",
+      "supported_events": [
+        "aem.assets.asset.metadata_updated",
+        "aem.assets.asset.updated",
+        "workfront.task.created",
+        "workfront.task.updated",
+        "workfront.task.completed"
+      ],
+      "supported_metadata_fields": [
+        "a2b__sync_on_change",
+        "a2d__customers",
+        "a2b__last_sync"
+      ],
+      "_metadata_field_descriptions": {
+        "a2b__sync_on_change": "Boolean flag that triggers asset sync when set to true",
+        "a2d__customers": "Comma-separated list of brand IDs that should receive the asset",
+        "a2b__last_sync": "Timestamp of the last successful sync operation"
+      },
+      "examples": [
+        "IF workfront.task.updated THEN push metadata to AEM",
+        "IF AEM asset.metadata_updated includes 'a2b__sync_on_change=true' THEN trigger brand sync",
+        "IF workfront.task.created THEN update AEM asset metadata",
+        "IF AEM asset.updated includes 'a2d__customers' THEN apply brand routing rules",
+        "IF workfront.task.completed THEN flag AEM asset for publishing"
+      ]
+    },
+    "approval_workflows": {
+      "_comment": "Workflow coordination rules that manage the approval process between AEM and Workfront",
+      "_implementation_notes": "Requires task-to-asset relationship mapping and status synchronization logic. The workfront-event-handler action will need to be implemented to handle Workfront task events.",
+      "_ui_considerations": "This rule type should include workflow status mapping and notification configuration options in the UI.",
+      "definition": "Rules that coordinate review and approval processes between AEM and Workfront. They trigger tasks, update statuses, and manage feedback loops.",
+      "complexity": "medium",
+      "supported_events": [
+        "aem.assets.asset.metadata_updated",
+        "aem.assets.asset.updated",
+        "workfront.task.created",
+        "workfront.task.updated",
+        "workfront.task.completed"
+      ],
+      "_workflow_status_mapping": {
+        "aem_to_workfront": "Asset status changes trigger Workfront task updates",
+        "workfront_to_aem": "Task completion updates AEM asset metadata"
+      },
+      "examples": [
+        "IF asset.metadata_updated in AEM THEN trigger Workfront task creation",
+        "IF workfront.task.completed THEN mark AEM asset as approved",
+        "IF workfront.task.updated THEN sync status to AEM metadata",
+        "IF workfront.task.created THEN notify AEM contributor",
+        "IF AEM asset.updated THEN update related Workfront task"
+      ]
+    },
+    "asset_folder_management": {
+      "_comment": "Simplified folder management using asset events instead of folder-level events",
+      "_implementation_notes": "This approach uses asset path analysis to determine folder relationships. The agency-assetsync-internal-handler can extract folder information from asset paths and apply folder-based rules.",
+      "_ui_considerations": "This rule type should include folder path mapping and asset organization options in the UI.",
+      "definition": "Rules that manage asset-to-folder relationships between AEM and Workfront. They handle asset placement and folder-based organization without requiring folder-level events.",
+      "complexity": "medium",
+      "supported_events": [
+        "aem.assets.asset.created",
+        "aem.assets.asset.updated",
+        "aem.assets.asset.deleted"
+      ],
+      "_folder_mapping_approach": {
+        "aem_path_analysis": "Extract folder structure from AEM asset paths (e.g., /content/dam/campaigns/summer2024/)",
+        "workfront_folder_creation": "Create corresponding Workfront folders based on AEM folder structure",
+        "metadata_based_organization": "Use asset metadata to determine target folders"
+      },
+      "examples": [
+        "IF asset.created in AEM folder '/content/dam/campaigns' THEN create Workfront document in 'Campaign Assets' folder",
+        "IF asset.updated in AEM THEN maintain Workfront folder structure",
+        "IF asset.deleted in AEM THEN remove from corresponding Workfront folder",
+        "IF asset.metadata_updated includes 'campaign=summer2024' THEN move to Workfront 'Summer Campaign' folder",
+        "IF workfront.task.completed THEN organize AEM asset in approved folder structure"
+      ]
+    }
+  },
+  "system_configuration": {
+    "_comment": "Infrastructure-level concerns that should be handled by system configuration, not user-configurable rules",
+    "_rationale": "These rule types are technical implementation details that should be configured by system administrators, not end users. They don't represent business logic that users need to configure.",
+    "note": "The following rule types have been moved to system configuration as they are infrastructure-level concerns, not business rules:",
+    "moved_to_system_config": [
+      "identity_and_auth",
+      "scalability_controls", 
+      "custom_connector_logic",
+      "deployment_and_testing"
+    ],
+    "_implementation_guidance": {
+      "identity_and_auth": "Handle in app.config.yaml and action-level authentication",
+      "scalability_controls": "Implement in RulesManager class with configurable thresholds",
+      "custom_connector_logic": "Handle in individual action implementations",
+      "deployment_and_testing": "Handle in CI/CD pipeline configuration"
+    }
+  },
+  "future_considerations": {
+    "_comment": "Rule types that are not currently supported but may be considered for future implementation",
+    "_rationale": "These rule types require additional event types and APIs that are not currently available in the A2B application. They are documented here for future planning and development.",
+    "note": "The following rule types are not currently supported but may be considered for future implementation:",
+    "deferred_rule_types": [
+      {
+        "type": "comment_sync",
+        "reason": "No comment events or APIs currently available",
+        "future_requirements": [
+          "aem.comment.* events",
+          "workfront.comment.* events",
+          "Comment API integration"
+        ],
+        "_implementation_notes": "Would require extending the EventTypeRegistry with comment events and implementing comment synchronization logic in the RulesManager."
+      },
+      {
+        "type": "versioning_and_rollback", 
+        "reason": "No versioning events or rollback functionality currently available",
+        "future_requirements": [
+          "aem.asset.version.* events",
+          "workfront.asset.version.* events",
+          "Version management APIs",
+          "Rollback functionality"
+        ],
+        "_implementation_notes": "Would require significant changes to the asset handling system to support version management and rollback operations."
+      }
+    ]
+  },
+  "development_guidelines": {
+    "_comment": "Guidelines for developers implementing the Rules Manager",
+    "_file_structure": {
+      "backend": "src/actions/classes/RulesManager.ts - Core rule processing logic",
+      "frontend": "src/dx-excshell-1/web-src/src/components/layout/RulesConfigurationView.tsx - UI component",
+      "events": "src/actions/classes/EventTypeRegistry.ts - Event type definitions",
+      "api": "src/actions/manage-rules/index.ts - REST API endpoints"
+    },
+    "_implementation_phases": {
+      "phase_1": "Implement asset_event_triggers rules (lowest complexity)",
+      "phase_2": "Add metadata_sync rules (medium complexity)",
+      "phase_3": "Implement approval_workflows rules (requires Workfront integration)",
+      "phase_4": "Add asset_folder_management rules (medium complexity)"
+    },
+    "_testing_approach": {
+      "unit_tests": "Test individual rule evaluation logic",
+      "integration_tests": "Test rule processing with actual events",
+      "ui_tests": "Test Rules Configuration UI in demo mode",
+      "end_to_end_tests": "Test complete rule workflows from event to action"
+    }
+  }
+}

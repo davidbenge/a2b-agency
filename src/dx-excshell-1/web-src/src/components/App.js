@@ -2,17 +2,27 @@
 * <license header>
 */
 
+
+
+
+
+
 import React, { useEffect } from 'react'
 import { Provider, defaultTheme, Grid, View } from '@adobe/react-spectrum'
 import ErrorBoundary from 'react-error-boundary'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
-import SpectrumHeader from './common/SpectrumHeader'
-import SideBar from './common/SideBar'
+import TopNavigation from './common/TopNavigation'
 import { Home } from './Home'
 import { About } from './About'
 import BrandManagerView from './layout/BrandManagerView'
-import RulesManagerView from './RulesManagerView'
+import RulesConfigurationView from './layout/RulesConfigurationView'
+import WorkfrontRequestForm from './layout/WorkfrontRequestForm'
 import { apiService } from '../services/api'
+
+
+
+
+
 
 function App(props) {
   console.log('runtime object:', props.runtime)
@@ -54,13 +64,14 @@ function App(props) {
             gap='size-100'
           >
             <View gridArea='header'>
-              <SpectrumHeader viewProps={safeViewProps} />
+              <TopNavigation viewProps={safeViewProps} />
             </View>
             <View gridArea='content' padding='size-200'>
               <Routes>
                 <Route path='/' element={<Home viewProps={safeViewProps} />} />
                 <Route path='/brand_manager' element={<BrandManagerView viewProps={safeViewProps} />} />
-                <Route path='/rules_manager' element={<RulesManagerView viewProps={safeViewProps} />} />
+                <Route path='/rules_manager' element={<RulesConfigurationView viewProps={safeViewProps} />} />
+                <Route path='/workfront_requests' element={<WorkfrontRequestForm viewProps={safeViewProps} />} />
                 <Route path='/about' element={<About viewProps={safeViewProps} />} />
               </Routes>
             </View>
