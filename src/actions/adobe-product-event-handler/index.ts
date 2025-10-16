@@ -8,8 +8,19 @@ import { errorResponse, checkMissingRequestInputs } from "../utils/common";
 import aioLogger from "@adobe/aio-lib-core-logging";
 const openwhisk = require("openwhisk");
 
+enum EventType {
+  AEM_ASSET_CREATED = "aem.assets.asset.created",
+  AEM_ASSET_UPDATED = "aem.assets.asset.updated",
+  AEM_ASSET_DELETED = "aem.assets.asset.deleted",
+  AEM_ASSET_METADATA_UPDATED = "aem.assets.asset.metadata_updated"
+}
+Object.values(EventType).forEach((eventType)  => {
+
 export async function main(params: any): Promise<any> {
+  
   const logger = aioLogger("adobe-product-event-handler", { level: params.LOG_LEVEL || "info" });
+
+
 
   try {
     const requiredParams: string[] = [];
@@ -67,6 +78,8 @@ export async function main(params: any): Promise<any> {
           }
         }
     }
+
+
 
     return {
       statusCode: 200,

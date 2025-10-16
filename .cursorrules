@@ -1,0 +1,184 @@
+# Adobe App Builder Demo Mode Rules
+
+## Demo Mode Implementation Guidelines
+
+### 1. Demo Mode Detection
+- Always check for demo mode using: `viewProps.aioEnableDemoMode` or `process.env.AIO_ENABLE_DEMO_MODE === 'true'`
+- Provide fallback UI when demo mode is disabled
+- Use consistent demo mode messaging across all components
+
+### 2. Mock Data Structure
+- Create comprehensive mock data arrays for demo mode
+- Use realistic, varied examples that showcase different scenarios
+- Include proper TypeScript interfaces for all mock data
+- Name mock data arrays with `mock` prefix (e.g., `mockBrands`, `mockRules`, `mockEventTypes`)
+
+### 3. Component Structure Pattern
+```typescript
+// Demo mode check at component start
+const isDemoMode = viewProps.aioEnableDemoMode;
+
+// Mock data arrays
+const mockData: DataType[] = [
+  // Realistic examples with varied data
+];
+
+// State initialization with demo mode
+const [data, setData] = useState<DataType[]>(isDemoMode ? mockData : []);
+
+// Demo mode fallback UI
+if (!isDemoMode) {
+  return (
+    <View padding="size-400">
+      <Heading level={1}>Component Name</Heading>
+      <Text>This component is only available in demo mode.</Text>
+    </View>
+  );
+}
+```
+
+### 4. Form Components in Demo Mode
+- Always include category/type filtering for better UX
+- Provide helpful text showing available options count
+- Use consistent form field ordering: Name → Description → Category → Type → Other fields
+- Include smart form reset logic that clears dependent fields
+
+### 5. Table/List Components
+- Show both display names and technical identifiers
+- Use color-coded status indicators
+- Include comprehensive filtering (category, status, search)
+- Provide clear action buttons (Edit, Delete, etc.)
+
+### 6. Event Type Management
+- Use `displayName` field for user-friendly names
+- Include technical `type` field for system use
+- Organize by categories (aem, workfront, brand, custom)
+- Provide category filtering in forms
+
+### 7. Brand Selection Patterns
+- Use Switch components for multi-select brand targeting
+- Show "All Brands" when no specific brands selected
+- Include helpful text about global vs. targeted rules
+
+### 8. React Spectrum Component Usage
+- Use only available components: View, Heading, Text, Button, ButtonGroup, Flex, TableView, TableHeader, TableBody, Column, Row, Cell, TextField, ComboBox, Switch, NumberField, TextArea, ActionGroup, Item, Divider, StatusLight, SearchField
+- Avoid unavailable components: Card, Modal, Select, Form
+- Use inline forms instead of modals for better compatibility
+
+### 9. Status Light Color Coding
+- `positive`: Success states, enabled items, "both" direction
+- `notice`: Warning states, inbound direction, workfront category
+- `info`: Information states, outbound direction, brand category
+- `negative`: Error states, disabled items
+- `neutral`: Default states, custom category
+
+### 10. Demo Mode Environment Setup
+- Always include `AIO_ENABLE_DEMO_MODE=true` in .env file
+- Handle null byte issues in .env files by recreating from _dot.env template
+- Use UTF-8 encoding for .env files
+
+### 11. Navigation Integration
+- Add new demo components to App.js routing
+- Include navigation links in SideBar.js
+- Use consistent naming: kebab-case for routes, Title Case for display
+
+### 12. Error Handling
+- Provide graceful fallbacks when demo mode is disabled
+- Include helpful error messages for missing data
+- Use consistent alert/confirmation dialogs
+
+### 13. Testing Guidelines
+- Always test both demo mode enabled and disabled states
+- Verify mock data displays correctly
+- Test all CRUD operations with mock data
+- Ensure filtering and search work properly
+
+### 14. Documentation
+- Include comprehensive comments explaining demo mode logic
+- Document mock data structure and examples
+- Provide clear instructions for enabling/disabling demo mode
+
+## Example Implementation Template
+
+```typescript
+import React, { useState } from 'react';
+import { View, Heading, Text, Button, /* other imports */ } from '@adobe/react-spectrum';
+import { ViewPropsBase } from '../../types/ViewPropsBase';
+
+interface DataType {
+  id: string;
+  name: string;
+  // other properties
+}
+
+// Mock data for demo mode
+const mockData: DataType[] = [
+  {
+    id: 'item-1',
+    name: 'Example Item 1',
+    // other properties
+  },
+  // more examples
+];
+
+const ComponentName: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps }) => {
+  const isDemoMode = viewProps.aioEnableDemoMode;
+  const [data, setData] = useState<DataType[]>(isDemoMode ? mockData : []);
+  
+  // Demo mode fallback
+  if (!isDemoMode) {
+    return (
+      <View padding="size-400">
+        <Heading level={1}>Component Name</Heading>
+        <Text>This component is only available in demo mode.</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View padding="size-400">
+      <Heading level={1}>Component Name</Heading>
+      {/* Component implementation */}
+    </View>
+  );
+};
+
+export default ComponentName;
+```
+
+## Reusable Patterns
+
+### Category Filtering
+```typescript
+const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+const getFilteredData = () => {
+  if (selectedCategory === 'all') return data;
+  return data.filter(item => item.category === selectedCategory);
+};
+```
+
+### Form Reset
+```typescript
+const resetForm = () => {
+  setFormData({
+    // default values
+  });
+  setSelectedCategory('all');
+};
+```
+
+### Status Light Helper
+```typescript
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'enabled': return 'positive';
+    case 'disabled': return 'negative';
+    case 'pending': return 'notice';
+    default: return 'neutral';
+  }
+};
+```
+
+Use these patterns consistently across all demo mode components for a cohesive user experience.
+

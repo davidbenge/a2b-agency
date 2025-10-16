@@ -5,6 +5,10 @@
  * Uses factory pattern to create event handlers and provides metadata for rules management.
  */
 
+
+
+import { main as agencyAssetsyncInternalHandler } from '../agency-assetsync-internal-handler';
+
 export interface EventTypeMetadata {
     type: string;
     category: 'aem' | 'workfront' | 'brand' | 'custom';
@@ -108,7 +112,7 @@ export function initializeEventRegistry(): void {
             metadata: { 'a2b__sync_on_change': 'true' }
         }
     }, {
-        createHandler: () => import('../agency-assetsync-internal-handler'),
+        createHandler: () => agencyAssetsyncInternalHandler,
         getMetadata: () => EventTypeRegistry.getEventTypeMetadata('aem.assets.asset.created')!
     });
 
@@ -127,7 +131,7 @@ export function initializeEventRegistry(): void {
             metadata: { 'a2b__sync_on_change': 'true' }
         }
     }, {
-        createHandler: () => import('../agency-assetsync-internal-handler'),
+        createHandler: () => agencyAssetsyncInternalHandler,
         getMetadata: () => EventTypeRegistry.getEventTypeMetadata('aem.assets.asset.updated')!
     });
 
@@ -144,7 +148,7 @@ export function initializeEventRegistry(): void {
             assetPath: '/content/dam/brand/logo.png'
         }
     }, {
-        createHandler: () => import('../agency-assetsync-internal-handler'),
+        createHandler: () => agencyAssetsyncInternalHandler,
         getMetadata: () => EventTypeRegistry.getEventTypeMetadata('aem.assets.asset.deleted')!
     });
 

@@ -32,6 +32,13 @@ import {
     SearchField
 } from '@adobe/react-spectrum';
 import { ViewPropsBase } from '../../types/ViewPropsBase';
+import Add from '@spectrum-icons/workflow/Add';
+import Edit from '@spectrum-icons/workflow/Edit';
+import Delete from '@spectrum-icons/workflow/Delete';
+import ViewDetail from '@spectrum-icons/workflow/ViewDetail';
+import Settings from '@spectrum-icons/workflow/Settings';
+import Play from '@spectrum-icons/workflow/Play';
+import Pause from '@spectrum-icons/workflow/Pause';
 
 interface Rule {
     id: string;
@@ -327,13 +334,21 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
     const [rules, setRules] = useState<Rule[]>(viewProps.aioEnableDemoMode ? mockRules : []);
     const [eventTypes] = useState<EventType[]>(viewProps.aioEnableDemoMode ? mockEventTypes : []);
     const [brands] = useState<Brand[]>(viewProps.aioEnableDemoMode ? mockBrands : []);
-    const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingRule, setEditingRule] = useState<Rule | null>(null);
+    const [showCreateForm, setShowCreateForm] = useState(false);
+    const [showConditionModal, setShowConditionModal] = useState(false);
+    const [editingCondition, setEditingCondition] = useState<RuleCondition | null>(null);
+    const [conditionFormData, setConditionFormData] = useState<Partial<RuleCondition>>({
+        field: '',
+        operator: 'equals',
+        value: '',
+        logicalOperator: 'AND'
+    });
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [filterDirection, setFilterDirection] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Form state for creating/editing rules
+    // Form state for creating rules
     const [formData, setFormData] = useState<Partial<Rule>>({
         name: '',
         description: '',
@@ -345,9 +360,6 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
         enabled: true,
         priority: 10
     });
-    
-    // Category filter for event types in form
-    const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
     // Safe access to viewProps
     const safeViewProps = viewProps || {} as any;
@@ -362,6 +374,14 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
         const matchesDirection = filterDirection === 'all' || rule.direction === filterDirection;
         return matchesSearch && matchesCategory && matchesDirection;
     });
+
+
+
+    const handleDeleteRule = (ruleId: string) => {
+        if (confirm('Are you sure you want to delete this rule?')) {
+            setRules(prev => prev.filter(rule => rule.id !== ruleId));
+        }
+    };
 
     const handleCreateRule = () => {
         if (!formData.name || !formData.eventType) {
@@ -397,57 +417,89 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
             enabled: true,
             priority: 10
         });
-        setSelectedCategory('all');
     };
 
-    const handleEditRule = () => {
-        if (!editingRule || !formData.name || !formData.eventType) {
+    const resetForm = () => {
+        setFormData({
+            name: '',
+            description: '',
+            eventType: '',
+            direction: 'both',
+            targetBrands: [],
+            conditions: [],
+            actions: [],
+            enabled: true,
+            priority: 10
+        });
+        setShowCreateForm(false);
+    };
+
+    const openConditionModal = (condition?: RuleCondition) => {
+        console.log('Opening condition modal:', condition);
+        console.log('Current showConditionModal state:', showConditionModal);
+        if (condition && condition.field) {
+            setEditingCondition(condition);
+            setConditionFormData(condition);
+        } else {
+            setEditingCondition(null);
+            setConditionFormData({
+                field: '',
+                operator: 'equals',
+                value: '',
+                logicalOperator: 'AND'
+            });
+        }
+        console.log('Setting showConditionModal to true');
+        setShowConditionModal(true);
+        console.log('Modal should be visible now');
+    };
+
+    const saveCondition = () => {
+        if (!conditionFormData.field || !conditionFormData.value) {
             alert('Please fill in required fields');
             return;
         }
 
-        const updatedRule: Rule = {
-            ...editingRule,
-            name: formData.name!,
-            description: formData.description || '',
-            eventType: formData.eventType!,
-            direction: formData.direction || 'both',
-            targetBrands: formData.targetBrands || [],
-            conditions: formData.conditions || [],
-            actions: formData.actions || [],
-            enabled: formData.enabled || true,
-            priority: formData.priority || 10,
-            updatedAt: new Date()
+        const newCondition: RuleCondition = {
+            field: conditionFormData.field!,
+            operator: conditionFormData.operator || 'equals',
+            value: conditionFormData.value!,
+            logicalOperator: conditionFormData.logicalOperator || 'AND'
         };
 
-        setRules(prev => prev.map(rule => rule.id === editingRule.id ? updatedRule : rule));
-        setEditingRule(null);
-    };
-
-    const handleDeleteRule = (ruleId: string) => {
-        if (confirm('Are you sure you want to delete this rule?')) {
-            setRules(prev => prev.filter(rule => rule.id !== ruleId));
+        if (editingCondition) {
+            // Update existing condition
+            setFormData(prev => ({
+                ...prev,
+                conditions: prev.conditions?.map(cond => 
+                    cond === editingCondition ? newCondition : cond
+                ) || []
+            }));
+        } else {
+            // Add new condition
+            setFormData(prev => ({
+                ...prev,
+                conditions: [...(prev.conditions || []), newCondition]
+            }));
         }
+
+        setShowConditionModal(false);
+        setEditingCondition(null);
+        setConditionFormData({
+            field: '',
+            operator: 'equals',
+            value: '',
+            logicalOperator: 'AND'
+        });
     };
 
-    const openEditForm = (rule: Rule) => {
-        setEditingRule(rule);
-        setFormData({
-            name: rule.name,
-            description: rule.description,
-            eventType: rule.eventType,
-            direction: rule.direction,
-            targetBrands: rule.targetBrands,
-            conditions: rule.conditions,
-            actions: rule.actions,
-            enabled: rule.enabled,
-            priority: rule.priority
-        });
-        
-        // Set category filter based on the rule's event type
-        const eventTypeObj = eventTypes.find(et => et.type === rule.eventType);
-        setSelectedCategory(eventTypeObj?.category || 'all');
+    const deleteCondition = (condition: RuleCondition) => {
+        setFormData(prev => ({
+            ...prev,
+            conditions: prev.conditions?.filter(cond => cond !== condition) || []
+        }));
     };
+
 
     const getCategoryColor = (category: string) => {
         switch (category) {
@@ -463,26 +515,6 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
         return eventTypeObj?.displayName || eventType;
     };
 
-    // Filter event types by selected category
-    const getFilteredEventTypes = () => {
-        if (selectedCategory === 'all') {
-            return eventTypes;
-        }
-        return eventTypes.filter(et => et.category === selectedCategory);
-    };
-
-    // Handle category change - clear event type if it's not in the new category
-    const handleCategoryChange = (category: string) => {
-        setSelectedCategory(category);
-        
-        // If current event type is not in the new category, clear it
-        if (formData.eventType) {
-            const currentEventType = eventTypes.find(et => et.type === formData.eventType);
-            if (currentEventType && currentEventType.category !== category && category !== 'all') {
-                setFormData(prev => ({ ...prev, eventType: '' }));
-            }
-        }
-    };
 
     if (!isDemoMode) {
         return (
@@ -495,19 +527,43 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
 
     return (
         <View padding="size-400">
+            <Flex justifyContent="space-between" alignItems="center" marginBottom="size-300">
+                <Flex direction="column">
             <Heading level={1}>Rules Configuration</Heading>
             <Text>Configure event routing rules for your application</Text>
+                </Flex>
+                <Flex gap="size-200">
+                    <Button variant="primary" onPress={() => setShowCreateForm(true)}>
+                        <Add />
+                        <Text>Create Rule</Text>
+                    </Button>
+                    <Button variant="secondary" onPress={() => {/* Browse templates */}}>
+                        <Text>From Template</Text>
+                    </Button>
+                    <Button variant="secondary" onPress={() => {
+                        console.log('Test Modal button clicked');
+                        console.log('Current state before:', showConditionModal);
+                        setShowConditionModal(false);
+                        setTimeout(() => setShowConditionModal(true), 100);
+                        console.log('State should be true now');
+                    }}>
+                        <Text>Test Modal</Text>
+                    </Button>
+                </Flex>
+            </Flex>
 
             <Divider marginY="size-300" />
+
+            {/* Debug Info */}
+            {showConditionModal && (
+                <View backgroundColor="red-400" padding="size-200" marginBottom="size-200">
+                    <Text>MODAL SHOULD BE VISIBLE - showConditionModal: {showConditionModal.toString()}</Text>
+                </View>
+            )}
 
             {/* Controls */}
             <Flex direction="column" gap="size-200" marginBottom="size-300">
                 <Flex direction="row" gap="size-200" alignItems="center" wrap>
-                    <ButtonGroup>
-                        <Button variant="primary" onPress={() => setShowCreateForm(true)}>
-                            Create Rule
-                        </Button>
-                    </ButtonGroup>
                     
                     <Flex direction="row" gap="size-200" alignItems="center">
                         <SearchField
@@ -545,17 +601,13 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
                 </Flex>
             </Flex>
 
-            {/* Create/Edit Form */}
-            {(showCreateForm || editingRule) && (
-                <View 
-                    backgroundColor="gray-100" 
-                    padding="size-300" 
-                    borderRadius="medium" 
-                    marginBottom="size-300"
-                >
-                    <Heading level={3}>
-                        {editingRule ? 'Edit Rule' : 'Create New Rule'}
-                    </Heading>
+            {/* Create Rule Form */}
+            {showCreateForm && (
+                <View backgroundColor="gray-50" padding="size-300" borderRadius="medium" marginBottom="size-300">
+                    <Heading level={3}>Create New Rule</Heading>
+                    <Text marginBottom="size-200">
+                        Fill in the details below to create a new event routing rule
+                    </Text>
                     
                     <Flex direction="column" gap="size-200" marginTop="size-200">
                         <TextField
@@ -564,6 +616,7 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
                             onChange={(value) => setFormData(prev => ({ ...prev, name: value }))}
                             isRequired
                             width="size-4000"
+                            placeholder="Enter a descriptive name for this rule"
                         />
                         
                         <TextArea
@@ -571,40 +624,23 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
                             value={formData.description || ''}
                             onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
                             width="size-4000"
+                            placeholder="Describe what this rule does"
                         />
                         
-                        <ComboBox
-                            label="Category"
-                            selectedKey={selectedCategory}
-                            onSelectionChange={(key) => handleCategoryChange(key as string)}
-                            width="size-2000"
-                        >
-                            <Item key="all">All Categories</Item>
-                            <Item key="aem">AEM</Item>
-                            <Item key="workfront">Workfront</Item>
-                            <Item key="brand">Brand</Item>
-                            <Item key="custom">Custom</Item>
-                        </ComboBox>
-                        
-                        <View>
                             <ComboBox
                                 label="Event Type"
                                 selectedKey={formData.eventType || ''}
                                 onSelectionChange={(value) => setFormData(prev => ({ ...prev, eventType: value as string }))}
                                 isRequired
                                 width="size-4000"
+                            placeholder="Select the event type this rule will handle"
                             >
-                                {getFilteredEventTypes().map(eventType => (
+                            {eventTypes.map(eventType => (
                                     <Item key={eventType.type}>
                                         {eventType.displayName}
                                     </Item>
                                 ))}
                             </ComboBox>
-                            <Text>
-                                {getFilteredEventTypes().length} event type{getFilteredEventTypes().length !== 1 ? 's' : ''} available
-                                {selectedCategory !== 'all' && ` in ${selectedCategory.toUpperCase()} category`}
-                            </Text>
-                        </View>
                         
                         <ComboBox
                             label="Direction"
@@ -620,6 +656,9 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
                         
                         <View>
                             <Text>Target Brands:</Text>
+                            <Text marginBottom="size-100">
+                                Select which brands this rule applies to. Leave all unchecked for a global rule.
+                            </Text>
                             <Flex direction="column" gap="size-100" marginTop="size-100">
                                 {brands.map(brand => (
                                     <Switch
@@ -643,7 +682,6 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
                                         {brand.name} - {brand.description}
                                     </Switch>
                                 ))}
-                                <Text>Leave all unchecked for global rule (applies to all brands)</Text>
                             </Flex>
                         </View>
                         
@@ -654,6 +692,7 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
                             minValue={1}
                             maxValue={100}
                             width="size-1000"
+                            description="Lower numbers have higher priority"
                         />
                         
                         <Switch
@@ -663,36 +702,246 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
                             Enabled
                         </Switch>
                         
-                        <ButtonGroup>
-                            <Button 
-                                variant="primary" 
-                                onPress={editingRule ? handleEditRule : handleCreateRule}
-                            >
-                                {editingRule ? 'Save Changes' : 'Create Rule'}
-                            </Button>
-                            <Button 
-                                variant="secondary" 
-                                onPress={() => {
-                                    setShowCreateForm(false);
-                                    setEditingRule(null);
-                                    setFormData({
-                                        name: '',
-                                        description: '',
-                                        eventType: '',
-                                        direction: 'both',
-                                        targetBrands: [],
-                                        conditions: [],
-                                        actions: [],
-                                        enabled: true,
-                                        priority: 10
-                                    });
-                                    setSelectedCategory('all');
+                        {/* Visual Rule Builder Canvas */}
+                        <Divider marginY="size-300" />
+                        <Heading level={4}>Visual Rule Builder</Heading>
+                        <View backgroundColor="blue-400" padding="size-200" borderRadius="small" marginBottom="size-200">
+                            <Text>
+                                <strong>How to build your rule:</strong>
+                            </Text>
+                            <Text>
+                                1. <strong>Add Conditions (IF)</strong> - Define when this rule should trigger (e.g., "if asset type equals image")
+                            </Text>
+                            <Text>
+                                2. <strong>Add Actions (THEN)</strong> - Define what should happen when conditions are met (e.g., "route to brand handler")
+                            </Text>
+                            <Text>
+                                3. <strong>Test Your Rule</strong> - Use the preview below to see how your rule will work
+                            </Text>
+                        </View>
+                        
+                        {/* Canvas Area */}
+                        <View 
+                            backgroundColor="gray-50" 
+                            borderWidth="thick" 
+                            borderColor="gray-300"
+                            borderRadius="medium"
+                            height="size-4000"
+                            position="relative"
+                            overflow="hidden"
+                            marginBottom="size-300"
+                        >
+                            {/* Canvas Grid Background */}
+                            <View 
+                                position="absolute" 
+                                top="0" 
+                                left="0" 
+                                right="0" 
+                                bottom="0"
+                                UNSAFE_style={{
+                                    backgroundImage: 'radial-gradient(circle, #e0e0e0 1px, transparent 1px)',
+                                    backgroundSize: '20px 20px'
                                 }}
-                            >
+                            />
+                            
+                            {/* Rule Canvas Content */}
+                            <View padding="size-400" height="100%">
+                                <VisualRuleCanvas 
+                                    rule={{
+                                        id: 'temp-rule',
+                                        name: formData.name || 'New Rule',
+                                        description: formData.description || '',
+                                        eventType: formData.eventType || '',
+                                        direction: formData.direction || 'both',
+                                        targetBrands: formData.targetBrands || [],
+                                        conditions: formData.conditions || [],
+                                        actions: formData.actions || [],
+                                        enabled: formData.enabled || true,
+                                        priority: formData.priority || 10,
+                                        createdAt: new Date(),
+                                        updatedAt: new Date()
+                                    }}
+                                    onUpdate={(updatedRule) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            conditions: updatedRule.conditions,
+                                            actions: updatedRule.actions
+                                        }));
+                                    }}
+                                    onAddCondition={(condition) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            conditions: [...(prev.conditions || []), condition]
+                                        }));
+                                    }}
+                                    onAddAction={(action) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            actions: [...(prev.actions || []), action]
+                                        }));
+                                    }}
+                                    onEditCondition={openConditionModal}
+                                    onDeleteCondition={deleteCondition}
+                                />
+                            </View>
+                        </View>
+                        
+                        {/* Rule Preview */}
+                        {(formData.conditions && formData.conditions.length > 0) || (formData.actions && formData.actions.length > 0) ? (
+                            <View backgroundColor="green-400" padding="size-200" borderRadius="small" marginBottom="size-200">
+                                <Heading level={5}>Rule Preview</Heading>
+                                <View backgroundColor="gray-50" padding="size-200" borderRadius="small">
+                                    <Text>
+                                        <strong>IF</strong> {' '}
+                                        {formData.conditions && formData.conditions.length > 0 ? (
+                                            formData.conditions.map((condition, index) => (
+                                                <span key={index}>
+                                                    {index > 0 && ` ${condition.logicalOperator || 'AND'} `}
+                                                    <strong>{condition.field || '[field]'}</strong> {condition.operator || '[operator]'} "{condition.value || '[value]'}"
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <em>no conditions</em>
+                                        )}
+                                        {' '}<strong>THEN</strong>{' '}
+                                        {formData.actions && formData.actions.length > 0 ? (
+                                            formData.actions.map((action, index) => (
+                                                <span key={index}>
+                                                    {index > 0 && ', '}
+                                                    <strong>{action.type || '[action]'}</strong>
+                                                    {action.target && ` to ${action.target}`}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <em>no actions</em>
+                                        )}
+                                    </Text>
+                                </View>
+                            </View>
+                        ) : (
+                            <View backgroundColor="gray-200" padding="size-200" borderRadius="small" marginBottom="size-200">
+                                <Text>
+                                    <strong>Rule Preview:</strong> Add conditions and actions above to see your rule logic here
+                                </Text>
+                            </View>
+                        )}
+                        
+                        <ButtonGroup>
+                            <Button variant="primary" onPress={handleCreateRule}>
+                                Create Rule
+                            </Button>
+                            <Button variant="secondary" onPress={resetForm}>
                                 Cancel
                             </Button>
                         </ButtonGroup>
                     </Flex>
+                </View>
+            )}
+
+            {/* Condition Configuration Modal */}
+            {showConditionModal && (
+                <View 
+                    position="fixed"
+                    top="0"
+                    left="0"
+                    right="0"
+                    bottom="0"
+                    backgroundColor="red-500"
+                    zIndex={9999}
+                    UNSAFE_style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <View 
+                        backgroundColor="gray-50" 
+                        padding="size-400" 
+                        borderRadius="medium"
+                        maxWidth="size-5000"
+                        width="90%"
+                        maxHeight="80%"
+                        overflow="auto"
+                        borderWidth="thick"
+                        borderColor="blue-500"
+                    >
+                        <Heading level={3}>
+                            {editingCondition ? 'Edit Condition' : 'Add New Condition'}
+                        </Heading>
+                        <Text marginBottom="size-200">
+                            Configure the condition that will trigger this rule
+                        </Text>
+                        
+                        <Flex direction="column" gap="size-200" marginTop="size-200">
+                            <ComboBox
+                                label="Field"
+                                selectedKey={conditionFormData.field || ''}
+                                onSelectionChange={(key) => setConditionFormData(prev => ({ ...prev, field: key as string }))}
+                                isRequired
+                                width="size-4000"
+                                placeholder="Select the field to check"
+                            >
+                                <Item key="metadata.a2b__sync_on_change">Sync on Change</Item>
+                                <Item key="metadata.a2d__customers">Customer List</Item>
+                                <Item key="metadata.campaign">Campaign</Item>
+                                <Item key="metadata.priority">Priority</Item>
+                                <Item key="metadata.status">Status</Item>
+                                <Item key="assetPath">Asset Path</Item>
+                                <Item key="assetName">Asset Name</Item>
+                                <Item key="taskId">Task ID</Item>
+                                <Item key="taskName">Task Name</Item>
+                                <Item key="projectId">Project ID</Item>
+                                <Item key="assignee">Assignee</Item>
+                                <Item key="dueDate">Due Date</Item>
+                            </ComboBox>
+                            
+                            <ComboBox
+                                label="Operator"
+                                selectedKey={conditionFormData.operator || 'equals'}
+                                onSelectionChange={(key) => setConditionFormData(prev => ({ ...prev, operator: key as any }))}
+                                isRequired
+                                width="size-3000"
+                            >
+                                <Item key="equals">Equals</Item>
+                                <Item key="contains">Contains</Item>
+                                <Item key="startsWith">Starts With</Item>
+                                <Item key="endsWith">Ends With</Item>
+                                <Item key="regex">Regex Match</Item>
+                                <Item key="exists">Exists</Item>
+                                <Item key="notExists">Not Exists</Item>
+                                <Item key="greaterThan">Greater Than</Item>
+                                <Item key="lessThan">Less Than</Item>
+                            </ComboBox>
+                            
+                            <TextField
+                                label="Value"
+                                value={conditionFormData.value || ''}
+                                onChange={(value) => setConditionFormData(prev => ({ ...prev, value }))}
+                                isRequired
+                                width="size-4000"
+                                placeholder="Enter the value to compare against"
+                            />
+                            
+                            <ComboBox
+                                label="Logical Operator"
+                                selectedKey={conditionFormData.logicalOperator || 'AND'}
+                                onSelectionChange={(key) => setConditionFormData(prev => ({ ...prev, logicalOperator: key as 'AND' | 'OR' }))}
+                                width="size-2000"
+                            >
+                                <Item key="AND">AND</Item>
+                                <Item key="OR">OR</Item>
+                            </ComboBox>
+                            
+                            <ButtonGroup>
+                                <Button variant="primary" onPress={saveCondition}>
+                                    {editingCondition ? 'Update Condition' : 'Add Condition'}
+                                </Button>
+                                <Button variant="secondary" onPress={() => setShowConditionModal(false)}>
+                                Cancel
+                            </Button>
+                        </ButtonGroup>
+                    </Flex>
+                </View>
                 </View>
             )}
 
@@ -707,7 +956,7 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
                         const selectedKey = Array.from(keys)[0] as string;
                         const rule = rules.find(r => r.id === selectedKey);
                         if (rule) {
-                            openEditForm(rule);
+                            setEditingRule(rule);
                         }
                     }}
                 >
@@ -769,7 +1018,7 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
                                     </Cell>
                                     <Cell>
                                         <ButtonGroup>
-                                            <Button variant="secondary" onPress={() => openEditForm(rule)}>
+                                            <Button variant="secondary" onPress={() => setEditingRule(rule)}>
                                                 Edit
                                             </Button>
                                             <Button variant="negative" onPress={() => handleDeleteRule(rule.id)}>
@@ -783,6 +1032,177 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
                     </TableBody>
                 </TableView>
             </View>
+        </View>
+    );
+};
+
+// Visual Rule Canvas Component
+const VisualRuleCanvas: React.FC<{ 
+    rule: Rule; 
+    onUpdate: (rule: Rule) => void;
+    onAddCondition: (condition: RuleCondition) => void;
+    onAddAction: (action: RuleAction) => void;
+    onEditCondition: (condition?: RuleCondition) => void;
+    onDeleteCondition: (condition: RuleCondition) => void;
+}> = ({ rule, onUpdate, onAddCondition, onAddAction, onEditCondition, onDeleteCondition }) => {
+    const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
+
+    return (
+        <View height="100%" position="relative">
+            {/* Rule Flow Visualization */}
+            <Flex direction="column" gap="size-400" alignItems="center">
+                {/* Event Trigger Block */}
+                <View 
+                    backgroundColor="blue-400" 
+                    padding="size-300" 
+                    borderRadius="medium"
+                    borderWidth="thick"
+                    borderColor="blue-600"
+                    minWidth="size-4000"
+                >
+                    <Heading level={4}>Event Trigger</Heading>
+                    <Text>{rule.eventType}</Text>
+                    <Text>Direction: {rule.direction}</Text>
+                </View>
+
+                {/* Conditions Block */}
+                {rule.conditions && rule.conditions.length > 0 ? (
+                    <View 
+                        backgroundColor="orange-400" 
+                        padding="size-300" 
+                        borderRadius="medium"
+                        borderWidth="thick"
+                        borderColor="orange-600"
+                        minWidth="size-4000"
+                    >
+                        <Heading level={4}>Conditions (IF)</Heading>
+                        {rule.conditions.map((condition, index) => (
+                            <View key={index} marginBottom="size-100" backgroundColor="gray-50" padding="size-200" borderRadius="small">
+                                <Flex direction="row" gap="size-200" alignItems="center">
+                                    <Text>
+                                        {index > 0 && `${condition.logicalOperator} `}
+                                        <strong>{condition.field}</strong> {condition.operator} "{condition.value}"
+                                    </Text>
+                                    <Button variant="negative" onPress={() => onDeleteCondition(condition)}>
+                                        <Delete />
+                                    </Button>
+                                    <Button variant="secondary" onPress={() => onEditCondition(condition)}>
+                                        <Edit />
+                                    </Button>
+                                </Flex>
+                            </View>
+                        ))}
+                    </View>
+                ) : (
+                    <View 
+                        backgroundColor="gray-200" 
+                        padding="size-300" 
+                        borderRadius="medium"
+                        borderWidth="thick"
+                        borderColor="gray-400"
+                        minWidth="size-4000"
+                    >
+                        <Heading level={4}>Conditions (IF)</Heading>
+                        <Text>No conditions defined</Text>
+                        <Text>Click "Add Condition" to define when this rule should trigger</Text>
+                    </View>
+                )}
+
+                {/* Actions Block */}
+                {rule.actions && rule.actions.length > 0 ? (
+                    <View 
+                        backgroundColor="green-400" 
+                        padding="size-300" 
+                        borderRadius="medium"
+                        borderWidth="thick"
+                        borderColor="green-600"
+                        minWidth="size-4000"
+                    >
+                        <Heading level={4}>Actions (THEN)</Heading>
+                        {rule.actions.map((action, index) => (
+                            <View key={index} marginBottom="size-100" backgroundColor="gray-50" padding="size-200" borderRadius="small">
+                                <Flex direction="row" gap="size-200" alignItems="center">
+                                    <Text>
+                                        <strong>{action.type}</strong>
+                                        {action.target && ` → ${action.target}`}
+                                    </Text>
+                                    <Button variant="negative" onPress={() => {/* Remove action */}}>
+                                        <Delete />
+                                    </Button>
+                                </Flex>
+                            </View>
+                        ))}
+                    </View>
+                ) : (
+                    <View 
+                        backgroundColor="gray-200" 
+                        padding="size-300" 
+                        borderRadius="medium"
+                        borderWidth="thick"
+                        borderColor="gray-400"
+                        minWidth="size-4000"
+                    >
+                        <Heading level={4}>Actions (THEN)</Heading>
+                        <Text>No actions defined</Text>
+                        <Text>Click "Add Action" to define what should happen when conditions are met</Text>
+                    </View>
+                )}
+
+                {/* Add New Blocks */}
+                <Flex direction="row" gap="size-200" marginTop="size-400">
+                    <Button variant="primary" onPress={() => {
+                        console.log('Add Condition button clicked');
+                        alert('Add Condition button clicked');
+                        onEditCondition();
+                    }}>
+                        <Add />
+                        <Text>Add Condition</Text>
+                    </Button>
+                    <Button variant="primary" onPress={() => {
+                        const newAction: RuleAction = {
+                            type: 'route',
+                            target: '',
+                            parameters: {}
+                        };
+                        onAddAction(newAction);
+                    }}>
+                        <Add />
+                        <Text>Add Action</Text>
+                    </Button>
+                </Flex>
+            </Flex>
+        </View>
+    );
+};
+
+// Empty Canvas Component
+const EmptyCanvas: React.FC<{ 
+    onStartBuilding: () => void 
+}> = ({ onStartBuilding }) => {
+    return (
+        <View 
+            height="100%"
+        >
+            <Flex direction="column" gap="size-300" alignItems="center">
+                <View backgroundColor="gray-200" padding="size-400" borderRadius="large">
+                    <Settings size="XL" />
+                </View>
+                <Heading level={3}>Start Building Your Rule</Heading>
+                <Text>
+                    Drag and drop components from the palette to build your rule logic visually.
+                    <br />
+                    Or start with a template for common rule patterns.
+                </Text>
+                <ButtonGroup>
+                    <Button variant="primary" onPress={onStartBuilding}>
+                        <Add />
+                        <Text>Start Building</Text>
+                    </Button>
+                    <Button variant="secondary">
+                        <Text>Browse Templates</Text>
+                    </Button>
+                </ButtonGroup>
+            </Flex>
         </View>
     );
 };

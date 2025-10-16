@@ -11,6 +11,7 @@ dist
 # Config
 config.json
 .env*
+_dot.env
 .aio
 
 # Adobe I/O console config
