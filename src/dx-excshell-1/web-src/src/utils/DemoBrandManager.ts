@@ -17,6 +17,9 @@ export class DemoBrandManager {
      * @param json JSON object containing brand data
      * @returns new Brand instance
      * @throws Error if JSON is invalid or missing required properties
+     * 
+     * Note: secret is optional because API responses exclude it for security.
+     * Demo mode and mock data will include secrets, but production API calls will not.
      */
     static getBrandFromJson(json: any): Brand {
         if (!json || typeof json !== 'object') {
@@ -25,7 +28,7 @@ export class DemoBrandManager {
 
         const missingProps: string[] = [];
         if (!json.brandId) missingProps.push('brandId');
-        if (!json.secret) missingProps.push('secret');
+        // secret is optional - API responses don't include it for security
         if (!json.name) missingProps.push('name');
         if (!json.endPointUrl) missingProps.push('endPointUrl');
 
@@ -35,7 +38,7 @@ export class DemoBrandManager {
 
         return new Brand({
             brandId: json.brandId,
-            secret: json.secret,
+            secret: json.secret, // Optional - will be empty string if not provided
             name: json.name,
             endPointUrl: json.endPointUrl,
             enabled: json.enabled,

@@ -12,15 +12,16 @@ export class Brand implements IBrand {
     readonly updatedAt: Date;
     readonly enabledAt: Date | null;
 
-    constructor(params: IBrand) {
+    constructor(params: Partial<IBrand> & { brandId: string; name: string; endPointUrl: string }) {
         // Validate required fields
         if (!params.brandId) throw new Error('brandId is required');
-        if (!params.secret) throw new Error('secret is required');
         if (!params.name) throw new Error('name is required');
         if (!params.endPointUrl) throw new Error('endPointUrl is required');
+        // Note: secret is optional for frontend use (API responses exclude it for security)
+        // Backend actions will always provide secret, frontend can work without it
 
         this.brandId = params.brandId;
-        this.secret = params.secret;
+        this.secret = params.secret || ''; // Empty string if not provided (frontend use case)
         this.name = params.name;
         this.endPointUrl = params.endPointUrl;
         this.enabled = params.enabled ?? false;

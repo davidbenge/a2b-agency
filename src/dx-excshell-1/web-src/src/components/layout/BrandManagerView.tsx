@@ -93,7 +93,9 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                     console.debug('response body.data', response.body.data);
                     if (response.body.data) {
                         const items = response.body.data as any[];
-                        const mapped = items.map(item => new Brand(item).toJSON()).map(item => DemoBrandManager.getBrandFromJson(item));
+                        // API returns brand data without secret for security
+                        // DemoBrandManager.getBrandFromJson handles missing secret gracefully
+                        const mapped = items.map(item => DemoBrandManager.getBrandFromJson(item));
                         setBrands(mapped);
                     }
                 } catch (error) {
@@ -240,7 +242,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                     setSuccess('Brand updated successfully');
                 }
             } else if (viewMode === 'edit' && selectedBrand) {
-
+                // Prepare update data (secret is excluded automatically by Brand.toJSON() on frontend)
                 const updatedBrand = new Brand({
                     ...selectedBrand.toJSON(),
                     ...brandData,
@@ -251,9 +253,11 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
 
                 const response = await apiService.updateBrand(updatedBrand);
 
-                if (response.statusCode === 200) {
+                if (response.statusCode === 200 && response.body.data) {
+                    // Use the brand data from API response (which excludes secret for security)
+                    const brandFromApi = DemoBrandManager.getBrandFromJson(response.body.data);
                     setBrands(brands.map(brand =>
-                        brand.brandId === selectedBrand.brandId ? updatedBrand : brand
+                        brand.brandId === selectedBrand.brandId ? brandFromApi : brand
                     ));
                     setSuccess('Brand updated successfully');
                 }
