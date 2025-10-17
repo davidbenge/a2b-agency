@@ -5,7 +5,7 @@
     "data": {
       "event": {
         "code": "com.adobe.a2b.assetsync.new",
-        "category": "asset-sync",
+        "category": "agency",
         "name": "Asset Sync New",
         "description": "Emitted when a new asset is synced from AEM",
         "eventClass": "AssetSyncNewEvent",

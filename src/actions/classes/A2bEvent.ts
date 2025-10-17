@@ -3,7 +3,7 @@ import { Ia2bEvent, IValidationResult } from '../types/index';
 import { v4 as uuidv4 } from 'uuid';
 import { IApplicationRuntimeInfo } from '../types/index';
 
-export abstract class a2bEvent implements Ia2bEvent {
+export abstract class A2bEvent implements Ia2bEvent {
     source!: string;
     type!: string;
     datacontenttype: string;

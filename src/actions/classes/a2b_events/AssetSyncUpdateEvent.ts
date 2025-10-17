@@ -1,7 +1,7 @@
 import { AEM_ASSET_SYNC_EVENT_CODE } from '../../constants';
-import { a2bEvent } from '../A2bEvent';
+import { A2bEvent } from '../A2bEvent';
 
-export class AssetSyncUpdateEvent extends a2bEvent {
+export class AssetSyncUpdateEvent extends A2bEvent {
     constructor(assetData: any) {
         super();
         this.type = AEM_ASSET_SYNC_EVENT_CODE.UPDATE;

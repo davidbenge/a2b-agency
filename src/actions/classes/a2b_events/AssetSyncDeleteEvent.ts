@@ -1,8 +1,8 @@
-import { a2bEvent } from '../A2bEvent';
+import { A2bEvent } from '../A2bEvent';
 import { AEM_ASSET_SYNC_EVENT_CODE } from '../../constants';
 import { IValidationResult } from '../../types';
 
-export class AssetSyncDeleteEvent extends a2bEvent {
+export class AssetSyncDeleteEvent extends A2bEvent {
     constructor(assetData: any) {
         super();
         this.type = AEM_ASSET_SYNC_EVENT_CODE.DELETE;

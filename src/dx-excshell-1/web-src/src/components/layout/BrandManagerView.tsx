@@ -292,13 +292,14 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         Brand Manager
                         {viewProps.aioEnableDemoMode && ' (Demo Mode)'}
                     </Heading>
-                    <Button
+                    {/* Brands register themselves with the agency via their own UI - agency cannot register brands */}
+                    {/* <Button
                         variant="primary"
                         onPress={handleAddBrand}
                     >
                         <Add />
                         <Text>Register Brand</Text>
-                    </Button>
+                    </Button> */}
                 </Flex>
 
                 <Text marginBottom="size-200">Welcome, {userEmail}</Text>

@@ -21,13 +21,19 @@ export async function main(params: any): Promise<any> {
 
     const brandManager = new BrandManager(params.LOG_LEVEL);
     const brand = await brandManager.getBrand(params.brandId);
+    
+    if (!brand) {
+      return errorResponse(404, `Brand ${params.brandId} not found`, logger);
+    }
+    
     logger.debug('Brand', JSON.stringify(brand, null, 2));
 
+    // Return brand without secret for security
     return {
       statusCode: 200,
       body: {
         "message": `Brand ${params.brandId} fetched successfully`,
-        "data": brand
+        "data": brand.toSafeJSON()
       }
     }
   } catch (error) {

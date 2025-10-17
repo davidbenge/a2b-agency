@@ -1,7 +1,7 @@
 import aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "./Brand";
 import { IBrand } from "../types";
-import { BRAND_STATE_PREFIX, BRAND_FILE_STORE_DIR } from "../constants";
+import { BRAND_STATE_PREFIX, BRAND_FILE_STORE_DIR, BRAND_SECRET_INDEX_PREFIX } from "../constants";
 
 export class BrandManager {
     private logger: any;
@@ -178,6 +178,9 @@ export class BrandManager {
         await fileStore.write(`${BRAND_FILE_STORE_DIR}/${brand.brandId}.json`, brand.toJSONString());
         this.logger.debug(`Saving brand ${brand.brandId} to file store`);
 
+        // Save secret index
+        await this.saveSecretIndex(brand.secret, brand.brandId);
+
         return brand;
     }
 
@@ -187,6 +190,9 @@ export class BrandManager {
      * @param brandId : string - The brand id to delete
      */
     async deleteBrand(brandId: string): Promise<void> {
+        // Get the brand first to get the secret for index cleanup
+        const brand = await this.getBrand(brandId);
+        
         // delete from state store
         try {
             const stateStore = await this.getStateStore();
@@ -201,6 +207,11 @@ export class BrandManager {
             await fileStore.delete(`${BRAND_FILE_STORE_DIR}/${brandId}.json`);
         } catch (error) {
             this.logger.error(`Error deleting brand ${brandId} from file store: ${error}`);
+        }
+
+        // Delete secret index if brand had a secret
+        if (brand && brand.secret) {
+            await this.deleteSecretIndex(brand.secret);
         }
     }
 
@@ -371,5 +382,91 @@ export class BrandManager {
             this.logger.warn(`Error extracting brandId from fileDataName ${fileDataName}: ${error}`);
             return undefined;
         }
+    }
+
+    /**
+     * Save a secret index entry mapping secret to brand ID
+     * @param secret - The secret to index
+     * @param brandId - The brand ID
+     */
+    private async saveSecretIndex(secret: string, brandId: string): Promise<void> {
+        try {
+            const stateStore = await this.getStateStore();
+            const indexKey = `${BRAND_SECRET_INDEX_PREFIX}${secret}`;
+            await stateStore.put(indexKey, brandId);
+            this.logger.debug(`Saved secret index for brand ${brandId}`);
+        } catch (error) {
+            this.logger.error(`Error saving secret index for brand ${brandId}: ${error}`);
+            throw error;
+        }
+    }
+
+    /**
+     * Get brand ID by secret from the index
+     * @param secret - The secret to look up
+     * @returns Promise<string | undefined> - The brand ID or undefined if not found
+     */
+    private async getBrandIdBySecret(secret: string): Promise<string | undefined> {
+        try {
+            const stateStore = await this.getStateStore();
+            const indexKey = `${BRAND_SECRET_INDEX_PREFIX}${secret}`;
+            const result = await stateStore.get(indexKey);
+            
+            if (!result || !result.value) {
+                this.logger.debug(`No brand found for secret in index`);
+                return undefined;
+            }
+
+            return result.value as string;
+        } catch (error) {
+            this.logger.error(`Error getting brand ID by secret: ${error}`);
+            return undefined;
+        }
+    }
+
+    /**
+     * Delete a secret index entry
+     * @param secret - The secret to remove from index
+     */
+    private async deleteSecretIndex(secret: string): Promise<void> {
+        try {
+            const stateStore = await this.getStateStore();
+            const indexKey = `${BRAND_SECRET_INDEX_PREFIX}${secret}`;
+            await stateStore.delete(indexKey);
+            this.logger.debug(`Deleted secret index for secret`);
+        } catch (error) {
+            this.logger.warn(`Error deleting secret index: ${error}`);
+        }
+    }
+
+    /**
+     * Get a brand by its secret (fast lookup using index)
+     * @param secret - The secret to look up
+     * @returns Promise<Brand | undefined> - The brand or undefined if not found
+     */
+    async getBrandBySecret(secret: string): Promise<Brand | undefined> {
+        // Use the secret index to find the brand ID
+        const brandId = await this.getBrandIdBySecret(secret);
+        
+        if (!brandId) {
+            this.logger.debug(`No brand found for provided secret`);
+            return undefined;
+        }
+
+        // Get the full brand object
+        const brand = await this.getBrand(brandId);
+        
+        if (!brand) {
+            this.logger.warn(`Brand ${brandId} found in index but not in storage`);
+            return undefined;
+        }
+
+        // Validate that the secret actually matches (double-check)
+        if (brand.secret !== secret) {
+            this.logger.warn(`Secret mismatch for brand ${brandId}`);
+            return undefined;
+        }
+
+        return brand;
     }
 }

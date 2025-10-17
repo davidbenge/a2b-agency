@@ -16,9 +16,9 @@ import {
     getEventCategories, 
     EVENT_REGISTRY,
     getEventCountByCategory,
-    isValidEventCode,
-    EventDefinition
-} from '../../shared/event-registry';
+    isValidEventCode
+} from '../../shared/classes/EventRegistry';
+import { EventDefinition } from '../../shared/types';
 import { HTTP_STATUS, ERROR_MESSAGES } from '../constants';
 import aioLogger from '@adobe/aio-lib-core-logging';
 

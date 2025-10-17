@@ -1,0 +1,16 @@
+{
+  "data": {
+    "name": "Acme Brand Inc",
+    "primaryContact": "John Doe",
+    "phoneNumber": "555-1234-5678",
+    "endPointUrl": "https://27200-brand2agency-benge.adobeioruntime.net/api/v1/web/a2b-brand/agency-event-handler",
+    "app_runtime_info": {
+      "actionPackageName": "a2b-brand",
+      "appName": "brand",
+      "consoleId": "27200",
+      "projectName": "brand2agency",
+      "workspace": "benge"
+    }
+  }
+}
+

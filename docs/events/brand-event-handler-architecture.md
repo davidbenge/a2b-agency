@@ -25,22 +25,22 @@ All incoming events must follow this structure:
 
 ```json
 {
-  "type": "com.adobe.b2a.assetsync.new",
+  "id": "urn:uuid:12345678-1234-1234-1234-123456789abc",
+  "source": "urn:uuid:5c3431a2-bd91-4eff-a356-26b747d0aad4",
+  "type": "com.adobe.b2a.registration.new",
+  "datacontenttype": "application/json",
+  "time": "2025-08-28T07:29:29.728Z",
+  "specversion": "1.0",
   "data": {
     "app_runtime_info": {
-      "AIO_runtime_apihost": "https://adobeioruntime.net",
-      "AIO_runtime_auth": "your-runtime-auth-key",
-      "AIO_runtime_namespace": "your-namespace",
-      "LOG_LEVEL": "debug"
+      "actionPackageName": "a2b-agency",
+      "appName": "agency",
+      "consoleId": "27200",
+      "projectName": "a2b",
+      "workspace": "benge"
     },
-    "asset_id": "urn:uuid:12345678-1234-1234-1234-123456789abc",
-    "asset_path": "/content/dam/your-asset.jpg",
-    "brandId": "brand-123",
-    "metadata": {
-      "a2b__sync_on_change": true,
-      "a2d__customers": ["brand-123"],
-      "a2d__last_sync": "2024-01-01T00:00:00Z"
-    }
+    "name": "Brand Name",
+    "endPointUrl": "https://example.com/webhook"
   }
 }
 ```
@@ -52,6 +52,12 @@ All incoming events must follow this structure:
 - **`data`**: Event-specific data payload
 
 ## Supported Event Types
+
+### Brand Registration Events
+
+| Event Type | Description | Internal Handler |
+|------------|-------------|------------------|
+| `com.adobe.b2a.registration.new` | New brand registration request | `brand-registration-handler` |
 
 ### Asset Sync Events
 
@@ -115,15 +121,15 @@ agency-assetsync-internal-handler:
 
 ### Sample Event
 
-Use the sample event in `docs/events/brand-event-handler-sample.json` for testing.
+Use the sample event in `docs/events/brand/com-adobe-b2a-registration-new.json` for testing.
 
 ### Invocation
 
 ```bash
-# Test the brand event handler
+# Test the brand event handler with a registration event
 curl -X POST https://your-runtime-host/api/v1/web/your-namespace/a2b-agency/brand-event-handler \
   -H "Content-Type: application/json" \
-  -d @docs/events/brand-event-handler-sample.json
+  -d @docs/events/brand/com-adobe-b2a-registration-new.json
 ```
 
 ## Future Extensions

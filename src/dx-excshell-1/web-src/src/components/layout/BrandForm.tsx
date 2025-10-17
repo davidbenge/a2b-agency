@@ -241,14 +241,11 @@ const BrandForm: React.FC<BrandFormProps> = ({
                         </Switch>
                     )}
 
-                    {brand && mode === 'view' && (
-                        <View marginTop="size-200">
-                            <Divider size="S" />
-                            <Text marginTop="size-100">
-                                <strong>Secret:</strong> {brand.secret}
-                            </Text>
-                        </View>
-                    )}
+                    {/* Secret is NEVER displayed in the UI for security reasons.
+                        It is only shared:
+                        - Generated during new-brand-registration
+                        - Sent via registration.enabled CloudEvent to brand
+                        - Used in X-A2B-Brand-Secret header for authentication */}
 
                     {!isViewMode && (
                         <Flex gap="size-100" marginTop="size-200">

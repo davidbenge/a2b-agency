@@ -31,6 +31,7 @@ export const LOG_LEVELS = {
 
 export const BRAND_STATE_PREFIX = 'BRAND_';
 export const BRAND_FILE_STORE_DIR = 'brand';
+export const BRAND_SECRET_INDEX_PREFIX = 'BRAND_SECRET_INDEX_';
 
 /**
  * Event codes - maintained for backward compatibility

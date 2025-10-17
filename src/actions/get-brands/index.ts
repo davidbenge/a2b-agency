@@ -24,11 +24,12 @@ export async function main(params: any): Promise<any> {
     const brands = await brandManager.getAllBrands();
     logger.debug('Brands',JSON.stringify(brands, null, 2));
 
+    // Return brands without secrets for security
     return {
       statusCode: 200,
       body: {
         "message": `${brands.length} brands fetched successfully`,
-        "data": brands
+        "data": brands.map(brand => brand.toSafeJSON())
       }
     }
   } catch (error) {

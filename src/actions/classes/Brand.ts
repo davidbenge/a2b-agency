@@ -50,6 +50,24 @@ export class Brand implements IBrand {
     }
 
     /**
+     * Convert the instance to a safe JSON object WITHOUT the secret
+     * Use this for API responses to frontend/external systems
+     * @returns JSON representation of the brand without the secret field
+     */
+    toSafeJSON(): Omit<IBrand, 'secret'> {
+        return {
+            brandId: this.brandId,
+            name: this.name,
+            endPointUrl: this.endPointUrl,
+            enabled: this.enabled,
+            logo: this.logo,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
+            enabledAt: this.enabledAt
+        };
+    }
+
+    /**
      * Convert the instance to a JSON string
      * @returns JSON string representation of the brand
      */

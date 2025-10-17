@@ -1,9 +1,9 @@
 import { AEM_ASSET_SYNC_EVENT_CODE } from '../../constants';
 import { IValidationResult } from '../../types';
-import { a2bEvent } from '../A2bEvent';
+import { A2bEvent } from '../A2bEvent';
 import { ApplicationRuntimeInfo } from '../ApplicationRuntimeInfo';
 
-export class AssetSyncNewEvent extends a2bEvent {
+export class AssetSyncNewEvent extends A2bEvent {
     private _assetId!: string;
     private _assetPath!: string;
     private _metadata!: any;

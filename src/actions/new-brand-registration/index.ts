@@ -20,24 +20,29 @@ export async function main(params: any): Promise<any> {
 
   try {
     logger.debug(JSON.stringify(params, null, 2));
+    
+    // Extract brand data from params.data
+    const brandData = params.data || {};
+    
     const requiredParams : string[] = ['name', 'endPointUrl']
     const requiredHeaders : string[] = []
-    const errorMessage = checkMissingRequestInputs(params, requiredParams, requiredHeaders)
+    const errorMessage = checkMissingRequestInputs(brandData, requiredParams, requiredHeaders)
     if (errorMessage) {
       // return and log client errors
       return errorResponse(400, errorMessage, logger)
     }
 
-    params.brandId = uuidv4();
-    params.secret = randomstring.generate(32);
-    params.enabled = true;
-    params.createdAt = new Date();
-    params.updatedAt = new Date();
-    params.enabledAt = new Date();
+    // Build brand object from data
+    brandData.brandId = uuidv4();
+    brandData.secret = randomstring.generate(32);
+    brandData.enabled = false;
+    brandData.createdAt = new Date();
+    brandData.updatedAt = new Date();
+    brandData.enabledAt = null;
 
     let savedBrand: Brand;
     try{
-      const brand = BrandManager.getBrandFromJson(params);
+      const brand = BrandManager.getBrandFromJson(brandData);
       logger.debug('Brand',JSON.stringify(brand, null, 2));
       logger.debug('Brand stringify',brand.toJSON());
 
@@ -56,14 +61,18 @@ export async function main(params: any): Promise<any> {
       logger.debug('new-brand-registration params keys', Object.keys(params));
       const currentS2sAuthenticationCredentials = EventManager.getS2sAuthenticationCredentials(params);
       const registrationProviderId = EventManager.getRegistrationProviderId(params);
+      
+      // Get runtime info from action params (from .env/config for this action)
       const applicationRuntimeInfoLocal = ApplicationRuntimeInfo.getApplicationRuntimeInfoFromActionParams(params);
+      
+      // Get runtime info from event data (from the brand's API call)
       const applicationRuntimeInfoEvent = ApplicationRuntimeInfo.getAppRuntimeInfoFromEventData(params);
       
       if (!applicationRuntimeInfoLocal) {
-        throw new Error('Missing APPLICATION_RUNTIME_INFO Local');
+        throw new Error('Missing APPLICATION_RUNTIME_INFO Local (from action config)');
       }
       if (!applicationRuntimeInfoEvent) {
-        throw new Error('Missing APPLICATION_RUNTIME_INFO Event');
+        throw new Error('Missing app_runtime_info in event data (from brand API call)');
       }
       
       const eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, applicationRuntimeInfoLocal);
@@ -79,8 +88,7 @@ export async function main(params: any): Promise<any> {
     return {
       statusCode: 200,
       body: {
-        message: `Brand registration processed successfully for brand id ${savedBrand.brandId}`,
-        data: savedBrand
+        message: `Brand registration processed successfully for brand id ${savedBrand.brandId}`
       }
     }
   } catch (error) {

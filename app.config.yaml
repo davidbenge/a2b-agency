@@ -33,7 +33,17 @@ application:
               LOG_LEVEL: debug
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
             annotations:
-              require-adobe-auth: false
+              require-adobe-auth: true
+              final: true
+          get-brand:
+            function: src/actions/get-brand/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+              APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
+            annotations:
+              require-adobe-auth: true
               final: true
           list-events:
             function: src/actions/list-events/index.ts
@@ -42,7 +52,7 @@ application:
             inputs:
               LOG_LEVEL: debug
             annotations:
-              require-adobe-auth: false
+              require-adobe-auth: true
               final: true
           delete-brand:
             function: src/actions/delete-brand/index.ts
@@ -56,7 +66,7 @@ application:
               ORG_ID: $ORG_ID
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
             annotations:
-              require-adobe-auth: false
+              require-adobe-auth: true
               final: true
           brand-event-handler:
             function: src/actions/brand-event-handler/index.ts
@@ -146,7 +156,7 @@ application:
               ORG_ID: $ORG_ID
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
             annotations:
-              require-adobe-auth: false
+              require-adobe-auth: true
               final: true              
 extensions:
   dx/excshell/1:

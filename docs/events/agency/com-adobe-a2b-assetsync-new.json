@@ -1,7 +1,4 @@
 {
-    "source": "urn:uuid:af5c4d93-e1e0-4985-ad33-80fde3837aaa",
-    "S2S_API_KEY": "FAKEe1d50176486a8521d82da35fFAKE",
-    "S2S_CLIENT_SECRET": "p8e-FAKEHx1jaXJe82sH5L34A--hVJHlFAKE",
     "data": {
         "app_runtime_info": {
             "actionPackageName": "a2b-agency",
@@ -76,37 +73,9 @@
             "tiff:ImageWidth": 1734
         }
     },
-    "__ow_method": "post",
-    "AIO_runtime_namespace": "27200-brand2agency-benge",
     "id": "75d44a0b-7c74-4892-b435-47dbd422eec5",
-    "__ow_headers": {
-        "accept-encoding": "gzip, compress, deflate, br",
-        "connection": "close",
-        "content-type": "application/json",
-        "host": "controller-ns-team-ethos651prodva6-runtime-prod-a",
-        "perf-br-req-in": "1756366169.832",
-        "user-agent": "Amazon CloudFront",
-        "via": "1.1 1e14f05fcabcaf0bb797410b0eab65c8.cloudfront.net (CloudFront), 1.1 798436e3040e2ba4f1a3ccb2e7b3f806.cloudfront.net (CloudFront)",
-        "x-a2b-brand-id": "c6409c52-9295-4d15-94e6-7bd39d04360c",
-        "x-a2b-brand-secret": "CbEslXO4Voq8VqwiV6gaI22FlMsFFAKE",
-        "x-amz-cf-id": "A0VcMoggYw_UmiFRpP5Qy7xjcJ-e3u9Q4KXgnj-dHiJ_0RVgy8M0EQ==",
-        "x-envoy-external-address": "130.176.179.208",
-        "x-forwarded-for": "54.234.136.160, 18.205.26.207, 130.176.179.208, 10.152.171.66",
-        "x-forwarded-host": "27200-brand2agency-benge.adobeioruntime.net",
-        "x-forwarded-port": "80",
-        "x-forwarded-proto": "https",
-        "x-real-ip": "10.152.171.66",
-        "x-request-id": "pbWEXslcCm0dC9WILD8dNoqd0VI79iGa"
-    },
-    "AIO_runtime_auth": "6f93ee7e-FAKE-4a5c-8457-358e73838812:YYq1C7hm2T3NIs0y1eKEyO4RfV25A4F2AkG3N3G6ncMUFw68ec67M2PMg3F3FAKE",
     "type": "com.adobe.a2b.assetsync.new",
-    "LOG_LEVEL": "debug",
     "datacontenttype": "application/json",
-    "__ow_path": "",
-    "ORG_ID": "33C1401053CF76370A490D4C@AdobeOrg",
-    "APPLICATION_RUNTIME_INFO": "{\"namespace\":\"27200-brand2agency-benge\",\"app_name\":\"brand\",\"action_package_name\":\"a2b-brand\"}",
-    "AIO_runtime_apihost": "https://adobeioruntime.net",
     "time": "2025-08-28T07:29:29.728Z",
-    "S2S_SCOPES": "[\"AdobeID\",\"openid\",\"read_organizations\",\"additional_info.projectedProductContext\",\"additional_info.roles\",\"adobeio_api\",\"read_client_secret\",\"manage_client_secrets\",\"event_receiver_api\"]",
     "specversion": "1.0"
 }

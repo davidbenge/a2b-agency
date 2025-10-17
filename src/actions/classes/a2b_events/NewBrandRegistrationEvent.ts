@@ -1,8 +1,8 @@
-import { a2bEvent } from '../A2bEvent';
+import { A2bEvent } from '../A2bEvent';
 import { IBrand } from '../../types/index';
 import { AGENCY_BRAND_REGISTRATION_EVENT_CODE } from '../../constants';
 
-export class NewBrandRegistrationEvent extends a2bEvent {
+export class NewBrandRegistrationEvent extends A2bEvent {
     constructor(brand: IBrand, sourceProviderId: string) {
         super();
         this.type = AGENCY_BRAND_REGISTRATION_EVENT_CODE.RECEIVED;

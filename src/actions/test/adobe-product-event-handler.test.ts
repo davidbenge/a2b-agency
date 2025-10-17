@@ -338,7 +338,7 @@ describe('adobe-product-event-handler', () => {
 
   describe('Integration with real event data', () => {
     it('should process AEM asset processing complete event', async () => {
-      // This simulates the real event data from docs/events/aem/aem_asset_processing_complete.json
+      // This simulates the real event data from docs/events/product/aem/aem-assets-asset-processing-complete.json
       const params = {
         type: 'aem.assets.unknown',
         LOG_LEVEL: 'debug',

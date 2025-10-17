@@ -46,6 +46,17 @@ export interface Ia2bEvent {
     toCloudEvent(): CloudEvent;
 }
 
+export interface Ib2aEvent {
+    source: string;
+    type: string;
+    datacontenttype: string;
+    data: any;
+    id: string;
+    validate(): IValidationResult;
+    toJSON(): any;
+    toCloudEvent(): CloudEvent;
+}
+
 export interface IBrandEventPostResponse {
     eventType: string;
     message: string;

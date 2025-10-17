@@ -10,7 +10,7 @@ import { BrandManager } from '../classes/BrandManager';
 // Import the Jest setup to ensure mocks are loaded
 import './mocks/jest.setup';
 
-// Mock data from the metadata_change.json file
+// Mock data from the docs/events/product/aem/aem-assets-metadata-change.json file
 const mockMetadataUpdateEventData = {
   "specversion": "1.0", 
   "id": "9b1539e6-4e91-4b64-bf9b-5801ebcc34e4",
