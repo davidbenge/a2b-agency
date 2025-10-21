@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ViewPropsBase } from '../../types/ViewPropsBase';
 import { IBrand } from '../../../../../shared/types';
-import { Brand } from '../../../../../actions/classes/Brand';
-import { DemoBrandManager } from '../../utils/DemoBrandManager';
+import { DemoBrandManager, Brand } from '../../utils/DemoBrandManager';
 import BrandForm from './BrandForm';
 import {
     TableView,
