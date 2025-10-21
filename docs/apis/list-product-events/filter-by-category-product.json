@@ -1,0 +1,42 @@
+{
+  "statusCode": 200,
+  "body": {
+    "success": true,
+    "data": {
+      "category": "product",
+      "count": 2,
+      "events": [
+        {
+          "code": "aem.assets.asset.metadata_updated",
+          "category": "product",
+          "name": "AEM Asset Metadata Updated",
+          "description": "Emitted when the metadata of an AEM asset is updated",
+          "version": "1.0.0",
+          "eventBodyexample": {},
+          "routingRules": [],
+          "requiredFields": [
+            "assetId,repositoryMetadata"
+          ],
+          "handlerActionName": "a2b-agency/agency-assetsync-internal-handler-metadata-updated",
+          "callBlocking": true
+        },
+        {
+          "code": "aem.assets.asset.processing_completed",
+          "category": "product",
+          "name": "AEM Assets Processing Completed",
+          "description": "Emitted when the processing of an AEM asset is completed",
+          "version": "1.0.0",
+          "eventBodyexample": {},
+          "routingRules": [],
+          "requiredFields": [
+            "assetId,repositoryMetadata"
+          ],
+          "handlerActionName": "a2b-agency/agency-assetsync-internal-handler-metadata-updated",
+          "callBlocking": true
+        }
+      ],
+      "timestamp": "2025-10-18T12:00:00.000Z"
+    }
+  }
+}
+

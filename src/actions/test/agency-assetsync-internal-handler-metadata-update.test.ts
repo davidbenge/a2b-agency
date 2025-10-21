@@ -266,8 +266,8 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
       expect(result.statusCode).toBe(200);
       expect(result.body.message).toBe('Adobe product event processed successfully');
       expect(result.body.eventType).toBe('aem.assets.asset.metadata_updated');
-      expect(result.body.routingResult).toBeDefined();
-      expect(result.body.routingResult.success).toBe(true);
+      expect(result.body.handler).toBe('a2b-agency/agency-assetsync-internal-handler-metadata-updated');
+      expect(result.body.result).toBeDefined();
     });
 
     it('should call getAemAssetData with correct parameters for metadata update', async () => {

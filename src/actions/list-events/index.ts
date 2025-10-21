@@ -17,13 +17,13 @@ import {
     EVENT_REGISTRY,
     getEventCountByCategory,
     isValidEventCode
-} from '../../shared/classes/EventRegistry';
-import { EventDefinition } from '../../shared/types';
+} from '../../shared/classes/AppEventRegistry';
+import { AppEventDefinition } from '../../shared/types';
 import { HTTP_STATUS, ERROR_MESSAGES } from '../constants';
 import aioLogger from '@adobe/aio-lib-core-logging';
 
 interface ListEventsParams {
-    category?: EventDefinition['category'];
+    category?: AppEventDefinition['category'];
     eventCode?: string;
     LOG_LEVEL?: string;
 }

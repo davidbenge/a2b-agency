@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { Brand } from '../../../../../actions/classes/Brand';
+import { IBrand } from '../../../../../shared/types';
 import {
     View,
     Form,
@@ -21,9 +21,9 @@ import {
 } from '@adobe/react-spectrum';
 
 interface BrandFormProps {
-    brand?: Brand | null;
+    brand?: IBrand | null;
     mode: 'add' | 'edit' | 'view';
-    onSubmit: (brandData: Partial<Brand>) => Promise<void>;
+    onSubmit: (brandData: Partial<IBrand>) => Promise<void>;
     onCancel: () => void;
     loading?: boolean;
 }
@@ -148,6 +148,12 @@ const BrandForm: React.FC<BrandFormProps> = ({
                 {brand && mode === 'view' && (
                     <View marginBottom="size-200">
                         <Text>Brand ID: {brand.brandId}</Text>
+                        {brand.imsOrgName && (
+                            <Text>IMS Organization: {brand.imsOrgName}</Text>
+                        )}
+                        {brand.imsOrgId && (
+                            <Text>IMS Org ID: {brand.imsOrgId}</Text>
+                        )}
                         <Text>Created: {brand.createdAt.toLocaleDateString()}</Text>
                         <Text>Last Updated: {brand.updatedAt.toLocaleDateString()}</Text>
                         {brand.enabledAt && (

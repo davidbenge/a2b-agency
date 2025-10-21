@@ -80,9 +80,7 @@
             "brandId",
             "asset_presigned_url"
           ],
-          "optionalFields": [
-            "app_runtime_info"
-          ]
+          "optionalFields": []
         },
         "com.adobe.a2b.assetsync.update": {
           "code": "com.adobe.a2b.assetsync.update",

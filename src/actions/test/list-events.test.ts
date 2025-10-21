@@ -13,8 +13,8 @@ import {
     getEventCategories,
     isValidEventCode,
     getEventCountByCategory
-} from '../../shared/classes/EventRegistry';
-import { EventDefinition } from '../../shared/types';
+} from '../../shared/classes/AppEventRegistry';
+import { AppEventDefinition } from '../../shared/types';
 
 // Import expected response samples
 const listAllEventsResponse = require('../../../docs/apis/list-events/list-all-events.json');
@@ -106,7 +106,7 @@ describe('Event Registry', () => {
             expect(event?.code).toBe('com.adobe.a2b.assetsync.new');
             expect(event?.category).toBe('agency');
             expect(event?.name).toBe('Asset Sync New');
-            expect(event?.eventClass).toBe('AssetSyncNewEvent');
+            // eventClass removed - events are now created dynamically
         });
 
         it('should match specific event sample response', () => {
@@ -117,7 +117,7 @@ describe('Event Registry', () => {
             expect(event?.category).toEqual(sampleEvent.category);
             expect(event?.name).toEqual(sampleEvent.name);
             expect(event?.description).toEqual(sampleEvent.description);
-            expect(event?.eventClass).toEqual(sampleEvent.eventClass);
+            // eventClass removed - events are now created dynamically
             expect(event?.version).toEqual(sampleEvent.version);
             expect(event?.requiredFields).toEqual(sampleEvent.requiredFields);
             expect(event?.optionalFields).toEqual(sampleEvent.optionalFields);
@@ -163,7 +163,7 @@ describe('Event Registry', () => {
 
     describe('Event Registry Structure', () => {
         it('should have all required fields for each event', () => {
-            Object.values(EVENT_REGISTRY).forEach((event: EventDefinition) => {
+            Object.values(EVENT_REGISTRY).forEach((event: AppEventDefinition) => {
                 expect(event.code).toBeDefined();
                 expect(typeof event.code).toBe('string');
                 
@@ -176,8 +176,7 @@ describe('Event Registry', () => {
                 expect(event.description).toBeDefined();
                 expect(typeof event.description).toBe('string');
                 
-                expect(event.eventClass).toBeDefined();
-                expect(typeof event.eventClass).toBe('string');
+                // eventClass removed - events are now created dynamically
                 
                 expect(event.version).toBeDefined();
                 expect(typeof event.version).toBe('string');
@@ -191,7 +190,11 @@ describe('Event Registry', () => {
             const sampleEvent = listAllEventsResponse.body.data.events['com.adobe.a2b.assetsync.new'];
             const registryEvent = EVENT_REGISTRY['com.adobe.a2b.assetsync.new'];
             
-            expect(registryEvent).toMatchObject(sampleEvent);
+            // Compare key fields (eventClass removed)
+            expect(registryEvent.code).toBe(sampleEvent.code);
+            expect(registryEvent.category).toBe(sampleEvent.category);
+            expect(registryEvent.name).toBe(sampleEvent.name);
+            expect(registryEvent.description).toBe(sampleEvent.description);
         });
     });
 });
@@ -257,7 +260,7 @@ describe('List Events Action Response Structure', () => {
             expect(event.category).toBe('agency');
             expect(event.name).toBeDefined();
             expect(event.description).toBeDefined();
-            expect(event.eventClass).toBeDefined();
+            // eventClass removed - events are now created dynamically
             expect(event.version).toBeDefined();
             expect(event.requiredFields).toBeDefined();
             expect(event.optionalFields).toBeDefined();

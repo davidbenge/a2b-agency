@@ -10,9 +10,7 @@ import { BRAND_STATE_PREFIX } from "../constants";
 import { BrandManager } from "../classes/BrandManager";
 import * as randomstring from 'randomstring';
 import { v4 as uuidv4 } from 'uuid';
-import { NewBrandRegistrationEvent } from "../classes/a2b_events/NewBrandRegistrationEvent";
 import { EventManager } from "../classes/EventManager";
-import { IApplicationRuntimeInfo, IS2SAuthenticationCredentials } from "../types";
 import { ApplicationRuntimeInfo } from "../classes/ApplicationRuntimeInfo";
 
 export async function main(params: any): Promise<any> {
@@ -39,10 +37,20 @@ export async function main(params: any): Promise<any> {
     brandData.createdAt = new Date();
     brandData.updatedAt = new Date();
     brandData.enabledAt = null;
+    
+    // IMS org fields are optional - pass through if provided
+    // brandData.imsOrgName and brandData.imsOrgId are already in brandData if sent by brand
 
     let savedBrand: Brand;
     try{
       const brand = BrandManager.getBrandFromJson(brandData);
+      logger.info('Creating brand registration', {
+        name: brand.name,
+        brandId: brand.brandId,
+        enabled: brand.enabled,
+        imsOrgName: brand.imsOrgName,
+        imsOrgId: brand.imsOrgId
+      });
       logger.debug('Brand',JSON.stringify(brand, null, 2));
       logger.debug('Brand stringify',brand.toJSON());
 
@@ -55,12 +63,9 @@ export async function main(params: any): Promise<any> {
     }
 
     // We dont want to block the brand registration if the event fails to send.
-    //TODO: We should make a manager or util to make this all much simpler
     try {
-      logger.debug('new-brand-registration starting cloud event construction');
+      logger.debug('new-brand-registration starting event processing');
       logger.debug('new-brand-registration params keys', Object.keys(params));
-      const currentS2sAuthenticationCredentials = EventManager.getS2sAuthenticationCredentials(params);
-      const registrationProviderId = EventManager.getRegistrationProviderId(params);
       
       // Get runtime info from action params (from .env/config for this action)
       const applicationRuntimeInfoLocal = ApplicationRuntimeInfo.getApplicationRuntimeInfoFromActionParams(params);
@@ -75,13 +80,28 @@ export async function main(params: any): Promise<any> {
         throw new Error('Missing app_runtime_info in event data (from brand API call)');
       }
       
-      const eventManager = new EventManager(params.LOG_LEVEL, currentS2sAuthenticationCredentials, applicationRuntimeInfoLocal);
+      const eventManager = new EventManager(params);
       
-      // publish the event
-      await eventManager.publishEvent(new NewBrandRegistrationEvent(savedBrand, registrationProviderId));
+      // Prepare event data - brand registration.received event
+      const eventData = {
+        name: savedBrand.name,
+        endPointUrl: savedBrand.endPointUrl,
+        brandId: savedBrand.brandId
+      };
+      
+      // Process the registration.received event (no brand object yet, since we just created it)
+      const result = await eventManager.processEvent(
+        'com.adobe.a2b.registration.received',
+        null,  // No brand yet for received event
+        eventData
+      );
+      
+      logger.info('Registration event processed', {
+        ioPublished: result.ioEventPublished
+      });
 
     } catch (error: unknown) {
-      logger.error('Error sending event', error as any);
+      logger.error('Error processing event', error as any);
       return errorResponse(500, 'Error handling event', logger);
     }
     

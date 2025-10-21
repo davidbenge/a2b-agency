@@ -11,6 +11,7 @@
 
 import aioLogger from "@adobe/aio-lib-core-logging";
 import { checkMissingRequestInputs, errorResponse, stripOpenWhiskParams } from '../utils/common';
+import { BrandManager } from '../classes/BrandManager';
 
 export async function main(params: any): Promise<any> {
   const ACTION_NAME = 'agency:brand-event-handler';
@@ -40,8 +41,66 @@ export async function main(params: any): Promise<any> {
     return errorResponse(400, 'Missing required data.app_runtime_info in event', logger);
   }
 
+  // Extract brand ID from app_runtime_info (brand's consoleId identifies the brand)
+  const brandId = params.data.app_runtime_info?.consoleId;
+  if (!brandId) {
+    logger.error(`${ACTION_NAME}: Missing consoleId in app_runtime_info`);
+    return errorResponse(400, 'Missing consoleId in app_runtime_info', logger);
+  }
+
+  // Validate secret header for all events EXCEPT registration events
+  // Registration events (b2a.registration.*) don't require secret validation
+  // because the brand doesn't have the secret yet during registration
+  const isRegistrationEvent = params.type?.startsWith('com.adobe.b2a.registration.');
+  
+  let brand;
+  if (!isRegistrationEvent) {
+    const headers = params.__ow_headers || {};
+    const agencySecret = headers['x-a2b-agency-secret'];
+    
+    if (!agencySecret) {
+      logger.error(`${ACTION_NAME}: Missing X-A2B-Agency-Secret header for event type ${params.type}`);
+      return {
+        statusCode: 401,
+        body: 'Missing X-A2B-Agency-Secret header'
+      };
+    }
+
+    // Validate the secret against the stored brand
+    try {
+      const brandManager = new BrandManager(params.LOG_LEVEL || 'info');
+      brand = await brandManager.getBrand(brandId);
+      
+      if (!brand) {
+        logger.error(`${ACTION_NAME}: Brand not found: ${brandId}`);
+        return {
+          statusCode: 401,
+          body: 'Brand not found or not registered'
+        };
+      }
+
+      if (!brand.validateSecret(agencySecret)) {
+        logger.error(`${ACTION_NAME}: Invalid agency secret for brand: ${brandId}`);
+        return {
+          statusCode: 401,
+          body: 'Invalid agency secret'
+        };
+      }
+
+      logger.info(`${ACTION_NAME}: Secret validated successfully for brand: ${brandId}`);
+    } catch (error: unknown) {
+      logger.error(`${ACTION_NAME}: Error validating brand secret`, error as any);
+      return {
+        statusCode: 500,
+        body: 'Error validating brand credentials'
+      };
+    }
+  } else {
+    logger.info(`${ACTION_NAME}: Skipping secret validation for registration event: ${params.type}`);
+  }
+
   try {
-    logger.info(`${ACTION_NAME}: Brand Event Handler called with type: ${params.type}`);
+    logger.info(`${ACTION_NAME}: Brand Event Handler called with type: ${params.type} from brand: ${brandId}`);
 
     // Route events based on type
     switch(params.type) {

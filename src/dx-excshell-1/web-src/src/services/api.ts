@@ -1,4 +1,4 @@
-import { Brand } from '../../../../actions/classes/Brand';
+import { IBrand } from '../../../../shared/types';
 
 /**
  * API configuration and endpoints
@@ -130,8 +130,8 @@ export class ApiService {
     /**
      * Get brand list
      */
-    async getBrandList(): Promise<ApiResponse<Brand[]>> {
-        return this.callApi<Brand[]>(
+    async getBrandList(): Promise<ApiResponse<IBrand[]>> {
+        return this.callApi<IBrand[]>(
             `${API_CONFIG.ENDPOINTS.BRAND_GET_LIST}`, 'GET'
         );
     }
@@ -148,8 +148,8 @@ export class ApiService {
     /**
      * Update brand
      */
-    async updateBrand(brand: Brand): Promise<ApiResponse<Brand>> {
-        return this.callApi<Brand>(
+    async updateBrand(brand: IBrand): Promise<ApiResponse<IBrand>> {
+        return this.callApi<IBrand>(
             `${API_CONFIG.ENDPOINTS.BRAND_UPDATE}`, 'POST', brand
         );
     }

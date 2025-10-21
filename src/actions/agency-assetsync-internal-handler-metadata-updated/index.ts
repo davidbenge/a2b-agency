@@ -11,12 +11,8 @@ import { checkMissingRequestInputs, errorResponse, mergeRouterParams } from '../
 import { createLazy } from '../utils/lazy';
 import { EventManager } from '../classes/EventManager';
 import { getAemAssetData, getAemAuth } from '../utils/aemCscUtils';
-import { AssetSyncUpdateEvent } from '../classes/a2b_events/AssetSyncUpdateEvent';
-import { AssetSyncNewEvent } from '../classes/a2b_events/AssetSyncNewEvent';
 import { BrandManager } from "../classes/BrandManager";
 import { normalizeCustomersToArray } from "../utils/normalizers";
-import { IApplicationRuntimeInfo, IBrandEventPostResponse } from "../types";
-import { ApplicationRuntimeInfo } from "../classes/ApplicationRuntimeInfo";
 
 
 export async function main(params: any): Promise<any> {
@@ -28,24 +24,8 @@ export async function main(params: any): Promise<any> {
   params = mergeRouterParams(params);
   logger.debug(`${ACTION_NAME} incoming params post merge`, JSON.stringify(params, null, 2));
   
-  // Lazily compute inputs independently so each is only created when needed
-  const getS2sAuthenticationCredentials = createLazy(() => EventManager.getS2sAuthenticationCredentials(params));
-  const getAssetSyncProviderId = createLazy(() => EventManager.getAssetSyncProviderId(params));
-  const getApplicationRuntimeInfo = createLazy(() => ApplicationRuntimeInfo.getApplicationRuntimeInfoFromActionParams(params));
-
-  const getEventManager = createLazy(() => {
-    const currentS2sAuthenticationCredentials = getS2sAuthenticationCredentials();
-    const assetSyncProviderId = getAssetSyncProviderId();
-    const applicationRuntimeInfo = getApplicationRuntimeInfo();
-    if (!applicationRuntimeInfo) {
-      throw new Error('Missing APPLICATION_RUNTIME_INFO');
-    }
-    return new EventManager(
-      params.LOG_LEVEL,
-      currentS2sAuthenticationCredentials,
-      applicationRuntimeInfo
-    );
-  });
+  // Create EventManager with lazy initialization
+  const eventManager = new EventManager(params);
 
   // Check for required params
   const requiredParams: string[] = []
@@ -106,7 +86,6 @@ export async function main(params: any): Promise<any> {
         console.log(`${ACTION_NAME}: DEBUG - Sync conditions met, entering brand processing loop`);
         // loop over brands and send an event for each brand
         const customers = metadata["a2b__customers"];
-        const sourceProviderId = getAssetSyncProviderId();
         const presignedUrl = await fetchPresignedReadUrl(aemHostHostOnly, aemAssetPath, params, logger, ACTION_NAME);
         const brandManager = new BrandManager(params.LOG_LEVEL);
 
@@ -138,59 +117,42 @@ export async function main(params: any): Promise<any> {
           if (aemAssetData["jcr:content"].metadata["a2b__last_sync"]) {
             // update event
             console.log(`${ACTION_NAME}: DEBUG - Creating update event for brand: ${brandId}`);
-            logger.info(`assetSyncEventUpdate`);
-            
-            // Get application runtime info
-            const appRtInfo = ApplicationRuntimeInfo.getApplicationRuntimeInfoFromActionParams(params);
-            if (!appRtInfo) throw new Error('Missing APPLICATION_RUNTIME_INFO');
-            
-            // Create update event data
-            const updateEventData = {
-              app_runtime_info: appRtInfo.serialize(),
-              asset_id: aemAssetData["jcr:uuid"],
-              asset_path: aemAssetPath,
-              metadata: metadata,
-              brandId: brandId,
-              asset_presigned_url: presignedUrl
-            };
-            
-            console.log(`${ACTION_NAME}: DEBUG - Creating AssetSyncUpdateEvent for brand ${brandId}`);
-            const assetSyncEventUpdate = new AssetSyncUpdateEvent(updateEventData);
-            console.log(`${ACTION_NAME}: DEBUG - AssetSyncUpdateEvent created successfully for brand ${brandId}`);
+            logger.info(`${ACTION_NAME}: Processing asset sync update event`);
             
             // Get the brand 
             const brand = await brandManager.getBrand(brandId);
             console.log(`${ACTION_NAME}: DEBUG - Retrieved brand for ${brandId}:`, { brand: !!brand, enabled: brand?.enabled });
-            let brandSendResponse: IBrandEventPostResponse;
+            
             if(brand && brand.enabled){
-              console.log(`${ACTION_NAME}: DEBUG - Brand ${brandId} is enabled, sending event`);
+              console.log(`${ACTION_NAME}: DEBUG - Brand ${brandId} is enabled, processing event`);
               try{
-                // Send the event to the brand
-                console.log(`${ACTION_NAME}: DEBUG - About to call sendCloudEventToEndpoint for brand ${brandId}`);
-                console.log(`${ACTION_NAME}: DEBUG - Brand sendCloudEventToEndpoint method:`, typeof brand.sendCloudEventToEndpoint);
-                console.log(`${ACTION_NAME}: DEBUG - Brand sendCloudEventToEndpoint is mock:`, (brand.sendCloudEventToEndpoint as any).mock);
-                console.log(`${ACTION_NAME}: DEBUG - About to log brand URL: ${brand.endPointUrl}`);
+                // Prepare event data
+                const eventData = {
+                  asset_id: aemAssetData["jcr:uuid"],
+                  asset_path: aemAssetPath,
+                  metadata: metadata,
+                  brandId: brandId,
+                  asset_presigned_url: presignedUrl
+                };
+                
+                console.log(`${ACTION_NAME}: DEBUG - About to process event for brand ${brandId}`);
                 logger.info(`${ACTION_NAME}: sending update event to brand url <${brand.endPointUrl}>`);
-                console.log(`${ACTION_NAME}: DEBUG - About to set source for event`);
-                assetSyncEventUpdate.setSource(getAssetSyncProviderId()); // set source before toCloudEvent()
-                console.log(`${ACTION_NAME}: DEBUG - About to call toCloudEvent()`);
-                logger.info(`${ACTION_NAME}: sending update event to brand this cloud event <${assetSyncEventUpdate.toCloudEvent()}>`);
-                console.log(`${ACTION_NAME}: DEBUG - toCloudEvent() completed successfully`);
-                try {
-                  console.log(`${ACTION_NAME}: DEBUG - About to await sendCloudEventToEndpoint for brand ${brandId}`);
-                  brandSendResponse = await brand.sendCloudEventToEndpoint(assetSyncEventUpdate);
-                  console.log(`${ACTION_NAME}: DEBUG - sendCloudEventToEndpoint completed successfully for brand ${brandId}`);
-                } catch (error) {
-                  console.log(`${ACTION_NAME}: DEBUG - sendCloudEventToEndpoint failed for brand ${brandId}:`, error);
-                  throw error;
-                }
-                logger.info(`${ACTION_NAME}: brandSendResponse`, JSON.stringify(brandSendResponse, null, 2));
-
-                // Publish the event to the event manager
-                await getEventManager().publishEvent(assetSyncEventUpdate);
-                logger.info(`assetSyncEventUpdate complete`);
+                
+                // Process event - handles validation, injection, brand send, and IO Events publish
+                const result = await eventManager.processEvent(
+                  'com.adobe.a2b.assetsync.update',
+                  brand,
+                  eventData
+                );
+                
+                console.log(`${ACTION_NAME}: DEBUG - Event processed successfully for brand ${brandId}`);
+                logger.info(`${ACTION_NAME}: Asset sync update complete`, {
+                  brandSent: !!result.brandSendResult,
+                  ioPublished: result.ioEventPublished
+                });
               }catch(error: unknown){
-                logger.error(`${ACTION_NAME}: error sending update event to brand`, error as string);
+                console.log(`${ACTION_NAME}: DEBUG - Error processing event for brand ${brandId}:`, error);
+                logger.error(`${ACTION_NAME}: error processing update event`, error as string);
                 //don't fail the action if the brand endpoint fails
               }
             } else {
@@ -200,34 +162,34 @@ export async function main(params: any): Promise<any> {
           } else {
             // new event  
             console.log(`${ACTION_NAME}: DEBUG - Creating new event for brand: ${brandId}`);
-            // todo: almost think a factory would be better here to build Events easier
-            const appRtInfo = ApplicationRuntimeInfo.getApplicationRuntimeInfoFromActionParams(params);
-            if (!appRtInfo) throw new Error('Missing APPLICATION_RUNTIME_INFO');
-            const assetSyncEventNew = new AssetSyncNewEvent(
-              appRtInfo,
-              aemAssetData["jcr:uuid"],
-              aemAssetPath,
-              metadata,
-              presignedUrl,
-              brandId,
-              sourceProviderId
-            );
-
+            logger.info(`${ACTION_NAME}: Processing asset sync new event`);
+            
             //get the brand 
             const brand = await brandManager.getBrand(brandId);
-            let brandSendResponse: IBrandEventPostResponse;
+            
             if(brand && brand.enabled){
               try{
-                //send the event to the brand
-                logger.info(`${ACTION_NAME}: sending event to brand url <${brand.endPointUrl}>`);
-                logger.info(`${ACTION_NAME}: sending event to brand this cloud event <${assetSyncEventNew.toCloudEvent()}>`);
-                brandSendResponse = await brand.sendCloudEventToEndpoint(assetSyncEventNew);
-                logger.info(`${ACTION_NAME}: brandSendResponse`, JSON.stringify(brandSendResponse, null, 2));
-
-                //publish the event to the event manager
-                assetSyncEventNew.setSource(getAssetSyncProviderId()); // update to IO event provider id
-                await getEventManager().publishEvent(assetSyncEventNew);
-                logger.info(`assetSyncEventNew complete`);
+                // Prepare event data
+                const eventData = {
+                  asset_id: aemAssetData["jcr:uuid"],
+                  asset_path: aemAssetPath,
+                  metadata: metadata,
+                  brandId: brandId,
+                  asset_presigned_url: presignedUrl
+                };
+                
+                // Process event - handles validation, injection, brand send, and IO Events publish
+                logger.info(`${ACTION_NAME}: sending new event to brand url <${brand.endPointUrl}>`);
+                const result = await eventManager.processEvent(
+                  'com.adobe.a2b.assetsync.new',
+                  brand,
+                  eventData
+                );
+                
+                logger.info(`${ACTION_NAME}: Asset sync new complete`, {
+                  brandSent: !!result.brandSendResult,
+                  ioPublished: result.ioEventPublished
+                });
               }catch(error: unknown){
                 // Error objects stringify to {}, so extract meaningful fields and any embedded JSON details
                 const safeError: any = (error instanceof Error)
@@ -242,7 +204,7 @@ export async function main(params: any): Promise<any> {
                   }
                 }
                 logger.error(
-                  `${ACTION_NAME}: error sending event to brand url <${brand.endPointUrl}>`,
+                  `${ACTION_NAME}: error processing new event to brand url <${brand.endPointUrl}>`,
                   { error: safeError, details: embeddedDetails }
                 );
               }

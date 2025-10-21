@@ -140,8 +140,8 @@ describe('adobe-product-event-handler', () => {
       expect(result.statusCode).toBe(200);
       expect(result.body.message).toBe('Adobe product event processed successfully');
       expect(result.body.eventType).toBe('aem.assets.asset.metadata_updated');
-      expect(result.body.routingResult).toBeDefined();
-      expect(result.body.routingResult.success).toBe(true);
+      expect(result.body.handler).toBe('a2b-agency/agency-assetsync-internal-handler-metadata-updated');
+      expect(result.body.result).toBeDefined();
     });
 
     it('should handle AEM asset processing completed events', async () => {
@@ -157,8 +157,8 @@ describe('adobe-product-event-handler', () => {
       expect(result.statusCode).toBe(200);
       expect(result.body.message).toBe('Adobe product event processed successfully');
       expect(result.body.eventType).toBe('aem.assets.asset.processing_completed');
-      expect(result.body.routingResult).toBeDefined();
-      expect(result.body.routingResult.success).toBe(true);
+      expect(result.body.handler).toBe('a2b-agency/agency-assetsync-internal-handler-process-complete');
+      expect(result.body.result).toBeDefined();
     });
 
     it('should handle errors gracefully', async () => {
@@ -176,10 +176,10 @@ describe('adobe-product-event-handler', () => {
 
       const result = await main(params, mockOpenWhisk);
 
-      expect(result.statusCode).toBe(200);
-      expect(result.body.message).toBe('Adobe product event processed successfully');
-      expect(result.body.routingResult.success).toBe(false);
-      expect(result.body.routingResult.error).toBeDefined();
+      // When handler throws, the action should catch and return 500
+      expect(result.statusCode).toBe(500);
+      expect(result.body.message).toBe('Error processing Adobe product event');
+      expect(result.body.error).toBeDefined();
     });
   });
 
@@ -294,8 +294,8 @@ describe('adobe-product-event-handler', () => {
       const result = await main(params, mockOpenWhisk);
 
       expect(result.statusCode).toBe(200);
-      expect(result.body.routingResult.success).toBe(true);
-      expect(result.body.routingResult.result).toEqual(customResult);
+      expect(result.body.handler).toBe('a2b-agency/agency-assetsync-internal-handler-metadata-updated');
+      expect(result.body.result).toEqual(customResult);
     });
   });
 
@@ -315,9 +315,10 @@ describe('adobe-product-event-handler', () => {
 
       const result = await main(params, mockOpenWhisk);
 
-      expect(result.statusCode).toBe(200);
-      expect(result.body.routingResult.success).toBe(false);
-      expect(result.body.routingResult.error).toBeDefined();
+      // When handler throws, the action should catch and return 500
+      expect(result.statusCode).toBe(500);
+      expect(result.body.message).toBe('Error processing Adobe product event');
+      expect(result.body.error).toBeDefined();
     });
 
     it('should handle malformed event data', async () => {
@@ -328,11 +329,12 @@ describe('adobe-product-event-handler', () => {
         data: null // Malformed data
       };
 
-      const result = await main(params);
+      const result = await main(params, mockOpenWhisk);
 
+      // Malformed data will still be passed to handler
       expect(result.statusCode).toBe(200);
       expect(result.body.message).toBe('Adobe product event processed successfully');
-      expect(result.body.routingResult).toBeDefined();
+      expect(result.body.handler).toBe('a2b-agency/agency-assetsync-internal-handler-metadata-updated');
     });
   });
 

@@ -186,8 +186,8 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
       expect(result.statusCode).toBe(200);
       expect(result.body.message).toBe('Adobe product event processed successfully');
       expect(result.body.eventType).toBe('aem.assets.asset.processing_completed');
-      expect(result.body.routingResult).toBeDefined();
-      expect(result.body.routingResult.success).toBe(true);
+      expect(result.body.handler).toBe('a2b-agency/agency-assetsync-internal-handler-process-complete');
+      expect(result.body.result).toBeDefined();
 
       // Verify that the agency-assetsync-internal-handler-process-complete was invoked
       expect(mockOpenWhiskClient.wasActionInvoked('a2b-agency/agency-assetsync-internal-handler-process-complete')).toBe(true);
@@ -431,8 +431,8 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
               consoleId: "27200",
               projectName: "a2b",
               workspace: "benge",
-              appName: "agency",
-              actionPackageName: "a2b-agency"
+              app_name: "agency",
+              action_package_name: "a2b-agency"
             })
           })
         })

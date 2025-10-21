@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ViewPropsBase } from '../../types/ViewPropsBase';
+import { IBrand } from '../../../../../shared/types';
 import { Brand } from '../../../../../actions/classes/Brand';
 import { DemoBrandManager } from '../../utils/DemoBrandManager';
 import BrandForm from './BrandForm';
@@ -20,19 +21,22 @@ import {
     SearchField,
     ComboBox,
     Item,
-    Image
+    Image,
+    TooltipTrigger,
+    Tooltip
 } from '@adobe/react-spectrum';
 import Add from '@spectrum-icons/workflow/Add';
 import Edit from '@spectrum-icons/workflow/Edit';
 import ViewDetail from '@spectrum-icons/workflow/ViewDetail';
 import Delete from '@spectrum-icons/workflow/Delete';
+import Close from '@spectrum-icons/workflow/Close';
 import { v4 as uuidv4 } from 'uuid';
 import { apiService } from '../../services/api';
 
 type ViewMode = 'list' | 'add' | 'edit' | 'view';
 
 // Mock data for testing (only used in demo mode)
-const mockBrands: Brand[] = [
+const mockBrands: IBrand[] = [
     DemoBrandManager.createBrand({
         brandId: '1',
         secret: 'mock-secret-1',
@@ -176,36 +180,105 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
         setSuccess(null);
     };
 
-    const handleEditBrand = (brand: Brand) => {
+    const handleEditBrand = (brand: IBrand) => {
         setSelectedBrand(brand);
         setViewMode('edit');
         setError(null);
         setSuccess(null);
     };
 
-    const handleViewBrand = (brand: Brand) => {
+    const handleViewBrand = (brand: IBrand) => {
         setSelectedBrand(brand);
         setViewMode('view');
         setError(null);
         setSuccess(null);
     };
 
-    const handleDeleteBrand = (brandId: string) => {
+    const handleDeleteBrand = async (brandId: string) => {
         if (!confirm('Are you sure you want to delete this brand?')) {
             return;
         }
 
-        if (viewProps.aioEnableDemoMode) {
-            // Demo mode: local state management
-            setBrands(brands.filter(brand => brand.brandId !== brandId));
-            setSuccess('Brand deleted successfully');
-        } else {
-            // TODO: Implement real API call here
-            setError('Delete functionality not implemented in production mode');
+        try {
+            setError(null);
+            setSuccess(null);
+
+            if (viewProps.aioEnableDemoMode) {
+                // Demo mode: local state management
+                setBrands(brands.filter(brand => brand.brandId !== brandId));
+                setSuccess('Brand deleted successfully');
+            } else {
+                // Production mode: call API
+                const response = await apiService.deleteBrand(brandId);
+                
+                if (response.statusCode === 200) {
+                    // Remove from local state
+                    setBrands(brands.filter(brand => brand.brandId !== brandId));
+                    setSuccess('Brand deleted successfully');
+                } else {
+                    setError(`Failed to delete brand: ${response.body?.error || 'Unknown error'}`);
+                }
+            }
+        } catch (error) {
+            console.error('Error deleting brand:', error);
+            setError('Error deleting brand. Please try again.');
         }
 
-        // Clear success message after 3 seconds
-        setTimeout(() => setSuccess(null), 3000);
+        // Clear messages after 3 seconds
+        setTimeout(() => {
+            setSuccess(null);
+            setError(null);
+        }, 3000);
+    };
+
+    const handleDisableBrand = async (brand: IBrand) => {
+        if (!confirm(`Are you sure you want to disable "${brand.name}"?`)) {
+            return;
+        }
+
+        try {
+            setError(null);
+            setSuccess(null);
+
+            if (viewProps.aioEnableDemoMode) {
+                // Demo mode: local state management
+                const updatedBrand = DemoBrandManager.createBrand({
+                    ...brand.toJSON(),
+                    enabled: false,
+                    enabledAt: null,
+                    updatedAt: new Date()
+                });
+                setBrands(brands.map(b => b.brandId === brand.brandId ? updatedBrand : b));
+                setSuccess('Brand disabled successfully');
+            } else {
+                // Production mode: call API
+                const updatedBrand = new Brand({
+                    ...brand.toJSON(),
+                    enabled: false,
+                    enabledAt: null,
+                    updatedAt: new Date()
+                });
+
+                const response = await apiService.updateBrand(updatedBrand);
+                
+                if (response.statusCode === 200 && response.body.data) {
+                    const brandFromApi = DemoBrandManager.getBrandFromJson(response.body.data);
+                    setBrands(brands.map(b => b.brandId === brand.brandId ? brandFromApi : b));
+                    setSuccess('Brand disabled successfully');
+                } else {
+                    setError(`Failed to disable brand: ${response.body?.error || 'Unknown error'}`);
+                }
+            }
+        } catch (error) {
+            console.error('Error disabling brand:', error);
+            setError('Error disabling brand. Please try again.');
+        }
+
+        // Clear messages after 3 seconds
+        setTimeout(() => {
+            setSuccess(null);
+            setError(null);
+        }, 3000);
     };
 
     const handleFormSubmit = async (brandData: Partial<Brand>) => {
@@ -358,20 +431,17 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                 ) : (
                     <TableView
                         aria-label="Brands table"
-                        selectionMode="single"
                         sortDescriptor={sortDescriptor}
                         onSortChange={setSortDescriptor}
-                        onSelectionChange={(selected) => {
-                            console.log('Selected:', selected);
-                        }}
                     >
                         <TableHeader>
-                            <Column key="logo">Logo</Column>
-                            <Column key="name" allowsSorting>Name</Column>
-                            <Column key="endPointUrl" allowsSorting>Endpoint URL</Column>
-                            <Column key="enabled" allowsSorting>Status</Column>
-                            <Column key="createdAt" allowsSorting>Created</Column>
-                            <Column align="center">Actions</Column>
+                            <Column key="logo" width={80}>Logo</Column>
+                            <Column key="name" allowsSorting minWidth={150}>Name</Column>
+                            <Column key="imsOrgName" allowsSorting minWidth={150}>IMS Org</Column>
+                            <Column key="endPointUrl" allowsSorting minWidth={200}>Endpoint URL</Column>
+                            <Column key="enabled" allowsSorting width={120}>Status</Column>
+                            <Column key="createdAt" allowsSorting width={120}>Created</Column>
+                            <Column key="actions" align="center" width={200}>Actions</Column>
                         </TableHeader>
                         <TableBody>
                             {filteredAndSortedBrands.map((brand) => (
@@ -381,8 +451,8 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                             <Image
                                                 src={brand.logo}
                                                 alt={brand.name}
-                                                width="size-400"
-                                                height="size-400"
+                                                width="size-600"
+                                                height="size-600"
                                                 objectFit="contain"
                                             />
                                         ) : (
@@ -390,7 +460,49 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                         )}
                                     </Cell>
                                     <Cell>{brand.name}</Cell>
-                                    <Cell>{brand.endPointUrl}</Cell>
+                                    <Cell>
+                                        {brand.imsOrgName ? (
+                                            <TooltipTrigger>
+                                                <Text
+                                                    UNSAFE_style={{
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                        display: 'block',
+                                                        cursor: 'help'
+                                                    }}
+                                                >
+                                                    {brand.imsOrgName}
+                                                </Text>
+                                                <Tooltip>
+                                                    <div>
+                                                        <strong>Org Name:</strong> {brand.imsOrgName}<br/>
+                                                        {brand.imsOrgId && (
+                                                            <><strong>Org ID:</strong> {brand.imsOrgId}</>
+                                                        )}
+                                                    </div>
+                                                </Tooltip>
+                                            </TooltipTrigger>
+                                        ) : (
+                                            <Text>—</Text>
+                                        )}
+                                    </Cell>
+                                    <Cell>
+                                        <TooltipTrigger>
+                                            <Text
+                                                UNSAFE_style={{
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    display: 'block',
+                                                    cursor: 'help'
+                                                }}
+                                            >
+                                                {brand.endPointUrl}
+                                            </Text>
+                                            <Tooltip>{brand.endPointUrl}</Tooltip>
+                                        </TooltipTrigger>
+                                    </Cell>
                                     <Cell>
                                         <StatusLight variant={brand.enabled ? 'positive' : 'negative'}>
                                             {brand.enabled ? 'Enabled' : 'Disabled'}
@@ -411,12 +523,24 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                             >
                                                 <Edit />
                                             </Button>
-                                            <Button
-                                                variant="negative"
-                                                onPress={() => handleDeleteBrand(brand.brandId)}
-                                            >
-                                                <Delete />
-                                            </Button>
+                                            {/* Disable button only shown for enabled brands */}
+                                            {brand.enabled && (
+                                                <Button
+                                                    variant="negative"
+                                                    onPress={() => handleDisableBrand(brand)}
+                                                >
+                                                    <Close />
+                                                </Button>
+                                            )}
+                                            {/* Delete button only shown for disabled brands */}
+                                            {!brand.enabled && (
+                                                <Button
+                                                    variant="negative"
+                                                    onPress={() => handleDeleteBrand(brand.brandId)}
+                                                >
+                                                    <Delete />
+                                                </Button>
+                                            )}
                                         </Flex>
                                     </Cell>
                                 </Row>

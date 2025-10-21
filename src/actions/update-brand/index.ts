@@ -5,9 +5,7 @@ import { errorResponse, checkMissingRequestInputs } from "../utils/common";
 import aioLogger from "@adobe/aio-lib-core-logging";
 import { Brand } from "../classes/Brand";
 import { BrandManager } from "../classes/BrandManager";
-import { RegistrationEnabledEvent } from "../classes/a2b_events/RegistrationEnabledEvent";
-import { RegistrationDisabledEvent } from "../classes/a2b_events/RegistrationDisabledEvent";
-import { getApplicationRuntimeInfo } from "../utils/applicationRuntimeInfo";
+import { EventManager } from "../classes/EventManager";
 
 export async function main(params: any): Promise<any> {
   const logger = aioLogger("update-brand", { level: params.LOG_LEVEL || "info" });
@@ -69,29 +67,29 @@ export async function main(params: any): Promise<any> {
       logger.info(`Brand ${params.brandId} was enabled, sending registration.enabled event`);
       
       try {
-        const event = new RegistrationEnabledEvent(
-          savedBrand.brandId,
-          savedBrand.secret,
-          savedBrand.name,
-          savedBrand.endPointUrl,
-          savedBrand.enabledAt || now
+        const eventManager = new EventManager(params);
+        
+        // Prepare event data
+        const eventData = {
+          brandId: savedBrand.brandId,
+          secret: savedBrand.secret,
+          enabled: true,
+          name: savedBrand.name,
+          endPointUrl: savedBrand.endPointUrl,
+          enabledAt: savedBrand.enabledAt || now
+        };
+        
+        // Process event - handles validation, injection, brand send, and IO Events publish
+        const result = await eventManager.processEvent(
+          'com.adobe.a2b.registration.enabled',
+          savedBrand,
+          eventData
         );
-
-        // Set the source from application runtime info
-        const appRuntimeInfo = getApplicationRuntimeInfo(params);
-        if (appRuntimeInfo) {
-          event.setSourceUri(appRuntimeInfo);
-          event.data.app_runtime_info = appRuntimeInfo;
-        } else {
-          logger.warn('Could not extract application runtime info for event source');
-        }
-
-        // savedBrand is already enabled (we just saved it with enabled: true)
-        // so we can send the event directly
-        const response = await savedBrand.sendCloudEventToEndpoint(event);
+        
         logger.info('Successfully sent registration.enabled event to brand', { 
-          brandId: savedBrand.brandId, 
-          response 
+          brandId: savedBrand.brandId,
+          brandSent: !!result.brandSendResult,
+          ioPublished: result.ioEventPublished
         });
       } catch (eventError: unknown) {
         const err = eventError as Error;
@@ -108,26 +106,26 @@ export async function main(params: any): Promise<any> {
       logger.info(`Brand ${params.brandId} was disabled, sending registration.disabled event`);
       
       try {
-        const event = new RegistrationDisabledEvent(
-          savedBrand.brandId,
-          savedBrand.name,
-          savedBrand.endPointUrl
+        const eventManager = new EventManager(params);
+        
+        // Prepare event data
+        const eventData = {
+          brandId: savedBrand.brandId,
+          enabled: false,
+          endPointUrl: savedBrand.endPointUrl
+        };
+        
+        // Process event - special handling allows sending even when disabled
+        const result = await eventManager.processEvent(
+          'com.adobe.a2b.registration.disabled',
+          savedBrand,
+          eventData
         );
-
-        // Set the source from application runtime info
-        const appRuntimeInfo = getApplicationRuntimeInfo(params);
-        if (appRuntimeInfo) {
-          event.setSourceUri(appRuntimeInfo);
-          event.data.app_runtime_info = appRuntimeInfo;
-        } else {
-          logger.warn('Could not extract application runtime info for event source');
-        }
-
-        // For disabled event, we can send it before marking as disabled
-        const response = await existingBrand.sendCloudEventToEndpoint(event);
+        
         logger.info('Successfully sent registration.disabled event to brand', { 
-          brandId: savedBrand.brandId, 
-          response 
+          brandId: savedBrand.brandId,
+          brandSent: !!result.brandSendResult,
+          ioPublished: result.ioEventPublished
         });
       } catch (eventError: unknown) {
         const err = eventError as Error;

@@ -7,6 +7,10 @@
           "projectName": "a2b",
           "workspace": "benge"
       },
+      "agency_identification": {
+          "agencyId": "2ff22120-d393-4743-afdd-0d4b2038d2be",
+          "orgId": "33C1401053CF76370A490D4C@AdobeOrg"
+      },
       "asset_id": "8327388d-d9e3-47c5-9280-a426c5dcb3b1",
       "asset_path": "/content/dam/agency_work_for_BRAND_A/Screenshot 2025-05-28 at 5.38.13 PM.png",
       "asset_presigned_url": "https://author-p142461-e1463137.adobeaemcloud.com/aem-blob-ns-team-aem-cm-prd-n136729-cm-p142461-e1463137/1fa7-df02-6e77-4f82-FAKE-97497c5e839a-1756351804571?sig=z%2FhdEY0gptpMpCTl7QZMW16XTD1uEDwQjXAfZg4ltrk%3D&se=2025-08-28T18%3A24%3A17Z&sv=2019-02-02&rscc=private%2C%20max-age%3D43200%2C%20immutable&rsct=image%2Fpng&rscd=attachment%3B%20filename%3D%22Screenshot%202025-05-28%20at%205.38.13%3FPM.png%22%3B%20filename*%3DUTF-8%27%27Screenshot%25202025-05-28%2520at%25205.38.13%25E2%2580%25AFPM.png&sp=r&sr=b",

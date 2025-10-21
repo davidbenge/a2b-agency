@@ -2,6 +2,7 @@ import { CloudEvent } from 'cloudevents';
 import { Ia2bEvent, IValidationResult } from '../types/index';
 import { v4 as uuidv4 } from 'uuid';
 import { IApplicationRuntimeInfo } from '../types/index';
+import { IAgencyIdentification } from './AgencyIdentification';
 
 export abstract class A2bEvent implements Ia2bEvent {
     source!: string;
@@ -15,6 +16,8 @@ export abstract class A2bEvent implements Ia2bEvent {
         this.datacontenttype = 'application/json';
         this.id = uuidv4(); // set the id
         this.data = {};
+        // Set a default source (will be overridden by setSourceUri if APPLICATION_RUNTIME_INFO is available)
+        this.source = `urn:uuid:${this.id}`;
     }
 
     validate(): IValidationResult {
@@ -88,6 +91,19 @@ export abstract class A2bEvent implements Ia2bEvent {
 
     setSourceUri(applicationRuntimeInfo: IApplicationRuntimeInfo): void {
          this.setSource(`https://${applicationRuntimeInfo.consoleId}-${applicationRuntimeInfo.projectName}-${applicationRuntimeInfo.workspace}.adobeio-static.net`);
+    }
+
+    /**
+     * Set agency identification in event data
+     * This allows brands to support multiple agencies and identify the source
+     * 
+     * @param agencyIdentification - Agency ID and Org ID
+     */
+    setAgencyIdentification(agencyIdentification: IAgencyIdentification): void {
+        this.data.agency_identification = {
+            agencyId: agencyIdentification.agencyId,
+            orgId: agencyIdentification.orgId
+        };
     }
 
     toCloudEvent(): CloudEvent {
