@@ -35,6 +35,15 @@ application:
             annotations:
               require-adobe-auth: false
               final: true
+          list-events:
+            function: src/actions/list-events/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: false
+              final: true
           delete-brand:
             function: src/actions/delete-brand/index.ts
             web: 'yes'
