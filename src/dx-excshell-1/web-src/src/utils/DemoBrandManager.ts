@@ -7,57 +7,10 @@
  */
 
 import { IBrand } from "../../../../shared/types";
-
-/**
- * Simple Brand class for frontend demo mode
- * Does not include Node-specific dependencies like axios
- */
-export class Brand implements IBrand {
-    readonly brandId: string;
-    readonly secret?: string;
-    readonly name: string;
-    readonly endPointUrl: string;
-    readonly enabled: boolean;
-    readonly logo?: string;
-    readonly imsOrgName?: string;
-    readonly imsOrgId?: string;
-    readonly createdAt: Date | string;
-    readonly updatedAt: Date | string;
-    readonly enabledAt: Date | string | null;
-
-    constructor(params: IBrand) {
-        this.brandId = params.brandId;
-        this.secret = params.secret;
-        this.name = params.name;
-        this.endPointUrl = params.endPointUrl;
-        this.enabled = params.enabled;
-        this.logo = params.logo;
-        this.imsOrgName = params.imsOrgName;
-        this.imsOrgId = params.imsOrgId;
-        this.createdAt = params.createdAt;
-        this.updatedAt = params.updatedAt;
-        this.enabledAt = params.enabledAt;
-    }
-
-    toJSON(): IBrand {
-        return {
-            brandId: this.brandId,
-            secret: this.secret,
-            name: this.name,
-            endPointUrl: this.endPointUrl,
-            enabled: this.enabled,
-            logo: this.logo,
-            imsOrgName: this.imsOrgName,
-            imsOrgId: this.imsOrgId,
-            createdAt: this.createdAt,
-            updatedAt: this.updatedAt,
-            enabledAt: this.enabledAt
-        };
-    }
-}
+import { Brand } from "../classes/Brand";
 
 export class DemoBrandManager {
-    private brands: Map<string, Brand> = new Map();
+    private brands: Map<string, IBrand> = new Map();
 
     /**
      * Factory method to create a Brand from JSON data
@@ -85,11 +38,12 @@ export class DemoBrandManager {
 
         return new Brand({
             brandId: json.brandId,
-            secret: json.secret, // Optional - will be empty string if not provided
             name: json.name,
             endPointUrl: json.endPointUrl,
             enabled: json.enabled,
             logo: json.logo,
+            imsOrgName: json.imsOrgName,
+            imsOrgId: json.imsOrgId,
             createdAt: json.createdAt ? new Date(json.createdAt) : new Date(),
             updatedAt: json.updatedAt ? new Date(json.updatedAt) : new Date(),
             enabledAt: json.enabledAt ? new Date(json.enabledAt) : null
@@ -105,11 +59,12 @@ export class DemoBrandManager {
         const now = new Date();
         return new Brand({
             brandId: data.brandId || this.generateBrandId(),
-            secret: data.secret || this.generateSecret(),
             name: data.name || '',
             endPointUrl: data.endPointUrl || '',
             enabled: data.enabled ?? false,
             logo: data.logo,
+            imsOrgName: data.imsOrgName,
+            imsOrgId: data.imsOrgId,
             createdAt: data.createdAt ?? now,
             updatedAt: data.updatedAt ?? now,
             enabledAt: data.enabledAt ?? null
@@ -130,7 +85,7 @@ export class DemoBrandManager {
      * @returns The brand or undefined if not found
      */
     getBrand(brandId: string): Brand | undefined {
-        return this.brands.get(brandId);
+        return this.brands.get(brandId) as Brand | undefined;
     }
 
     /**
@@ -156,7 +111,7 @@ export class DemoBrandManager {
      * @returns Array of all brands
      */
     getAllBrands(): Brand[] {
-        return Array.from(this.brands.values());
+        return Array.from(this.brands.values()) as Brand[];
     }
 
     /**

@@ -45,14 +45,16 @@ export async function main(params: any): Promise<any> {
 
     const now = new Date();
     
-    // Create update data, excluding secret from params for security
-    // Secret can only be generated internally, never passed from client
-    const { secret: _ignoredSecret, ...safeParams } = params;
+    // Create update data, excluding secret and endPointUrl from params for security
+    // - Secret can only be generated internally, never passed from client
+    // - endPointUrl can only be set during initial registration, never changed
+    const { secret: _ignoredSecret, endPointUrl: _ignoredEndPointUrl, ...safeParams } = params;
     
     const updatedBrand = BrandManager.createBrand({
       ...existingBrand.toJSON(),
       ...safeParams,
       brandId: params.brandId, // Ensure brandId doesn't change
+      endPointUrl: existingBrand.endPointUrl, // Preserve original endPointUrl (never from params)
       secret: secret, // Use existing or newly generated secret (never from params)
       updatedAt: now,
       enabledAt: isEnablingBrand ? now : (isDisablingBrand ? null : existingBrand.enabledAt)

@@ -178,10 +178,10 @@ const BrandForm: React.FC<BrandFormProps> = ({
                         value={formData.endPointUrl || ''}
                         onChange={(value) => setFormData({ ...formData, endPointUrl: value })}
                         isRequired
-                        isReadOnly={isViewMode}
+                        isReadOnly={true}
                         validationState={errors.endPointUrl ? 'invalid' : undefined}
                         errorMessage={errors.endPointUrl}
-                        placeholder="https://example.com/api"
+                        description="Set during initial registration and cannot be changed"
                     />
 
                     {/* Logo Upload Section */}

@@ -108,7 +108,8 @@ export async function main(params: any): Promise<any> {
     return {
       statusCode: 200,
       body: {
-        message: `Brand registration processed successfully for brand id ${savedBrand.brandId}`
+        message: `Brand registration processed successfully for brand id ${savedBrand.brandId}`,
+        ...savedBrand.toSafeJSON() // Include brand data WITHOUT secret (follows security rule)
       }
     }
   } catch (error) {

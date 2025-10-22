@@ -9,6 +9,8 @@
  * @module shared/types/brand
  */
 
+import { Ia2bEvent } from "../../actions/types";
+
 /**
  * Brand interface representing a registered brand/customer
  * 

@@ -350,12 +350,13 @@ describe('update-brand Action', () => {
       // If business logic requires new secret on re-enable, that should be tested differently
     });
 
-    it('should update other fields without changing enabled state', async () => {
+    it('should update other fields without changing enabled state or endPointUrl', async () => {
       const brandManager = await setupDisabledBrand();
+      const originalEndPointUrl = 'https://test-brand.example.com/webhook';
       
       const params = createTestParams('test-brand-123', {
         name: 'Updated Name Only',
-        endPointUrl: 'https://new-url.example.com/webhook'
+        endPointUrl: 'https://new-url.example.com/webhook' // This should be ignored
         // Note: enabled not specified, should keep current state (false)
       });
 
@@ -365,7 +366,7 @@ describe('update-brand Action', () => {
       
       const updatedBrand = await brandManager.getBrand('test-brand-123');
       expect(updatedBrand!.name).toBe('Updated Name Only');
-      expect(updatedBrand!.endPointUrl).toBe('https://new-url.example.com/webhook');
+      expect(updatedBrand!.endPointUrl).toBe(originalEndPointUrl); // ✅ endPointUrl should NOT change (immutable)
       expect(updatedBrand!.enabled).toBe(false); // Should remain disabled
     });
 

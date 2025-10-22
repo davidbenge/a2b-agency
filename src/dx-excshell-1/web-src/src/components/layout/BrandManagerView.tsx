@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ViewPropsBase } from '../../types/ViewPropsBase';
 import { IBrand } from '../../../../../shared/types';
-import { DemoBrandManager, Brand } from '../../utils/DemoBrandManager';
+import { DemoBrandManager } from '../../utils/DemoBrandManager';
 import BrandForm from './BrandForm';
 import {
     TableView,
@@ -31,11 +31,12 @@ import Delete from '@spectrum-icons/workflow/Delete';
 import Close from '@spectrum-icons/workflow/Close';
 import { v4 as uuidv4 } from 'uuid';
 import { apiService } from '../../services/api';
+import { Brand } from '../../classes/Brand';
 
 type ViewMode = 'list' | 'add' | 'edit' | 'view';
 
 // Mock data for testing (only used in demo mode)
-const mockBrands: IBrand[] = [
+const mockBrands: Brand[] = [
     DemoBrandManager.createBrand({
         brandId: '1',
         secret: 'mock-secret-1',
@@ -152,8 +153,8 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         bValue = b.enabled;
                         break;
                     case 'createdAt':
-                        aValue = a.createdAt.getTime();
-                        bValue = b.createdAt.getTime();
+                        aValue = new Date(a.createdAt).getTime();
+                        bValue = new Date(b.createdAt).getTime();
                         break;
                     default:
                         return 0;
@@ -172,21 +173,14 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
         return filteredBrands;
     };
 
-    const handleAddBrand = () => {
-        setSelectedBrand(null);
-        setViewMode('add');
-        setError(null);
-        setSuccess(null);
-    };
-
-    const handleEditBrand = (brand: IBrand) => {
+    const handleEditBrand = (brand: Brand) => {
         setSelectedBrand(brand);
         setViewMode('edit');
         setError(null);
         setSuccess(null);
     };
 
-    const handleViewBrand = (brand: IBrand) => {
+    const handleViewBrand = (brand: Brand) => {
         setSelectedBrand(brand);
         setViewMode('view');
         setError(null);
@@ -230,7 +224,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
         }, 3000);
     };
 
-    const handleDisableBrand = async (brand: IBrand) => {
+    const handleDisableBrand = async (brand: Brand) => {
         if (!confirm(`Are you sure you want to disable "${brand.name}"?`)) {
             return;
         }
@@ -282,6 +276,11 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
 
     const handleFormSubmit = async (brandData: Partial<Brand>) => {
         try {
+            console.debug('BrandManagerView: handleFormSubmit called', {
+                viewMode,
+                brandData,
+                selectedBrand: selectedBrand?.brandId
+            });
             setFormLoading(true);
             setError(null);
 
@@ -323,7 +322,15 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                     enabledAt: brandData.enabled ? (selectedBrand.enabledAt || new Date()) : null
                 });
 
-                const response = await apiService.updateBrand(updatedBrand);
+                console.debug('BrandManagerView: Submitting brand update', {
+                    brandId: updatedBrand.brandId,
+                    enabled: updatedBrand.enabled,
+                    enabledAt: updatedBrand.enabledAt,
+                    brandDataEnabled: brandData.enabled
+                });
+
+                // Convert to plain object for API call
+                const response = await apiService.updateBrand(updatedBrand.toJSON());
 
                 if (response.statusCode === 200 && response.body.data) {
                     // Use the brand data from API response (which excludes secret for security)
