@@ -12,6 +12,7 @@ import { Home } from './Home'
 import { About } from './About'
 import BrandManagerView from './layout/BrandManagerView'
 import RulesManagerView from './RulesManagerView'
+import RulesConfigurationView from './layout/RulesConfigurationView'
 import { apiService } from '../services/api'
 
 function App(props) {
@@ -60,7 +61,7 @@ function App(props) {
               <Routes>
                 <Route path='/' element={<Home viewProps={safeViewProps} />} />
                 <Route path='/brand_manager' element={<BrandManagerView viewProps={safeViewProps} />} />
-                <Route path='/rules_manager' element={<RulesManagerView viewProps={safeViewProps} />} />
+                <Route path='/rules_manager' element={<RulesConfigurationView viewProps={safeViewProps} />} />
                 <Route path='/about' element={<About viewProps={safeViewProps} />} />
               </Routes>
             </View>

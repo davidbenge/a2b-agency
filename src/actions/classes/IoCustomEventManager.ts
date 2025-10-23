@@ -51,13 +51,16 @@ export class IoCustomEventManager {
     }
 
     /*******
-     * publishEvent - publish the event to the Adobe Event Hub
+     * publishToAdobeIOEvents - Publish an internal custom event to Adobe I/O Events
      * 
-     * @param event: Ia2bEvent
+     * This publishes events to the Adobe I/O Events service for internal event distribution.
+     * This is NOT for sending events to external brand endpoints (use Brand.sendCloudEventToEndpoint for that).
+     * 
+     * @param event: Ia2bEvent - The event to publish
      * @returns Promise<void>
      *******/
-    async publishEvent(event: Ia2bEvent): Promise<void> {
-        this.logger.debug('IoCustomEventManager:publishEvent starting');
+    async publishToAdobeIOEvents(event: Ia2bEvent): Promise<void> {
+        this.logger.debug('IoCustomEventManager:publishToAdobeIOEvents starting');
 
         // add the application runtime info to the event data
         if (event.data) {

@@ -1,0 +1,49 @@
+{
+    "S2S_API_KEY": "FAKE_API_KEY",
+    "S2S_CLIENT_SECRET": "FAKE_CLIENT_SECRET",
+    "data": {
+      "app_runtime_info": {
+        "actionPackageName": "a2b-brand",
+        "appName": "agency",
+        "consoleId": "27200",
+        "projectName": "brand2agency",
+        "workspace": "benge"
+      },
+      "endPointUrl": "https://27200-brand2agency-benge.adobeio-static.net/api/v1/web/a2b-brand/agency-event-handler",
+      "imsOrgId": "33C1401053CF76370A490D4C@AdobeOrg",
+      "imsOrgName": "Tech Marketing Development",
+      "name": "benge-10-20-2025",
+      "phoneNumber": "212343",
+      "primaryContact": "David Benge"
+    },
+    "__ow_method": "post",
+    "AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID": "5c3431a2-bd91-4eff-a356-26b747d0aad4",
+    "LOG_LEVEL": "debug",
+    "AIO_RUNTIME_APIHOST": "https://adobeioruntime.net",
+    "__ow_headers": {
+      "accept-encoding": "gzip, compress, deflate, br",
+      "connection": "close",
+      "content-type": "application/json",
+      "host": "controller-ns-team-ethos651prodva6-runtime-prod-b",
+      "perf-br-req-in": "1761026298.725",
+      "user-agent": "Amazon CloudFront",
+      "via": "1.1 870f727707d4b04bb51c428dfcc673b4.cloudfront.net (CloudFront), 1.1 58c3ce6e485adff4a9658be41214af94.cloudfront.net (CloudFront)",
+      "x-amz-cf-id": "IpmmL6EOqn7JZFbXXrOTvti3aUtxM3qgAaqbM7BZEtPVRPAknO1YAw==",
+      "x-envoy-external-address": "15.158.214.233",
+      "x-forwarded-for": "44.208.197.195, 3.172.32.247, 15.158.214.233, 10.152.171.14",
+      "x-forwarded-host": "27200-a2b-benge.adobeioruntime.net",
+      "x-forwarded-port": "80",
+      "x-forwarded-proto": "http",
+      "x-gw-ims-org-id": "33C1401053CF76370A490D4C@AdobeOrg",
+      "x-real-ip": "10.152.171.14",
+      "x-request-id": "VXcydaxtaxcUacfPj4hU7qJNRjLOz0Q6"
+    },
+    "AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID": "af5c4d93-e1e0-4985-ad33-80fde3837aaa",
+    "AIO_RUNTIME_AUTH": "FAKE_RUNTIME_AUTH",
+    "S2S_CLIENT_ID": "FAKE_CLIENT_ID",
+    "__ow_path": "",
+    "ORG_ID": "33C1401053CF76370A490D4C@AdobeOrg",
+    "APPLICATION_RUNTIME_INFO": "{\"namespace\":\"27200-a2b-benge\",\"app_name\":\"agency\",\"action_package_name\":\"a2b-agency\"}",
+    "AIO_RUNTIME_NAMESPACE": "27200-a2b-benge",
+    "S2S_SCOPES": "[\"AdobeID\",\"openid\",\"read_organizations\",\"additional_info.projectedProductContext\",\"additional_info.roles\",\"adobeio_api\",\"read_client_secret\",\"manage_client_secrets\"]"
+  }

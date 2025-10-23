@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { Brand } from '../../../../../actions/classes/Brand';
+import { IBrand } from '../../../../../shared/types';
 import {
     View,
     Form,
@@ -21,9 +21,9 @@ import {
 } from '@adobe/react-spectrum';
 
 interface BrandFormProps {
-    brand?: Brand | null;
+    brand?: IBrand | null;
     mode: 'add' | 'edit' | 'view';
-    onSubmit: (brandData: Partial<Brand>) => Promise<void>;
+    onSubmit: (brandData: Partial<IBrand>) => Promise<void>;
     onCancel: () => void;
     loading?: boolean;
 }
@@ -148,6 +148,12 @@ const BrandForm: React.FC<BrandFormProps> = ({
                 {brand && mode === 'view' && (
                     <View marginBottom="size-200">
                         <Text>Brand ID: {brand.brandId}</Text>
+                        {brand.imsOrgName && (
+                            <Text>IMS Organization: {brand.imsOrgName}</Text>
+                        )}
+                        {brand.imsOrgId && (
+                            <Text>IMS Org ID: {brand.imsOrgId}</Text>
+                        )}
                         <Text>Created: {brand.createdAt.toLocaleDateString()}</Text>
                         <Text>Last Updated: {brand.updatedAt.toLocaleDateString()}</Text>
                         {brand.enabledAt && (
@@ -172,10 +178,10 @@ const BrandForm: React.FC<BrandFormProps> = ({
                         value={formData.endPointUrl || ''}
                         onChange={(value) => setFormData({ ...formData, endPointUrl: value })}
                         isRequired
-                        isReadOnly={isViewMode}
+                        isReadOnly={true}
                         validationState={errors.endPointUrl ? 'invalid' : undefined}
                         errorMessage={errors.endPointUrl}
-                        placeholder="https://example.com/api"
+                        description="Set during initial registration and cannot be changed"
                     />
 
                     {/* Logo Upload Section */}
@@ -241,14 +247,11 @@ const BrandForm: React.FC<BrandFormProps> = ({
                         </Switch>
                     )}
 
-                    {brand && mode === 'view' && (
-                        <View marginTop="size-200">
-                            <Divider size="S" />
-                            <Text marginTop="size-100">
-                                <strong>Secret:</strong> {brand.secret}
-                            </Text>
-                        </View>
-                    )}
+                    {/* Secret is NEVER displayed in the UI for security reasons.
+                        It is only shared:
+                        - Generated during new-brand-registration
+                        - Sent via registration.enabled CloudEvent to brand
+                        - Used in X-A2B-Brand-Secret header for authentication */}
 
                     {!isViewMode && (
                         <Flex gap="size-100" marginTop="size-200">

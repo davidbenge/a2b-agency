@@ -1,0 +1,13 @@
+{
+    "data": {
+        "brandId": "3b4afd64-7e11-4342-8fc4-bb75cc624dc5",
+        "createdAt": "2025-10-21T05:58:20.319Z",
+        "enabled": false,
+        "enabledAt": null,
+        "endPointUrl": "https://27200-brand2agency-benge.adobeio-static.net/api/v1/web/a2b-brand/agency-event-handler",
+        "name": "benge-10-20-2025",
+        "updatedAt": "2025-10-22T02:22:59.803Z"
+    },
+    "eventSent": "none",
+    "message": "Brand 3b4afd64-7e11-4342-8fc4-bb75cc624dc5 updated successfully"
+}

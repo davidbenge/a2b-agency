@@ -1,0 +1,14 @@
+{
+  "message": "Brand 24316544-aacc-4494-8c96-2a354c60cf01 fetched successfully",
+  "data": {
+    "brandId": "24316544-aacc-4494-8c96-2a354c60cf01",
+    "name": "Acme Brand Inc",
+    "endPointUrl": "https://27200-brand2agency-benge.adobeioruntime.net/api/v1/web/a2b-brand/agency-event-handler",
+    "enabled": true,
+    "logo": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIi...",
+    "createdAt": "2025-10-17T04:38:30.016Z",
+    "updatedAt": "2025-10-17T04:38:30.016Z",
+    "enabledAt": "2025-10-17T05:12:15.442Z"
+  }
+}
+

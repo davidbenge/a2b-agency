@@ -1,4 +1,4 @@
-import { IBrand, Ia2bEvent, IBrandEventPostResponse } from '../types';
+import { IBrand, Ia2bEvent, IBrandEventPostResponse, IRoutingRule } from '../types';
 import axios from 'axios';
 
 export class Brand implements IBrand {
@@ -8,26 +8,41 @@ export class Brand implements IBrand {
     readonly endPointUrl: string;
     readonly enabled: boolean;
     readonly logo?: string;
+    readonly imsOrgName?: string;
+    readonly imsOrgId?: string;
+    readonly routingRules?: { [eventCode: string]: IRoutingRule[] };
     readonly createdAt: Date;
     readonly updatedAt: Date;
     readonly enabledAt: Date | null;
 
-    constructor(params: IBrand) {
+    constructor(params: Partial<IBrand> & { brandId: string; name: string; endPointUrl: string }) {
         // Validate required fields
         if (!params.brandId) throw new Error('brandId is required');
-        if (!params.secret) throw new Error('secret is required');
         if (!params.name) throw new Error('name is required');
         if (!params.endPointUrl) throw new Error('endPointUrl is required');
+        // Note: secret is optional for frontend use (API responses exclude it for security)
+        // Backend actions will always provide secret, frontend can work without it
 
         this.brandId = params.brandId;
-        this.secret = params.secret;
+        this.secret = params.secret || ''; // Empty string if not provided (frontend use case)
         this.name = params.name;
         this.endPointUrl = params.endPointUrl;
         this.enabled = params.enabled ?? false;
         this.logo = params.logo;
-        this.createdAt = params.createdAt ?? new Date();
-        this.updatedAt = params.updatedAt ?? new Date();
-        this.enabledAt = params.enabledAt ?? null;
+        this.imsOrgName = params.imsOrgName;
+        this.imsOrgId = params.imsOrgId;
+        this.routingRules = params.routingRules || {};
+        
+        // Normalize Date | string to Date
+        this.createdAt = params.createdAt 
+            ? (typeof params.createdAt === 'string' ? new Date(params.createdAt) : params.createdAt)
+            : new Date();
+        this.updatedAt = params.updatedAt 
+            ? (typeof params.updatedAt === 'string' ? new Date(params.updatedAt) : params.updatedAt)
+            : new Date();
+        this.enabledAt = params.enabledAt
+            ? (typeof params.enabledAt === 'string' ? new Date(params.enabledAt) : params.enabledAt)
+            : null;
     }
 
 
@@ -43,6 +58,30 @@ export class Brand implements IBrand {
             endPointUrl: this.endPointUrl,
             enabled: this.enabled,
             logo: this.logo,
+            imsOrgName: this.imsOrgName,
+            imsOrgId: this.imsOrgId,
+            routingRules: this.routingRules,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
+            enabledAt: this.enabledAt
+        };
+    }
+
+    /**
+     * Convert the instance to a safe JSON object WITHOUT the secret
+     * Use this for API responses to frontend/external systems
+     * @returns JSON representation of the brand without the secret field
+     */
+    toSafeJSON(): Omit<IBrand, 'secret'> {
+        return {
+            brandId: this.brandId,
+            name: this.name,
+            endPointUrl: this.endPointUrl,
+            enabled: this.enabled,
+            logo: this.logo,
+            imsOrgName: this.imsOrgName,
+            imsOrgId: this.imsOrgId,
+            routingRules: this.routingRules,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
             enabledAt: this.enabledAt
@@ -71,6 +110,15 @@ export class Brand implements IBrand {
     }
 
     /**
+     * Validate incoming request secret against stored secret
+     * @param requestSecret The secret from the incoming request header
+     * @returns true if the secrets match
+     */
+    validateSecret(requestSecret: string): boolean {
+        return this.secret === requestSecret;
+    }
+
+    /**
      * Send an Cloud event payload to this brand's configured endpoint
      * @param event - the IO event to send
      * @returns the response from the brand endpoint
@@ -80,7 +128,11 @@ export class Brand implements IBrand {
      * @throws Error if the response from the brand endpoint is not a valid IBrandEventPostResponse
      */
     async sendCloudEventToEndpoint(event: Ia2bEvent): Promise<IBrandEventPostResponse> {
-        if (!this.enabled) {
+        // Special case: registration.disabled events must be sent even when brand is disabled
+        // This notifies the brand that it has been disabled by the agency
+        const isDisabledEvent = event.type === 'com.adobe.a2b.registration.disabled';
+        
+        if (!this.enabled && !isDisabledEvent) {
             throw new Error('Brand:sendCloudEventToEndpoint: brand is disabled');
         }
         if (!this.endPointUrl) {

@@ -132,7 +132,7 @@ jest.spyOn(Brand.prototype, 'sendCloudEventToEndpoint').mockImplementation(mockS
 const mockOpenWhisk = createMockOpenWhisk();
 
 // Import the main function
-const { main } = require('../adobe-product-event-handler');
+const { main } = require('../services/event-registry/product/adobe-product-event-handler');
 
 describe('adobe-product-event-handler - Asset Processing Complete Integration Test', () => {
   let mockOpenWhiskClient: MockOpenWhiskClient;
@@ -149,7 +149,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
     mockOpenWhiskClient.reset();
 
     // Setup default mock implementations
-    const { getAemAssetData } = require('../utils/aemCscUtils');
+    const { getAemAssetData } = require('../../utils/aemCscUtils');
     getAemAssetData.mockResolvedValue(mockAemAssetData);
 
     // Mock fetch for presigned URL call
@@ -176,7 +176,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
       // Setup the mock for agency-assetsync-internal-handler-process-complete to call real implementation
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {
         // Import and call the real agency-assetsync-internal-handler-process-complete
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-process-complete');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-process-complete');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -186,8 +186,8 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
       expect(result.statusCode).toBe(200);
       expect(result.body.message).toBe('Adobe product event processed successfully');
       expect(result.body.eventType).toBe('aem.assets.asset.processing_completed');
-      expect(result.body.routingResult).toBeDefined();
-      expect(result.body.routingResult.success).toBe(true);
+      expect(result.body.handler).toBe('a2b-agency/agency-assetsync-internal-handler-process-complete');
+      expect(result.body.result).toBeDefined();
 
       // Verify that the agency-assetsync-internal-handler-process-complete was invoked
       expect(mockOpenWhiskClient.wasActionInvoked('a2b-agency/agency-assetsync-internal-handler-process-complete')).toBe(true);
@@ -203,14 +203,14 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
 
     it('should call getAemAssetData with correct parameters', async () => {
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-process-complete');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-process-complete');
         return await internalHandlerMain(params.routerParams);
       });
 
       await main(mockEventData, mockOpenWhisk);
 
       // Verify getAemAssetData was called with correct parameters
-      const { getAemAssetData } = require('../utils/aemCscUtils');
+      const { getAemAssetData } = require('../../utils/aemCscUtils');
       expect(getAemAssetData).toHaveBeenCalledWith(
         'https://author-p142461-e1463137.adobeaemcloud.com',
         '/content/dam/agency_work_for_BRAND_A/Screenshot 2025-05-28 at 5.05.48 PM.png',
@@ -223,7 +223,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
 
     it('should call fetchPresignedReadUrl and get presigned URL', async () => {
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-process-complete');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-process-complete');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -249,7 +249,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
 
     it('should get brand and call sendCloudEventToEndpoint', async () => {
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-process-complete');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-process-complete');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -284,11 +284,11 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
         }
       };
 
-      const { getAemAssetData } = require('../utils/aemCscUtils');
+      const { getAemAssetData } = require('../../utils/aemCscUtils');
       getAemAssetData.mockResolvedValue(multiCustomerAssetData);
 
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-process-complete');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-process-complete');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -322,7 +322,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
       mockGetBrand.mockResolvedValue(disabledBrand);
 
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-process-complete');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-process-complete');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -350,11 +350,11 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
         }
       };
 
-      const { getAemAssetData } = require('../utils/aemCscUtils');
+      const { getAemAssetData } = require('../../utils/aemCscUtils');
       getAemAssetData.mockResolvedValue(assetWithoutSyncData);
 
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-process-complete');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-process-complete');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -373,7 +373,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
       mockSendCloudEventToEndpoint.mockRejectedValue(new Error('Brand endpoint failed'));
 
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-process-complete');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-process-complete');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -391,7 +391,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
   describe('Event Structure Validation', () => {
     it('should create proper CloudEvent structure for Brand notification', async () => {
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-process-complete');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-process-complete');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -417,7 +417,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
 
     it('should include APPLICATION_RUNTIME_INFO in events', async () => {
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-process-complete');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-process-complete');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -431,8 +431,8 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
               consoleId: "27200",
               projectName: "a2b",
               workspace: "benge",
-              appName: "agency",
-              actionPackageName: "a2b-agency"
+              app_name: "agency",
+              action_package_name: "a2b-agency"
             })
           })
         })

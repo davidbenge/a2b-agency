@@ -1,0 +1,13 @@
+{
+  "statusCode": 400,
+  "body": {
+    "success": false,
+    "error": "Invalid category 'invalid-category'",
+    "details": {
+      "validCategories": [
+        "product"
+      ]
+    }
+  }
+}
+
