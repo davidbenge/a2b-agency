@@ -10,6 +10,7 @@
  */
 
 import { Ia2bEvent } from "../../actions/types";
+import { IRoutingRule } from "./rules-types";
 
 /**
  * Brand interface representing a registered brand/customer
@@ -47,6 +48,20 @@ export interface IBrand {
     
     /** IMS Organization ID (from Adobe IMS) */
     imsOrgId?: string;
+    
+    /**
+     * Brand-specific routing rules for app events
+     * Stored as a map of event codes to arrays of routing rules
+     * Example: { "com.adobe.a2b.registration.enabled": [rule1, rule2] }
+     * 
+     * OPTIMIZATION: Embedded in brand object to reduce state store reads
+     * - Single read gets brand + all routing rules (vs. N+1 reads)
+     * - Reduces cost (state store charges per read)
+     * - Reduces latency (no sequential reads)
+     */
+    routingRules?: {
+        [eventCode: string]: IRoutingRule[];
+    };
     
     /** 
      * Timestamp when brand was created

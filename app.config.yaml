@@ -6,7 +6,7 @@ application:
         license: Apache-2.0
         actions:
           new-brand-registration:
-            function: src/actions/new-brand-registration/index.ts
+            function: src/actions/services/brand/new-brand-registration/index.ts
             web: 'yes'
             runtime: nodejs:22
             inputs:
@@ -26,7 +26,7 @@ application:
               require-adobe-auth: false
               final: true
           get-brands:
-            function: src/actions/get-brands/index.ts
+            function: src/actions/services/brand/get-brands/index.ts
             web: 'yes'
             runtime: nodejs:22
             inputs:
@@ -36,7 +36,7 @@ application:
               require-adobe-auth: true
               final: true
           get-brand:
-            function: src/actions/get-brand/index.ts
+            function: src/actions/services/brand/get-brand/index.ts
             web: 'yes'
             runtime: nodejs:22
             inputs:
@@ -45,17 +45,8 @@ application:
             annotations:
               require-adobe-auth: true
               final: true
-          list-events:
-            function: src/actions/list-events/index.ts
-            web: 'yes'
-            runtime: nodejs:22
-            inputs:
-              LOG_LEVEL: debug
-            annotations:
-              require-adobe-auth: true
-              final: true
           list-product-events:
-            function: src/actions/list-product-events/index.ts
+            function: src/actions/services/event-registry/product/list-product-events/index.ts
             web: 'yes'
             runtime: nodejs:22
             inputs:
@@ -64,7 +55,7 @@ application:
               require-adobe-auth: true
               final: true
           delete-brand:
-            function: src/actions/delete-brand/index.ts
+            function: src/actions/services/brand/delete-brand/index.ts
             web: 'yes'
             runtime: nodejs:22
             inputs:
@@ -79,7 +70,7 @@ application:
               require-adobe-auth: true
               final: true
           brand-event-handler:
-            function: src/actions/brand-event-handler/index.ts
+            function: src/actions/event-handlers/brand-event-handler/index.ts
             web: 'yes'
             runtime: nodejs:22
             inputs:
@@ -92,7 +83,7 @@ application:
               require-adobe-auth: false
               final: true
           adobe-product-event-handler:
-            function: src/actions/adobe-product-event-handler/index.ts
+            function: src/actions/services/event-registry/product/adobe-product-event-handler/index.ts
             web: 'no'
             runtime: nodejs:22
             inputs:
@@ -101,7 +92,7 @@ application:
               require-adobe-auth: false
               final: true
           agency-assetsync-internal-handler-process-complete:
-            function: src/actions/agency-assetsync-internal-handler-process-complete/index.ts
+            function: src/actions/event-handlers/product/agency-assetsync-internal-handler-process-complete/index.ts
             web: 'no'
             runtime: nodejs:22
             inputs:
@@ -128,7 +119,7 @@ application:
               require-adobe-auth: false
               final: true
           agency-assetsync-internal-handler-metadata-updated:
-            function: src/actions/agency-assetsync-internal-handler-metadata-updated/index.ts
+            function: src/actions/event-handlers/product/agency-assetsync-internal-handler-metadata-updated/index.ts
             web: 'no'
             runtime: nodejs:22
             inputs:
@@ -155,7 +146,7 @@ application:
               require-adobe-auth: false
               final: true
           update-brand:
-            function: src/actions/update-brand/index.ts
+            function: src/actions/services/brand/update-brand/index.ts
             web: 'yes'
             runtime: nodejs:22
             inputs:
@@ -168,7 +159,169 @@ application:
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
             annotations:
               require-adobe-auth: true
-              final: true              
+              final: true
+          list-app-events:
+            function: src/actions/services/event-registry/app/list-app-events/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          get-app-event:
+            function: src/actions/services/event-registry/app/get-app-event/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          get-product-event:
+            function: src/actions/services/event-registry/product/get-product-event/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          list-product-routing-rules:
+            function: src/actions/services/routing-rules/global/product/list-product-routing-rules/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          get-product-routing-rules:
+            function: src/actions/services/routing-rules/global/product/get-product-routing-rules/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          create-product-routing-rule:
+            function: src/actions/services/routing-rules/global/product/create-product-routing-rule/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          update-product-routing-rule:
+            function: src/actions/services/routing-rules/global/product/update-product-routing-rule/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          delete-product-routing-rule:
+            function: src/actions/services/routing-rules/global/product/delete-product-routing-rule/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          list-app-routing-rules:
+            function: src/actions/services/routing-rules/global/app/list-app-routing-rules/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          get-app-routing-rules:
+            function: src/actions/services/routing-rules/global/app/get-app-routing-rules/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          create-app-routing-rule:
+            function: src/actions/services/routing-rules/global/app/create-app-routing-rule/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          update-app-routing-rule:
+            function: src/actions/services/routing-rules/global/app/update-app-routing-rule/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          delete-app-routing-rule:
+            function: src/actions/services/routing-rules/global/app/delete-app-routing-rule/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          list-brand-routing-rules:
+            function: src/actions/services/routing-rules/brand/list-brand-routing-rules/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          get-brand-routing-rules:
+            function: src/actions/services/routing-rules/brand/get-brand-routing-rules/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          create-brand-routing-rule:
+            function: src/actions/services/routing-rules/brand/create-brand-routing-rule/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          update-brand-routing-rule:
+            function: src/actions/services/routing-rules/brand/update-brand-routing-rule/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
+          delete-brand-routing-rule:
+            function: src/actions/services/routing-rules/brand/delete-brand-routing-rule/index.ts
+            web: 'yes'
+            runtime: nodejs:22
+            inputs:
+              LOG_LEVEL: debug
+            annotations:
+              require-adobe-auth: true
+              final: true
 extensions:
   dx/excshell/1:
     $include: src/dx-excshell-1/ext.config.yaml

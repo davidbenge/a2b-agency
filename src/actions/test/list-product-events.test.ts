@@ -6,15 +6,15 @@
  */
 
 import { 
-    EVENT_REGISTRY, 
+    DEFAULT_PRODUCT_EVENTS, 
     getAllProductEventCodes, 
     getProductEventsByCategory, 
     getProductEventDefinition,
     getProductEventCategories,
     isValidProductEventCode,
     getProductEventCountByCategory
-} from '../../shared/classes/ProductEventRegistry';
-import { ProductEventDefinition } from '../../shared/types';
+} from '../classes/ProductEventRegistry';
+import { IProductEventDefinition } from '../../shared/types';
 
 describe('Product Event Registry', () => {
     describe('getAllProductEventCodes', () => {
@@ -125,7 +125,7 @@ describe('Product Event Registry', () => {
 
     describe('Product Event Registry Structure', () => {
         it('should have all required fields for each event', () => {
-            Object.values(EVENT_REGISTRY).forEach((event: ProductEventDefinition) => {
+            Object.values(DEFAULT_PRODUCT_EVENTS).forEach((event: IProductEventDefinition) => {
                 expect(event.code).toBeDefined();
                 expect(typeof event.code).toBe('string');
                 
@@ -153,14 +153,14 @@ describe('Product Event Registry', () => {
         });
 
         it('should not have sendSecretHeader or sendSignedKey (product events dont use these)', () => {
-            Object.values(EVENT_REGISTRY).forEach((event: ProductEventDefinition) => {
+            Object.values(DEFAULT_PRODUCT_EVENTS).forEach((event: IProductEventDefinition) => {
                 expect((event as any).sendSecretHeader).toBeUndefined();
                 expect((event as any).sendSignedKey).toBeUndefined();
             });
         });
 
         it('should not have injectedObjects (product events dont inject agency data)', () => {
-            Object.values(EVENT_REGISTRY).forEach((event: ProductEventDefinition) => {
+            Object.values(DEFAULT_PRODUCT_EVENTS).forEach((event: IProductEventDefinition) => {
                 expect((event as any).injectedObjects).toBeUndefined();
             });
         });

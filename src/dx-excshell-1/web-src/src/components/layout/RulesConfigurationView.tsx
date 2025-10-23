@@ -33,29 +33,29 @@ import {
 } from '@adobe/react-spectrum';
 import { ViewPropsBase } from '../../types/ViewPropsBase';
 
-interface Rule {
+interface IRule {
     id: string;
     name: string;
     description: string;
     eventType: string;
     direction: 'inbound' | 'outbound' | 'both';
     targetBrands: string[];
-    conditions: RuleCondition[];
-    actions: RuleAction[];
+    conditions: IRuleCondition[];
+    actions: IRuleAction[];
     enabled: boolean;
     priority: number;
     createdAt: Date;
     updatedAt: Date;
 }
 
-interface RuleCondition {
+interface IRuleCondition {
     field: string;
     operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'regex' | 'exists' | 'notExists';
     value: string;
     logicalOperator?: 'AND' | 'OR';
 }
 
-interface RuleAction {
+interface IRuleAction {
     type: 'route' | 'transform' | 'filter' | 'log';
     target?: string;
     parameters?: Record<string, any>;
@@ -195,7 +195,7 @@ const mockBrands: Brand[] = [
     }
 ];
 
-const mockRules: Rule[] = [
+const mockRules: IRule[] = [
     {
         id: 'rule-1',
         name: 'AEM Asset Sync Rule',
@@ -334,7 +334,7 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
     const [searchQuery, setSearchQuery] = useState('');
 
     // Form state for creating/editing rules
-    const [formData, setFormData] = useState<Partial<Rule>>({
+    const [formData, setFormData] = useState<Partial<IRule>>({
         name: '',
         description: '',
         eventType: '',
@@ -369,7 +369,7 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
             return;
         }
 
-        const newRule: Rule = {
+        const newRule: IRule = {
             id: `rule-${Date.now()}`,
             name: formData.name!,
             description: formData.description || '',
@@ -406,7 +406,7 @@ const RulesConfigurationView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewPr
             return;
         }
 
-        const updatedRule: Rule = {
+        const updatedRule: IRule = {
             ...editingRule,
             name: formData.name!,
             description: formData.description || '',

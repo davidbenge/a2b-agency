@@ -6,9 +6,9 @@ import { ApplicationRuntimeInfo } from "./ApplicationRuntimeInfo";
 import { AgencyIdentification } from "./AgencyIdentification";
 import { Brand } from "./Brand";
 import aioLogger from "@adobe/aio-lib-core-logging";
-import { AppEventDefinition, Logger } from "../../shared/types";
+import { IAppEventDefinition, ILogger } from "../../shared/types";
 import { EventCategory } from "../../shared/constants";
-import { getEventDefinition } from "../../shared/classes/AppEventRegistry";
+import { getEventDefinition } from "./AppEventRegistry";
 import { A2bEvent } from "./A2bEvent";
 
 /**
@@ -31,7 +31,7 @@ export class EventManager {
     private s2sAuthenticationCredentials?: IS2SAuthenticationCredentials;
     private logLevel: string;
     private ioCustomEventManager?: IoCustomEventManager;
-    private logger: Logger;
+    private logger: ILogger;
     private brandManager: BrandManager;
     private params: any;
     
@@ -160,7 +160,7 @@ export class EventManager {
      * 1. Looks up event definition from registry
      * 2. Validates required fields
      * 3. Checks brand configuration and flags
-     * 4. Evaluates routing rules from AppEventDefinition
+     * 4. Evaluates routing rules from IAppEventDefinition
      * 5. Constructs CloudEvent if validation passes
      * 6. Sends to brand (if rules/flags allow)
      * 7. Publishes to IO Events (if rules/flags allow)

@@ -175,7 +175,7 @@ jest.mock('../classes/BrandManager', () => {
 });
 
 // Import both the product event handler and internal handler
-const { main: productEventHandlerMain } = require('../adobe-product-event-handler');
+const { main: productEventHandlerMain } = require('../services/event-registry/product/adobe-product-event-handler');
 const { createMockOpenWhisk } = require('./mocks/MockOpenWhisk');
 
 describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update Integration Test', () => {
@@ -193,7 +193,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     // Note: We're using mocked BrandManager instead of state store approach
 
     // Setup default mock implementations
-    const { getAemAssetData } = require('../utils/aemCscUtils');
+    const { getAemAssetData } = require('../../utils/aemCscUtils');
     getAemAssetData.mockResolvedValue(mockAemAssetDataForMetadataUpdate);
 
     // Mock fetch for presigned URL call
@@ -239,7 +239,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
 
     // Setup OpenWhisk mock to call the real internal handler
     mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-      const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+      const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
       return await internalHandlerMain(params.routerParams);
     });
   });
@@ -256,7 +256,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should handle aem.assets.asset.metadata_updated event and trigger Brand notifications', async () => {
       // Register custom handler to call internal handler directly (like asset processing complete tests)
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -273,14 +273,14 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should call getAemAssetData with correct parameters for metadata update', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
       await productEventHandlerMain(mockMetadataUpdateEventData, mockOpenWhiskClient);
 
       // Verify getAemAssetData was called with correct parameters
-      const { getAemAssetData } = require('../utils/aemCscUtils');
+      const { getAemAssetData } = require('../../utils/aemCscUtils');
       expect(getAemAssetData).toHaveBeenCalledWith(
         'https://author-p142461-e1463137.adobeaemcloud.com',
         '/content/dam/benge/sad_elmo.webp',
@@ -294,7 +294,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should call fetchPresignedReadUrl and get presigned URL for metadata update', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -321,7 +321,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should process metadata update event and call brand notifications', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -333,7 +333,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
       expect(result.body.message).toBe('Adobe product event processed successfully');
 
       // Verify AEM asset data was fetched
-      const { getAemAssetData } = require('../utils/aemCscUtils');
+      const { getAemAssetData } = require('../../utils/aemCscUtils');
       expect(getAemAssetData).toHaveBeenCalledTimes(1);
       
       // Verify it was called with the expected host and path
@@ -351,7 +351,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should generate AssetSyncUpdate events for assets with existing sync history', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -367,7 +367,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should handle single brand scenarios', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -383,7 +383,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
         }
       };
 
-      const { getAemAssetData } = require('../utils/aemCscUtils');
+      const { getAemAssetData } = require('../../utils/aemCscUtils');
       getAemAssetData.mockResolvedValue(singleBrandAssetData);
 
       await productEventHandlerMain(mockMetadataUpdateEventData, mockOpenWhiskClient);
@@ -396,7 +396,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should handle disabled brand gracefully', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -429,7 +429,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should handle asset without sync metadata gracefully', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -446,7 +446,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
         }
       };
 
-      const { getAemAssetData } = require('../utils/aemCscUtils');
+      const { getAemAssetData } = require('../../utils/aemCscUtils');
       getAemAssetData.mockResolvedValue(assetWithoutSyncData);
 
       const result = await productEventHandlerMain(mockMetadataUpdateEventData, mockOpenWhiskClient);
@@ -461,7 +461,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should handle errors in Brand.sendCloudEventToEndpoint gracefully', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -493,7 +493,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should create proper CloudEvent structure for Brand notification on metadata update', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -508,7 +508,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should include APPLICATION_RUNTIME_INFO in metadata update events', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -523,7 +523,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should include updated metadata in the event payload', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -540,7 +540,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should process aem.assets.asset.metadata_updated event type', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 
@@ -550,7 +550,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
       expect(result.statusCode).toBe(200);
       
       // The handler should have identified this as a metadata update
-      const { getAemAssetData } = require('../utils/aemCscUtils');
+      const { getAemAssetData } = require('../../utils/aemCscUtils');
       expect(getAemAssetData).toHaveBeenCalled();
       expect(mockGetBrand).toHaveBeenCalledTimes(2);
     });
@@ -558,7 +558,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     it('should differentiate metadata updates from processing completed events', async () => {
       // Register custom handler to call internal handler directly
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-metadata-updated', async (params: any) => {
-        const { main: internalHandlerMain } = require('../agency-assetsync-internal-handler-metadata-updated');
+        const { main: internalHandlerMain } = require('../event-handlers/product/agency-assetsync-internal-handler-metadata-updated');
         return await internalHandlerMain(params.routerParams);
       });
 

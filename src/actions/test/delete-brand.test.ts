@@ -3,7 +3,7 @@
  * Verifies that registration.disabled event is sent before deletion
  */
 
-import { main } from '../delete-brand/index';
+import { main } from '../services/brand/delete-brand/index';
 import { MockFactory } from './mocks/MockFactory';
 import { Brand } from '../classes/Brand';
 import { BrandManager } from '../classes/BrandManager';

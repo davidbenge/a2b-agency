@@ -3,7 +3,7 @@
  * Tests brand enable/disable state changes and verifies events are sent to brands
  */
 
-import { main } from '../update-brand/index';
+import { main } from '../services/brand/update-brand/index';
 import { MockFactory } from './mocks/MockFactory';
 import { Brand } from '../classes/Brand';
 import { BrandManager } from '../classes/BrandManager';

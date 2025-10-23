@@ -7,8 +7,8 @@
  * 3. Verify that registration.enabled event is sent to brand endpoint
  */
 
-import { main as newBrandRegistration } from '../new-brand-registration';
-import { main as updateBrand } from '../update-brand';
+import { main as newBrandRegistration } from '../services/brand/new-brand-registration';
+import { main as updateBrand } from '../services/brand/update-brand';
 import { MockStateStore } from './mocks/MockStateStore';
 import { MockFileStore } from './mocks/MockFileStore';
 import { MockOpenWhiskClient } from './mocks/MockOpenWhisk';

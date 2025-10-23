@@ -50,8 +50,11 @@ export {
     ILogger,
     
     // Event registry types
-    AppEventDefinition,
-    ProductEventDefinition,
+    IAppEventDefinition,
+    IProductEventDefinition,
+    
+    // Routing rules types
+    IRoutingRule,
     
     // Backward compatibility
     Logger

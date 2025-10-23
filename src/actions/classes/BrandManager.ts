@@ -469,4 +469,182 @@ export class BrandManager {
 
         return brand;
     }
+
+    // ============================================================================
+    // Brand-Specific Event Definition Management
+    // ============================================================================
+    // BRAND-SPECIFIC ROUTING RULES (App Events Only)
+    // OPTIMIZED: Embedded in brand object to reduce state store reads/writes
+    // ============================================================================
+
+    /**
+     * Get routing rules for a brand-specific app event
+     * OPTIMIZED: Rules are embedded in brand object (single read vs. N+1 reads)
+     * @param brandId - The brand ID
+     * @param eventCode - The app event code
+     * @returns Promise<IRoutingRule[]>
+     */
+    async getBrandRoutingRules(brandId: string, eventCode: string): Promise<any[]> {
+        try {
+            const brand = await this.getBrand(brandId);
+            if (!brand) {
+                this.logger.debug(`Brand ${brandId} not found`);
+                return [];
+            }
+
+            const rules = brand.routingRules?.[eventCode] || [];
+            this.logger.debug(`Retrieved ${rules.length} routing rules for brand ${brandId}, event: ${eventCode}`);
+            return rules;
+        } catch (error: unknown) {
+            this.logger.error(`Error getting brand routing rules for ${brandId}, event ${eventCode}:`, error as any);
+            return [];
+        }
+    }
+
+    /**
+     * Add a single routing rule to a brand-specific app event
+     * OPTIMIZED: Updates brand object (single write vs. separate write)
+     * @param brandId - The brand ID
+     * @param eventCode - The app event code
+     * @param rule - The routing rule to add
+     * @returns Promise<void>
+     */
+    async addBrandRoutingRule(brandId: string, eventCode: string, rule: any): Promise<void> {
+        const brand = await this.getBrand(brandId);
+        if (!brand) {
+            throw new Error(`Brand with ID ${brandId} not found`);
+        }
+
+        const routingRules = { ...brand.routingRules };
+        const existingRules = routingRules[eventCode] || [];
+        
+        // Check if rule with same ID already exists
+        const existingIndex = existingRules.findIndex((r: any) => r.id === rule.id);
+        if (existingIndex >= 0) {
+            throw new Error(`Rule with ID ${rule.id} already exists for brand ${brandId}, event ${eventCode}`);
+        }
+
+        existingRules.push(rule);
+        routingRules[eventCode] = existingRules;
+
+        // Update brand with new routing rules
+        const updatedBrand = BrandManager.createBrand({
+            ...brand.toJSON(),
+            routingRules,
+            updatedAt: new Date()
+        });
+
+        await this.saveBrand(updatedBrand);
+        
+        this.logger.info(`Added routing rule ${rule.id} for brand ${brandId}, event: ${eventCode}`);
+    }
+
+    /**
+     * Update a routing rule for a brand-specific app event
+     * OPTIMIZED: Updates brand object (single write vs. separate write)
+     * @param brandId - The brand ID
+     * @param eventCode - The app event code
+     * @param ruleId - The rule ID to update
+     * @param updates - Partial updates to apply
+     * @returns Promise<void>
+     */
+    async updateBrandRoutingRule(brandId: string, eventCode: string, ruleId: string, updates: any): Promise<void> {
+        const brand = await this.getBrand(brandId);
+        if (!brand) {
+            throw new Error(`Brand with ID ${brandId} not found`);
+        }
+
+        const routingRules = { ...brand.routingRules };
+        const existingRules = [...(routingRules[eventCode] || [])];
+        
+        const ruleIndex = existingRules.findIndex((r: any) => r.id === ruleId);
+        if (ruleIndex < 0) {
+            throw new Error(`Rule with ID ${ruleId} not found for brand ${brandId}, event ${eventCode}`);
+        }
+
+        existingRules[ruleIndex] = {
+            ...existingRules[ruleIndex],
+            ...updates,
+            id: ruleId, // Ensure ID doesn't change
+            updatedAt: new Date()
+        };
+
+        routingRules[eventCode] = existingRules;
+
+        // Update brand with modified routing rules
+        const updatedBrand = BrandManager.createBrand({
+            ...brand.toJSON(),
+            routingRules,
+            updatedAt: new Date()
+        });
+
+        await this.saveBrand(updatedBrand);
+        
+        this.logger.info(`Updated routing rule ${ruleId} for brand ${brandId}, event: ${eventCode}`);
+    }
+
+    /**
+     * Delete a routing rule from a brand-specific app event
+     * OPTIMIZED: Updates brand object (single write vs. separate write)
+     * @param brandId - The brand ID
+     * @param eventCode - The app event code
+     * @param ruleId - The rule ID to delete
+     * @returns Promise<void>
+     */
+    async deleteBrandRoutingRule(brandId: string, eventCode: string, ruleId: string): Promise<void> {
+        const brand = await this.getBrand(brandId);
+        if (!brand) {
+            throw new Error(`Brand with ID ${brandId} not found`);
+        }
+
+        const routingRules = { ...brand.routingRules };
+        const existingRules = routingRules[eventCode] || [];
+        
+        const filteredRules = existingRules.filter((r: any) => r.id !== ruleId);
+
+        if (filteredRules.length === existingRules.length) {
+            throw new Error(`Rule with ID ${ruleId} not found for brand ${brandId}, event ${eventCode}`);
+        }
+
+        if (filteredRules.length === 0) {
+            // Remove the event code key if no rules left
+            delete routingRules[eventCode];
+        } else {
+            routingRules[eventCode] = filteredRules;
+        }
+
+        // Update brand with modified routing rules
+        const updatedBrand = BrandManager.createBrand({
+            ...brand.toJSON(),
+            routingRules,
+            updatedAt: new Date()
+        });
+
+        await this.saveBrand(updatedBrand);
+        
+        this.logger.info(`Deleted routing rule ${ruleId} for brand ${brandId}, event: ${eventCode}`);
+    }
+
+    /**
+     * Get all app event codes that have brand-specific routing rules
+     * OPTIMIZED: Reads from brand object (single read vs. listing all keys)
+     * @param brandId - The brand ID
+     * @returns Promise<string[]>
+     */
+    async getBrandEventCodesWithRoutingRules(brandId: string): Promise<string[]> {
+        try {
+            const brand = await this.getBrand(brandId);
+            if (!brand) {
+                this.logger.debug(`Brand ${brandId} not found`);
+                return [];
+            }
+
+            const eventCodes = Object.keys(brand.routingRules || {});
+            this.logger.debug(`Found ${eventCodes.length} app events with routing rules for brand ${brandId}`);
+            return eventCodes;
+        } catch (error: unknown) {
+            this.logger.error(`Error listing brand event codes with routing rules for ${brandId}:`, error as any);
+            return [];
+        }
+    }
 }

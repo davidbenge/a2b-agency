@@ -7,16 +7,16 @@
 
 import { Logger } from '../types';
 import { 
-    RoutingRule, 
-    RuleCondition, 
-    RuleAction, 
-    RuleEvaluationResult,
+    IRoutingRule, 
+    IRuleCondition, 
+    IRuleAction, 
+    IRuleEvaluationResult,
     noOpLogger,
     EventTypeMetadata
 } from '../types/rules-types';
 
 export class RulesManager {
-    private rules: Map<string, RoutingRule> = new Map();
+    private rules: Map<string, IRoutingRule> = new Map();
     private logger: Logger;
     private eventTypeValidator?: (eventType: string) => boolean;
     private eventTypes: EventTypeMetadata[] = [];
@@ -45,7 +45,7 @@ export class RulesManager {
     /**
      * Add a new routing rule
      */
-    addRule(rule: RoutingRule): void {
+    addRule(rule: IRoutingRule): void {
         // Validate that the event type exists (if validator is provided)
         if (this.eventTypeValidator && !this.eventTypeValidator(rule.eventType)) {
             throw new Error(`Event type ${rule.eventType} is not supported`);
@@ -58,7 +58,7 @@ export class RulesManager {
     /**
      * Get all rules for a specific event type
      */
-    getRulesForEventType(eventType: string, direction?: 'inbound' | 'outbound', brandId?: string): RoutingRule[] {
+    getRulesForEventType(eventType: string, direction?: 'inbound' | 'outbound', brandId?: string): IRoutingRule[] {
         return Array.from(this.rules.values())
             .filter(rule => {
                 if (rule.eventType !== eventType || !rule.enabled) {
@@ -83,9 +83,9 @@ export class RulesManager {
     /**
      * Evaluate rules for an event
      */
-    evaluateRules(eventType: string, eventData: any, direction?: 'inbound' | 'outbound', brandId?: string): RuleEvaluationResult[] {
+    evaluateRules(eventType: string, eventData: any, direction?: 'inbound' | 'outbound', brandId?: string): IRuleEvaluationResult[] {
         const rules = this.getRulesForEventType(eventType, direction, brandId);
-        const results: RuleEvaluationResult[] = [];
+        const results: IRuleEvaluationResult[] = [];
 
         for (const rule of rules) {
             const startTime = Date.now();
@@ -111,7 +111,7 @@ export class RulesManager {
     /**
      * Evaluate a single rule against event data
      */
-    private evaluateRule(rule: RoutingRule, eventData: any): boolean {
+    private evaluateRule(rule: IRoutingRule, eventData: any): boolean {
         if (rule.conditions.length === 0) {
             return true; // No conditions means always match
         }
@@ -142,7 +142,7 @@ export class RulesManager {
     /**
      * Evaluate a single condition
      */
-    private evaluateCondition(condition: RuleCondition, eventData: any): boolean {
+    private evaluateCondition(condition: IRuleCondition, eventData: any): boolean {
         const fieldValue = this.getNestedFieldValue(eventData, condition.field);
 
         switch (condition.operator) {
@@ -177,7 +177,7 @@ export class RulesManager {
     /**
      * Get all available event types with their routing rules
      */
-    getEventTypesWithRules(direction?: 'inbound' | 'outbound', brandId?: string): Array<EventTypeMetadata & { rules: RoutingRule[] }> {
+    getEventTypesWithRules(direction?: 'inbound' | 'outbound', brandId?: string): Array<EventTypeMetadata & { rules: IRoutingRule[] }> {
         return this.eventTypes.map(eventType => ({
             ...eventType,
             rules: this.getRulesForEventType(eventType.type || eventType.code || '', direction, brandId)
@@ -191,7 +191,7 @@ export class RulesManager {
         for (const eventType of this.eventTypes) {
             const eventTypeId = eventType.type || eventType.code || '';
             // Create a default rule for each event type
-            const defaultRule: RoutingRule = {
+            const defaultRule: IRoutingRule = {
                 id: `default-${eventTypeId}`,
                 name: `Default rule for ${eventTypeId}`,
                 description: `Default routing rule for ${eventTypeId} events`,
@@ -218,7 +218,7 @@ export class RulesManager {
     /**
      * Export rules configuration
      */
-    exportRules(): { rules: RoutingRule[], eventTypes: EventTypeMetadata[] } {
+    exportRules(): { rules: IRoutingRule[], eventTypes: EventTypeMetadata[] } {
         return {
             rules: Array.from(this.rules.values()),
             eventTypes: this.eventTypes
@@ -228,7 +228,7 @@ export class RulesManager {
     /**
      * Import rules configuration
      */
-    importRules(config: { rules: RoutingRule[], eventTypes?: EventTypeMetadata[] }): void {
+    importRules(config: { rules: IRoutingRule[], eventTypes?: EventTypeMetadata[] }): void {
         // Clear existing rules
         this.rules.clear();
 
@@ -243,7 +243,7 @@ export class RulesManager {
     /**
      * Get rules that apply to a specific brand
      */
-    getRulesForBrand(brandId: string): RoutingRule[] {
+    getRulesForBrand(brandId: string): IRoutingRule[] {
         return Array.from(this.rules.values())
             .filter(rule => rule.enabled && (rule.targetBrands.length === 0 || rule.targetBrands.includes(brandId)))
             .sort((a, b) => b.priority - a.priority);
@@ -252,7 +252,7 @@ export class RulesManager {
     /**
      * Get rules by direction (inbound/outbound)
      */
-    getRulesByDirection(direction: 'inbound' | 'outbound'): RoutingRule[] {
+    getRulesByDirection(direction: 'inbound' | 'outbound'): IRoutingRule[] {
         return Array.from(this.rules.values())
             .filter(rule => rule.enabled && (rule.direction === 'both' || rule.direction === direction))
             .sort((a, b) => b.priority - a.priority);

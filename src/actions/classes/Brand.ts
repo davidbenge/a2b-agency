@@ -1,4 +1,4 @@
-import { IBrand, Ia2bEvent, IBrandEventPostResponse } from '../types';
+import { IBrand, Ia2bEvent, IBrandEventPostResponse, IRoutingRule } from '../types';
 import axios from 'axios';
 
 export class Brand implements IBrand {
@@ -10,6 +10,7 @@ export class Brand implements IBrand {
     readonly logo?: string;
     readonly imsOrgName?: string;
     readonly imsOrgId?: string;
+    readonly routingRules?: { [eventCode: string]: IRoutingRule[] };
     readonly createdAt: Date;
     readonly updatedAt: Date;
     readonly enabledAt: Date | null;
@@ -30,6 +31,7 @@ export class Brand implements IBrand {
         this.logo = params.logo;
         this.imsOrgName = params.imsOrgName;
         this.imsOrgId = params.imsOrgId;
+        this.routingRules = params.routingRules || {};
         
         // Normalize Date | string to Date
         this.createdAt = params.createdAt 
@@ -58,6 +60,7 @@ export class Brand implements IBrand {
             logo: this.logo,
             imsOrgName: this.imsOrgName,
             imsOrgId: this.imsOrgId,
+            routingRules: this.routingRules,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
             enabledAt: this.enabledAt
@@ -78,6 +81,7 @@ export class Brand implements IBrand {
             logo: this.logo,
             imsOrgName: this.imsOrgName,
             imsOrgId: this.imsOrgId,
+            routingRules: this.routingRules,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
             enabledAt: this.enabledAt

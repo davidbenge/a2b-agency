@@ -8,7 +8,7 @@ import './mocks/jest.setup';
 const mockOpenWhisk = createMockOpenWhisk();
 
 // Import the main function
-const { main } = require('../adobe-product-event-handler');
+const { main } = require('../services/event-registry/product/adobe-product-event-handler');
 
 describe('adobe-product-event-handler', () => {
   let mockOpenWhiskClient: MockOpenWhiskClient;
