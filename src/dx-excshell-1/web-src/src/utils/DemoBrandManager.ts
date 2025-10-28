@@ -6,17 +6,20 @@
  * BrandManager but works with in-memory storage instead of Adobe I/O state/file stores.
  */
 
-import { Brand } from "../../../../actions/classes/Brand";
-import { IBrand } from "../../../../actions/types";
+import { IBrand } from "../../../../shared/types";
+import { Brand } from "../classes/Brand";
 
 export class DemoBrandManager {
-    private brands: Map<string, Brand> = new Map();
+    private brands: Map<string, IBrand> = new Map();
 
     /**
      * Factory method to create a Brand from JSON data
      * @param json JSON object containing brand data
      * @returns new Brand instance
      * @throws Error if JSON is invalid or missing required properties
+     * 
+     * Note: secret is optional because API responses exclude it for security.
+     * Demo mode and mock data will include secrets, but production API calls will not.
      */
     static getBrandFromJson(json: any): Brand {
         if (!json || typeof json !== 'object') {
@@ -25,7 +28,7 @@ export class DemoBrandManager {
 
         const missingProps: string[] = [];
         if (!json.brandId) missingProps.push('brandId');
-        if (!json.secret) missingProps.push('secret');
+        // secret is optional - API responses don't include it for security
         if (!json.name) missingProps.push('name');
         if (!json.endPointUrl) missingProps.push('endPointUrl');
 
@@ -35,11 +38,12 @@ export class DemoBrandManager {
 
         return new Brand({
             brandId: json.brandId,
-            secret: json.secret,
             name: json.name,
             endPointUrl: json.endPointUrl,
             enabled: json.enabled,
             logo: json.logo,
+            imsOrgName: json.imsOrgName,
+            imsOrgId: json.imsOrgId,
             createdAt: json.createdAt ? new Date(json.createdAt) : new Date(),
             updatedAt: json.updatedAt ? new Date(json.updatedAt) : new Date(),
             enabledAt: json.enabledAt ? new Date(json.enabledAt) : null
@@ -55,11 +59,12 @@ export class DemoBrandManager {
         const now = new Date();
         return new Brand({
             brandId: data.brandId || this.generateBrandId(),
-            secret: data.secret || this.generateSecret(),
             name: data.name || '',
             endPointUrl: data.endPointUrl || '',
             enabled: data.enabled ?? false,
             logo: data.logo,
+            imsOrgName: data.imsOrgName,
+            imsOrgId: data.imsOrgId,
             createdAt: data.createdAt ?? now,
             updatedAt: data.updatedAt ?? now,
             enabledAt: data.enabledAt ?? null
@@ -80,7 +85,7 @@ export class DemoBrandManager {
      * @returns The brand or undefined if not found
      */
     getBrand(brandId: string): Brand | undefined {
-        return this.brands.get(brandId);
+        return this.brands.get(brandId) as Brand | undefined;
     }
 
     /**
@@ -106,7 +111,7 @@ export class DemoBrandManager {
      * @returns Array of all brands
      */
     getAllBrands(): Brand[] {
-        return Array.from(this.brands.values());
+        return Array.from(this.brands.values()) as Brand[];
     }
 
     /**

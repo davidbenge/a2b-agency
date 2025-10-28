@@ -81,6 +81,26 @@ export class ApplicationRuntimeInfo implements IApplicationRuntimeInfo {
       actionPackageName: this.actionPackageName,
     };
   }
+
+  /**
+   * Build the base endpoint URL for this application
+   * Format: https://{consoleId}-{projectName}-{workspace}.adobeio-static.net
+   * @returns The base endpoint URL
+   */
+  buildEndpointUrl(): string {
+    return `https://${this.consoleId}-${this.projectName}-${this.workspace}.adobeio-static.net`;
+  }
+
+  /**
+   * Build a runtime action URL for this application
+   * Format: https://{namespace}.adobeioruntime.net/api/v1/web/{packageName}/{actionName}
+   * @param actionName The name of the action to invoke
+   * @returns The full action URL
+   */
+  buildActionUrl(actionName: string): string {
+    const namespace = `${this.consoleId}-${this.projectName}-${this.workspace}`;
+    return `https://${namespace}.adobeioruntime.net/api/v1/web/${this.actionPackageName}/${actionName}`;
+  }
 }
 
 

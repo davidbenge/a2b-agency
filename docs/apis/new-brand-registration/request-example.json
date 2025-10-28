@@ -1,0 +1,17 @@
+{
+  "data": {
+    "app_runtime_info": {
+      "actionPackageName": "a2b-brand",
+      "appName": "agency",
+      "consoleId": "27200",
+      "projectName": "brand2agency",
+      "workspace": "benge"
+    },
+    "endPointUrl": "https://27200-brand2agency-benge.adobeio-static.net/api/v1/web/a2b-brand/agency-event-handler",
+    "imsOrgId": "33C1401053CF76370A490D4C@AdobeOrg",
+    "imsOrgName": "Tech Marketing Development",
+    "name": "benge-10-20-2025",
+    "phoneNumber": "212343",
+    "primaryContact": "David Benge"
+  }
+}

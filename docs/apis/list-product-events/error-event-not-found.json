@@ -1,0 +1,14 @@
+{
+  "statusCode": 404,
+  "body": {
+    "success": false,
+    "error": "Product event code 'invalid.event.code' not found in registry",
+    "details": {
+      "availableEventCodes": [
+        "aem.assets.asset.metadata_updated",
+        "aem.assets.asset.processing_completed"
+      ]
+    }
+  }
+}
+

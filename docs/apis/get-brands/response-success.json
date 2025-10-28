@@ -1,0 +1,35 @@
+{
+  "message": "3 brands fetched successfully",
+  "data": [
+    {
+      "brandId": "24316544-aacc-4494-8c96-2a354c60cf01",
+      "name": "Acme Brand Inc",
+      "endPointUrl": "https://27200-brand2agency-benge.adobeioruntime.net/api/v1/web/a2b-brand/agency-event-handler",
+      "enabled": true,
+      "logo": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIi...",
+      "createdAt": "2025-10-17T04:38:30.016Z",
+      "updatedAt": "2025-10-17T04:38:30.016Z",
+      "enabledAt": "2025-10-17T05:12:15.442Z"
+    },
+    {
+      "brandId": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+      "name": "Beta Brand Co",
+      "endPointUrl": "https://12345-beta-prod.adobeioruntime.net/api/v1/web/a2b-brand/agency-event-handler",
+      "enabled": false,
+      "createdAt": "2025-10-16T10:20:30.000Z",
+      "updatedAt": "2025-10-16T10:20:30.000Z",
+      "enabledAt": null
+    },
+    {
+      "brandId": "f9e8d7c6-b5a4-3210-fedc-ba9876543210",
+      "name": "Gamma Brands Ltd",
+      "endPointUrl": "https://67890-gamma-stage.adobeio-static.net/api/v1/web/a2b-brand/agency-event-handler",
+      "enabled": true,
+      "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+      "createdAt": "2025-10-15T08:15:45.123Z",
+      "updatedAt": "2025-10-17T03:45:20.789Z",
+      "enabledAt": "2025-10-15T09:00:00.000Z"
+    }
+  ]
+}
+
