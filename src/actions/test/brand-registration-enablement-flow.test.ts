@@ -78,7 +78,7 @@ describe('Brand Registration and Enablement Flow', () => {
       data: {
         ...registrationRequestExample.data,
         name: 'Test Brand Registration Flow',
-        endPointUrl: 'https://test-brand-endpoint.example.com/agency-event-handler'
+        endPointUrl: 'https://brand-webhook.example.com/agency-event-handler'
       }
     };
 
@@ -115,7 +115,7 @@ describe('Brand Registration and Enablement Flow', () => {
     expect(storedBrand).toBeDefined();
     expect(storedBrand?.enabled).toBe(false);
     expect(storedBrand?.secret).toBe(brandSecret);
-    expect(storedBrand?.endPointUrl).toBe('https://test-brand-endpoint.example.com/agency-event-handler');
+    expect(storedBrand?.endPointUrl).toBe('https://brand-webhook.example.com/agency-event-handler');
 
     // ===================================================================
     // STEP 3: Mock axios.post for sendCloudEventToEndpoint
@@ -181,7 +181,7 @@ describe('Brand Registration and Enablement Flow', () => {
     const cloudEventPayload = payload as any;
     
     // Verify the URL
-    expect(url).toBe('https://test-brand-endpoint.example.com/agency-event-handler');
+    expect(url).toBe('https://brand-webhook.example.com/agency-event-handler');
     
     // Verify the headers include secret
     expect(config?.headers).toHaveProperty('X-A2B-Brand-Secret', brandSecret);
@@ -202,7 +202,7 @@ describe('Brand Registration and Enablement Flow', () => {
     expect(eventData).toHaveProperty('secret', brandSecret);
     expect(eventData).toHaveProperty('enabled', true);
     expect(eventData).toHaveProperty('name', 'Test Brand Registration Flow');
-    expect(eventData).toHaveProperty('endPointUrl', 'https://test-brand-endpoint.example.com/agency-event-handler');
+    expect(eventData).toHaveProperty('endPointUrl', 'https://brand-webhook.example.com/agency-event-handler');
     expect(eventData).toHaveProperty('enabledAt');
     
     // Verify app_runtime_info is included
@@ -230,7 +230,7 @@ describe('Brand Registration and Enablement Flow', () => {
       data: {
         ...registrationRequestExample.data,
         name: 'Test Brand No Enable',
-        endPointUrl: 'https://test-brand-endpoint-2.example.com/agency-event-handler'
+        endPointUrl: 'https://brand-webhook-2.example.com/agency-event-handler'
       }
     };
 
@@ -278,7 +278,7 @@ describe('Brand Registration and Enablement Flow', () => {
       data: {
         ...registrationRequestExample.data,
         name: 'Test Brand for Event Structure',
-        endPointUrl: 'https://test-brand-endpoint-3.example.com/agency-event-handler'
+        endPointUrl: 'https://brand-webhook-3.example.com/agency-event-handler'
       }
     };
 
@@ -354,7 +354,7 @@ describe('Brand Registration and Enablement Flow', () => {
       data: {
         ...registrationRequestExample.data,
         name: 'Test Brand Secret Generation',
-        endPointUrl: 'https://test-brand-endpoint-4.example.com/agency-event-handler'
+        endPointUrl: 'https://brand-webhook-4.example.com/agency-event-handler'
       }
     };
 

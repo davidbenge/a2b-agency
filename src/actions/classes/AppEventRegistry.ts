@@ -69,8 +69,8 @@ export const DEFAULT_APP_EVENTS: Record<string, IAppEventDefinition> = {
         sendSignedKey: true,
         eventBodyexample: registrationEnabledBody,
         routingRules: [],
-        requiredFields: ['brandId', 'secret', 'enabled'],
-        optionalFields: ['name', 'endPointUrl', 'enabledAt'],
+        requiredFields: ['brandId', 'secret', 'enabled','agencyEndPointUrl','name', 'endPointUrl', 'enabledAt'],
+        optionalFields: [],
         injectedObjects: ['app_runtime_info','agency_identification'],
         ioProviderIdEnvVariable: 'AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID'
     },

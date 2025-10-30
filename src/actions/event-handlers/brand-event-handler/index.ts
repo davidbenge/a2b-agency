@@ -12,10 +12,15 @@
 import aioLogger from "@adobe/aio-lib-core-logging";
 import { checkMissingRequestInputs, errorResponse, stripOpenWhiskParams } from '../../utils/common';
 import { BrandManager } from '../../classes/BrandManager';
+import { getEventDefinition } from "../../classes/AppEventRegistry";
+import { sanitizeEventForLogging } from '../../utils/eventSanitizer';
 
 export async function main(params: any): Promise<any> {
   const ACTION_NAME = 'agency:brand-event-handler';
   const logger = aioLogger(ACTION_NAME, { level: params.LOG_LEVEL || "info" });
+
+  // Log sanitized incoming event
+  logger.info(`${ACTION_NAME}: Received event`, sanitizeEventForLogging(params));
 
   // handle IO webhook challenge
   if(params.challenge){
@@ -103,23 +108,19 @@ export async function main(params: any): Promise<any> {
     logger.info(`${ACTION_NAME}: Brand Event Handler called with type: ${params.type} from brand: ${brandId}`);
 
     // Route events based on type
-    switch(params.type) {
-      case "com.adobe.b2a.assetsync.new":
-      case "com.adobe.b2a.assetsync.updated":
-      case "com.adobe.b2a.assetsync.deleted":
-        logger.info(`${ACTION_NAME}: Routing ${params.type} to agency-assetsync-internal-handler`);
-        return await routeToInternalHandler('agency-assetsync-internal-handler', params, logger);
-      
-      default:
-        logger.warn(`${ACTION_NAME}: Unhandled event type: ${params.type}`);
-        return {
-          statusCode: 400,
-          body: {
-            message: `Unhandled event type: ${params.type}`,
-            error: 'Event type not supported'
-          }
+    const eventDefinition = getEventDefinition(params.type);    
+    if (!eventDefinition || !eventDefinition.handlerActionName) {
+      logger.warn(`${ACTION_NAME}: Event definition not found for type: ${params.type}`);
+      return {
+        statusCode: 400,
+        body: {
+          message: `Event definition not found for type: ${params.type}`,
+          error: 'Event type not supported'
         }
+      }
     }
+    logger.info(`${ACTION_NAME}: Routing ${params.type} to ${eventDefinition.handlerActionName}`);
+    return await routeToInternalHandler(eventDefinition.handlerActionName, params, logger);
 
   } catch (error: unknown) {
     logger.error(`${ACTION_NAME}: Error processing event`, error as any);
@@ -148,11 +149,7 @@ async function routeToInternalHandler(actionName: string, eventData: any, logger
     const openwhisk = require('openwhisk');
     
     // Initialize the OpenWhisk client
-    const ow = openwhisk({
-      apihost: eventData.AIO_runtime_apihost || 'https://adobeioruntime.net',
-      api_key: eventData.AIO_runtime_auth,
-      namespace: eventData.AIO_runtime_namespace
-    });
+    const ow = openwhisk();
 
     // Prepare the parameters for the internal action
     const actionParams = stripOpenWhiskParams(eventData);

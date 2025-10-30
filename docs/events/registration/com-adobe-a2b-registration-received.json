@@ -19,6 +19,7 @@
         },
         "brandId": "c6409c52-9295-4d15-94e6-7bd39d04360c",
         "name": "Brand Name",
+        "agencyName": "Benge Agency",
         "endPointUrl": "https://example.com/webhook"
     }
 }

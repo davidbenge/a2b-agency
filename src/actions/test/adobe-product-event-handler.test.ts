@@ -8,7 +8,7 @@ import './mocks/jest.setup';
 const mockOpenWhisk = createMockOpenWhisk();
 
 // Import the main function
-const { main } = require('../services/event-registry/product/adobe-product-event-handler');
+const { main } = require('../event-handlers/product/adobe-product-event-handler');
 
 describe('adobe-product-event-handler', () => {
   let mockOpenWhiskClient: MockOpenWhiskClient;
@@ -73,10 +73,9 @@ describe('adobe-product-event-handler', () => {
 
       const result = await main(params, mockOpenWhisk);
 
-      expect(result.statusCode).toBe(200);
-      expect(result.body.message).toBe('Adobe product event processed - unhandled type');
-      expect(result.body.eventType).toBe('unknown.event.type');
-      expect(result.body.note).toBe('Event type not configured for routing');
+      expect(result.statusCode).toBe(400);
+      expect(result.body.message).toBe('No internal handler configured for event type: unknown.event.type');
+      expect(result.body.error).toBe('Event type not supported');
     });
 
     it('should handle AEM asset created events as unhandled', async () => {
@@ -89,10 +88,9 @@ describe('adobe-product-event-handler', () => {
 
       const result = await main(params, mockOpenWhisk);
 
-      expect(result.statusCode).toBe(200);
-      expect(result.body.message).toBe('Adobe product event processed - unhandled type');
-      expect(result.body.eventType).toBe('aem.assets.asset.created');
-      expect(result.body.note).toBe('Event type not configured for routing');
+      expect(result.statusCode).toBe(400);
+      expect(result.body.message).toBe('No internal handler configured for event type: aem.assets.asset.created');
+      expect(result.body.error).toBe('Event type not supported');
     });
 
     it('should handle AEM asset updated events as unhandled', async () => {
@@ -105,10 +103,9 @@ describe('adobe-product-event-handler', () => {
 
       const result = await main(params, mockOpenWhisk);
 
-      expect(result.statusCode).toBe(200);
-      expect(result.body.message).toBe('Adobe product event processed - unhandled type');
-      expect(result.body.eventType).toBe('aem.assets.asset.updated');
-      expect(result.body.note).toBe('Event type not configured for routing');
+      expect(result.statusCode).toBe(400);
+      expect(result.body.message).toBe('No internal handler configured for event type: aem.assets.asset.updated');
+      expect(result.body.error).toBe('Event type not supported');
     });
 
     it('should handle AEM asset deleted events as unhandled', async () => {
@@ -121,10 +118,9 @@ describe('adobe-product-event-handler', () => {
 
       const result = await main(params, mockOpenWhisk);
 
-      expect(result.statusCode).toBe(200);
-      expect(result.body.message).toBe('Adobe product event processed - unhandled type');
-      expect(result.body.eventType).toBe('aem.assets.asset.deleted');
-      expect(result.body.note).toBe('Event type not configured for routing');
+      expect(result.statusCode).toBe(400);
+      expect(result.body.message).toBe('No internal handler configured for event type: aem.assets.asset.deleted');
+      expect(result.body.error).toBe('Event type not supported');
     });
 
     it('should handle AEM asset metadata updated events', async () => {
@@ -361,12 +357,9 @@ describe('adobe-product-event-handler', () => {
 
       const result = await main(params, mockOpenWhisk);
 
-      expect(result.statusCode).toBe(200);
-      expect(result.body.message).toBe('Adobe product event processed - unhandled type');
-      expect(result.body.eventType).toBe('aem.assets.unknown');
-      
-      // Since this event type is not handled, it should return unhandled message
-      expect(result.body.note).toBe('Event type not configured for routing');
+      expect(result.statusCode).toBe(400);
+      expect(result.body.message).toBe('No internal handler configured for event type: aem.assets.unknown');
+      expect(result.body.error).toBe('Event type not supported');
     });
   });
 });

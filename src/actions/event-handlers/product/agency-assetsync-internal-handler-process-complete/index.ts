@@ -12,11 +12,15 @@ import { EventManager } from '../../../classes/EventManager';
 import { getAemAssetData, getAemAuth } from '../../../utils/aemCscUtils';
 import { BrandManager } from "../../../classes/BrandManager";
 import { normalizeCustomersToArray } from "../../../utils/normalizers";
+import { sanitizeEventForLogging } from '../../../utils/eventSanitizer';
 
 
 export async function main(params: any): Promise<any> {
   const ACTION_NAME = 'agency:agency-assetsync-internal-handler-process-complete';
   const logger = aioLogger(ACTION_NAME, { level: params.LOG_LEVEL || "info" });
+
+  // Log sanitized incoming event (before merging router params)
+  logger.info(`${ACTION_NAME}: Received event`, sanitizeEventForLogging(params));
 
   logger.debug(`${ACTION_NAME} incoming params`, JSON.stringify(params, null, 2));
   // Normalize the params using shared helper

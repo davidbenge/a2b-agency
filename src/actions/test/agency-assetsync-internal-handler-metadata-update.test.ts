@@ -175,7 +175,7 @@ jest.mock('../classes/BrandManager', () => {
 });
 
 // Import both the product event handler and internal handler
-const { main: productEventHandlerMain } = require('../services/event-registry/product/adobe-product-event-handler');
+const { main: productEventHandlerMain } = require('../event-handlers/product/adobe-product-event-handler');
 const { createMockOpenWhisk } = require('./mocks/MockOpenWhisk');
 
 describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update Integration Test', () => {
@@ -193,7 +193,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
     // Note: We're using mocked BrandManager instead of state store approach
 
     // Setup default mock implementations
-    const { getAemAssetData } = require('../../utils/aemCscUtils');
+    const { getAemAssetData } = require('../utils/aemCscUtils');
     getAemAssetData.mockResolvedValue(mockAemAssetDataForMetadataUpdate);
 
     // Mock fetch for presigned URL call
@@ -280,7 +280,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
       await productEventHandlerMain(mockMetadataUpdateEventData, mockOpenWhiskClient);
 
       // Verify getAemAssetData was called with correct parameters
-      const { getAemAssetData } = require('../../utils/aemCscUtils');
+      const { getAemAssetData } = require('../utils/aemCscUtils');
       expect(getAemAssetData).toHaveBeenCalledWith(
         'https://author-p142461-e1463137.adobeaemcloud.com',
         '/content/dam/benge/sad_elmo.webp',
@@ -333,7 +333,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
       expect(result.body.message).toBe('Adobe product event processed successfully');
 
       // Verify AEM asset data was fetched
-      const { getAemAssetData } = require('../../utils/aemCscUtils');
+      const { getAemAssetData } = require('../utils/aemCscUtils');
       expect(getAemAssetData).toHaveBeenCalledTimes(1);
       
       // Verify it was called with the expected host and path
@@ -383,7 +383,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
         }
       };
 
-      const { getAemAssetData } = require('../../utils/aemCscUtils');
+      const { getAemAssetData } = require('../utils/aemCscUtils');
       getAemAssetData.mockResolvedValue(singleBrandAssetData);
 
       await productEventHandlerMain(mockMetadataUpdateEventData, mockOpenWhiskClient);
@@ -446,7 +446,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
         }
       };
 
-      const { getAemAssetData } = require('../../utils/aemCscUtils');
+      const { getAemAssetData } = require('../utils/aemCscUtils');
       getAemAssetData.mockResolvedValue(assetWithoutSyncData);
 
       const result = await productEventHandlerMain(mockMetadataUpdateEventData, mockOpenWhiskClient);
@@ -550,7 +550,7 @@ describe('agency-assetsync-internal-handler-metadata-updated - Metadata Update I
       expect(result.statusCode).toBe(200);
       
       // The handler should have identified this as a metadata update
-      const { getAemAssetData } = require('../../utils/aemCscUtils');
+      const { getAemAssetData } = require('../utils/aemCscUtils');
       expect(getAemAssetData).toHaveBeenCalled();
       expect(mockGetBrand).toHaveBeenCalledTimes(2);
     });

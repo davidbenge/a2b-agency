@@ -95,7 +95,7 @@ docs/events/
 └── product/               # Adobe product events (consumed BY agency)
     └── aem/               # AEM Assets events
         ├── README.md      ← New documentation
-        ├── aem-assets-asset-metadata.json
+        ├── (aem-assets-asset-metadata.json - DEPRECATED, use ../apis/aem/asset_metadata/aem-assets-asset-metadata_with-sync-on.json)
         ├── aem-assets-asset-processing-complete.json
         ├── aem-assets-metadata-change.json
         ├── aem-assets-asset-metadata-updated-event.json
@@ -140,7 +140,7 @@ Bad examples:
 |-----------|----------|---------|
 | Agency-published events | `docs/events/agency/` | `com-adobe-a2b-assetsync-new.json` |
 | Brand-published events | `docs/events/brand/` | `com-adobe-b2a-registration-new.json` |
-| AEM product events | `docs/events/product/aem/` | `aem-assets-asset-metadata.json` |
+| AEM product events | `docs/apis/aem/asset_metadata/` | `aem-assets-asset-metadata_with-sync-on.json` |
 | Registration events | `docs/events/registration/` | `com-adobe-a2b-registration-enabled.json` |
 | AEM API responses | `docs/apis/aem/asset_metadata/` | `aem-assets-asset-metadata_with-sync-off.json` |
 

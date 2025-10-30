@@ -155,6 +155,8 @@ export class Brand implements IBrand {
         const requestPayload = (typeof (cloudEvent as any).toJSON === 'function')
             ? (cloudEvent as any).toJSON()
             : cloudEvent;
+        // Debug log of outgoing payload to brand
+        try { console.debug('Brand:sendCloudEventToEndpoint: Outgoing CloudEvent payload', JSON.stringify(requestPayload, null, 2)); } catch {}
         
         try {
             // Check if this is a mock endpoint for testing

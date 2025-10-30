@@ -111,7 +111,7 @@ const mockEventTypes: EventType[] = [
         displayName: 'Workfront Task Created',
         category: 'workfront',
         description: 'Triggered when a new task is created in Workfront',
-        handler: 'workfront-event-handler',
+        handler: 'workfront-internal-event-handler',
         requiredFields: ['taskId', 'taskName', 'projectId'],
         optionalFields: ['assignee', 'dueDate', 'priority']
     },
@@ -120,7 +120,7 @@ const mockEventTypes: EventType[] = [
         displayName: 'Workfront Task Updated',
         category: 'workfront',
         description: 'Triggered when a task is updated in Workfront',
-        handler: 'workfront-event-handler',
+        handler: 'workfront-internal-event-handler',
         requiredFields: ['taskId', 'taskName', 'projectId'],
         optionalFields: ['assignee', 'dueDate', 'priority', 'status']
     },
@@ -129,7 +129,7 @@ const mockEventTypes: EventType[] = [
         displayName: 'Workfront Task Completed',
         category: 'workfront',
         description: 'Triggered when a task is marked as completed in Workfront',
-        handler: 'workfront-event-handler',
+        handler: 'workfront-internal-event-handler',
         requiredFields: ['taskId', 'taskName', 'projectId'],
         optionalFields: ['assignee', 'completionDate', 'notes']
     },
@@ -307,7 +307,7 @@ const mockRules: IRule[] = [
         actions: [
             {
                 type: 'route',
-                target: 'workfront-event-handler'
+                target: 'workfront-internal-event-handler'
             },
             {
                 type: 'log',

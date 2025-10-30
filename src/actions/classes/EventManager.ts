@@ -192,20 +192,14 @@ export class EventManager {
             throw new Error(`EventManager:processEvent: Event code '${eventCode}' not found in registry`);
         }
 
-        // 2. Validate required fields
-        const missingFields = eventDefinition.requiredFields.filter(field => !(field in eventData));
-        if (missingFields.length > 0) {
-            throw new Error(`EventManager:processEvent: Missing required fields for '${eventCode}': ${missingFields.join(', ')}`);
-        }
-
-        // 3. Get runtime info and agency identification
+        // 2. Get runtime info and agency identification (before validation, as they may be needed for derived fields)
         const runtimeInfo = this.getApplicationRuntimeInfo();
         const agencyIdentification = this.getAgencyIdentificationLazy();
 
-        // 4. Build the complete event data with injected objects
+        // 3. Build the complete event data with injected objects
         const completeEventData = { ...eventData };
         
-        // Inject app_runtime_info if specified in event definition
+        // Inject app_runtime_info if specified in event definition (needed for deriving agencyEndPointUrl)
         if (eventDefinition.injectedObjects?.includes('app_runtime_info')) {
             completeEventData.app_runtime_info = {
                 consoleId: runtimeInfo.consoleId,
@@ -214,6 +208,17 @@ export class EventManager {
                 app_name: runtimeInfo.appName,
                 action_package_name: runtimeInfo.actionPackageName
             };
+        }
+
+        // Derive agencyEndPointUrl from runtime info BEFORE validation
+        if (!completeEventData.agencyEndPointUrl) {
+            completeEventData.agencyEndPointUrl = runtimeInfo.buildEndpointUrl();
+        }
+
+        // 4. Validate required fields (after deriving auto-populated fields)
+        const missingFields = eventDefinition.requiredFields.filter(field => !(field in completeEventData));
+        if (missingFields.length > 0) {
+            throw new Error(`EventManager:processEvent: Missing required fields for '${eventCode}': ${missingFields.join(', ')}`);
         }
 
         // Inject agency_identification if specified in event definition
@@ -258,6 +263,10 @@ export class EventManager {
 
         if (shouldSendToBrand) {
             try {
+                // Log the exact CloudEvent payload before sending to brand
+                const ce = event.toCloudEvent() as any;
+                const payload = typeof ce.toJSON === 'function' ? ce.toJSON() : ce;
+                this.logger.debug?.('EventManager: Prepared CloudEvent payload for brand send', payload);
                 this.logger.info(`EventManager: Sending event to brand ${brand!.brandId}`, { eventCode });
                 brandSendResult = await brand!.sendCloudEventToEndpoint(event);
                 this.logger.info(`EventManager: Successfully sent event to brand ${brand!.brandId}`);

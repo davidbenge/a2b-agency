@@ -132,7 +132,7 @@ jest.spyOn(Brand.prototype, 'sendCloudEventToEndpoint').mockImplementation(mockS
 const mockOpenWhisk = createMockOpenWhisk();
 
 // Import the main function
-const { main } = require('../services/event-registry/product/adobe-product-event-handler');
+const { main } = require('../event-handlers/product/adobe-product-event-handler');
 
 describe('adobe-product-event-handler - Asset Processing Complete Integration Test', () => {
   let mockOpenWhiskClient: MockOpenWhiskClient;
@@ -149,7 +149,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
     mockOpenWhiskClient.reset();
 
     // Setup default mock implementations
-    const { getAemAssetData } = require('../../utils/aemCscUtils');
+    const { getAemAssetData } = require('../utils/aemCscUtils');
     getAemAssetData.mockResolvedValue(mockAemAssetData);
 
     // Mock fetch for presigned URL call
@@ -210,7 +210,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
       await main(mockEventData, mockOpenWhisk);
 
       // Verify getAemAssetData was called with correct parameters
-      const { getAemAssetData } = require('../../utils/aemCscUtils');
+      const { getAemAssetData } = require('../utils/aemCscUtils');
       expect(getAemAssetData).toHaveBeenCalledWith(
         'https://author-p142461-e1463137.adobeaemcloud.com',
         '/content/dam/agency_work_for_BRAND_A/Screenshot 2025-05-28 at 5.05.48 PM.png',
@@ -284,7 +284,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
         }
       };
 
-      const { getAemAssetData } = require('../../utils/aemCscUtils');
+      const { getAemAssetData } = require('../utils/aemCscUtils');
       getAemAssetData.mockResolvedValue(multiCustomerAssetData);
 
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {
@@ -350,7 +350,7 @@ describe('adobe-product-event-handler - Asset Processing Complete Integration Te
         }
       };
 
-      const { getAemAssetData } = require('../../utils/aemCscUtils');
+      const { getAemAssetData } = require('../utils/aemCscUtils');
       getAemAssetData.mockResolvedValue(assetWithoutSyncData);
 
       mockOpenWhiskClient.registerAction('a2b-agency/agency-assetsync-internal-handler-process-complete', async (params) => {

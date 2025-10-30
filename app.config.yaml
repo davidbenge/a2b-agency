@@ -12,6 +12,8 @@ application:
             inputs:
               LOG_LEVEL: debug
               ORG_ID: $ORG_ID
+              AGENCY_ID: $AGENCY_ID
+              AGENCY_NAME: $AGENCY_NAME
               S2S_API_KEY: $SERVICE_API_KEY
               AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID: $AIO_AGENCY_EVENTS_BRAND_REGISTRATION_PROVIDER_ID
               AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID: $AIO_AGENCY_EVENTS_AEM_ASSET_SYNC_PROVIDER_ID
@@ -83,7 +85,7 @@ application:
               require-adobe-auth: false
               final: true
           adobe-product-event-handler:
-            function: src/actions/services/event-registry/product/adobe-product-event-handler/index.ts
+            function: src/actions/event-handlers/product/adobe-product-event-handler/index.ts
             web: 'no'
             runtime: nodejs:22
             inputs:
@@ -155,6 +157,7 @@ application:
               S2S_CLIENT_SECRET: $S2S_CLIENT_SECRET
               S2S_SCOPES: $S2S_SCOPES
               AGENCY_ID: $AGENCY_ID
+              AGENCY_NAME: $AGENCY_NAME
               ORG_ID: $ORG_ID
               APPLICATION_RUNTIME_INFO: '{"namespace":"${AIO_runtime_namespace}","app_name":"agency","action_package_name":"${AIO_ACTION_PACKAGE_NAME}"}'
             annotations:
