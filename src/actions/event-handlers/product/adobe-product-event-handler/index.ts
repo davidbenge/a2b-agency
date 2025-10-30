@@ -4,12 +4,16 @@
  * This action handles events from Adobe products (AEM, Creative Cloud, etc.)
  * and routes them to the appropriate internal event handlers based on event type.
  */
-import { getProductEventDefinition } from "../../../../classes/ProductEventRegistry";
-import { errorResponse, checkMissingRequestInputs } from "../../../../utils/common";
+import { getProductEventDefinition } from "../../../classes/ProductEventRegistry";
+import { errorResponse, checkMissingRequestInputs } from "../../../utils/common";
 import aioLogger from "@adobe/aio-lib-core-logging";
+import { sanitizeEventForLogging } from "../../../utils/eventSanitizer";
 
 export async function main(params: any, openwhiskClient?: any): Promise<any> {
   const logger = aioLogger("adobe-product-event-handler", { level: params.LOG_LEVEL || "info" });
+
+  // Log sanitized incoming event
+  logger.info(`adobe-product-event-handler: Received event`, sanitizeEventForLogging(params));
 
   try {
     const requiredParams: string[] = [];
@@ -43,14 +47,12 @@ export async function main(params: any, openwhiskClient?: any): Promise<any> {
 
     // Get event definition from registry
     const eventDefinition = getProductEventDefinition(params.type);
-    if (!eventDefinition) {
-      logger.warn(`Event type not found in registry: ${params.type}`);
+    if (!eventDefinition || !eventDefinition.handlerActionName) {
       return {
-        statusCode: 200,
+        statusCode: 400,  // ✅ Correct!
         body: {
-          message: 'Adobe product event processed - unhandled type',
-          eventType: params.type,
-          note: 'Event type not configured for routing'
+          message: `No internal handler configured for event type: ${params.type}`,
+          error: 'Event type not supported'
         }
       };
     }

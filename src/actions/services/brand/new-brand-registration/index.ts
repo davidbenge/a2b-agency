@@ -86,7 +86,8 @@ export async function main(params: any): Promise<any> {
       const eventData = {
         name: savedBrand.name,
         endPointUrl: savedBrand.endPointUrl,
-        brandId: savedBrand.brandId
+        brandId: savedBrand.brandId,
+        agencyName: params.AGENCY_NAME // Include agency name for brand to store
       };
       
       // Process the registration.received event (no brand object yet, since we just created it)

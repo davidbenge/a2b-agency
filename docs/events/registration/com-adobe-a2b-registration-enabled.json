@@ -20,7 +20,9 @@
         "brandId": "c6409c52-9295-4d15-94e6-7bd39d04360c",
         "secret": "aB3dEf7GhI9jKlMnOpQrStUvWxYz1234",
         "name": "Brand Name",
+        "agencyName": "Benge Agency",
         "endPointUrl": "https://example.com/webhook",
+        "agencyEndPointUrl": "https://27200-a2b-benge.adobeio-static.net",
         "enabled": true,
         "enabledAt": "2025-08-28T07:29:29.728Z"
     }
