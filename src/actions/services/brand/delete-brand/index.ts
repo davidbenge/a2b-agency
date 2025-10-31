@@ -30,6 +30,40 @@ export async function main(params: any): Promise<any> {
         return errorResponse(404, `Brand ${params.brandId} not found`, logger);
       }
 
+      // Clean up Workfront event subscriptions if configured
+      if (brand.workfrontServerUrl && brand.workfrontEventSubscriptions && brand.workfrontEventSubscriptions.length > 0) {
+        logger.info(`Cleaning up ${brand.workfrontEventSubscriptions.length} Workfront event subscriptions before deletion`);
+        
+        try {
+          // Call manage-workfront-subscriptions to unregister
+          const ow = require("openwhisk")();
+          await ow.actions.invoke({
+            name: 'a2b-agency/manage-workfront-subscriptions',
+            params: {
+              brandId: brand.brandId,
+              action: 'unregister',
+              S2S_CLIENT_ID: params.S2S_CLIENT_ID,
+              S2S_CLIENT_SECRET: params.S2S_CLIENT_SECRET,
+              S2S_SCOPES: params.S2S_SCOPES,
+              ORG_ID: params.ORG_ID,
+              APPLICATION_RUNTIME_INFO: params.APPLICATION_RUNTIME_INFO,
+              LOG_LEVEL: params.LOG_LEVEL
+            },
+            blocking: true,
+            result: true
+          });
+          
+          logger.info('Successfully cleaned up Workfront subscriptions before deletion');
+        } catch (wfError: unknown) {
+          const err = wfError as Error;
+          logger.error('Failed to cleanup Workfront subscriptions before deletion', { 
+            error: err.message, 
+            stack: err.stack 
+          });
+          // Don't fail the deletion if Workfront cleanup fails - log and continue
+        }
+      }
+
       // Send registration.disabled event before deletion
       logger.info(`Sending registration.disabled event before deleting brand ${params.brandId}`);
       

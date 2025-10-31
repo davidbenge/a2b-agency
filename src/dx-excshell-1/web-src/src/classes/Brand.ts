@@ -15,6 +15,12 @@ export class Brand implements Omit<IBrand, 'secret'> {
     readonly createdAt: Date | string;
     readonly updatedAt: Date | string;
     readonly enabledAt: Date | string | null;
+    readonly workfrontServerUrl?: string;
+    readonly workfrontCompanyId?: string;
+    readonly workfrontCompanyName?: string;
+    readonly workfrontGroupId?: string;
+    readonly workfrontGroupName?: string;
+    readonly workfrontEventSubscriptions?: string[];
 
     constructor(params: Omit<IBrand, 'secret'>) {
         this.brandId = params.brandId;
@@ -27,6 +33,12 @@ export class Brand implements Omit<IBrand, 'secret'> {
         this.createdAt = params.createdAt;
         this.updatedAt = params.updatedAt;
         this.enabledAt = params.enabledAt;
+        this.workfrontServerUrl = params.workfrontServerUrl;
+        this.workfrontCompanyId = params.workfrontCompanyId;
+        this.workfrontCompanyName = params.workfrontCompanyName;
+        this.workfrontGroupId = params.workfrontGroupId;
+        this.workfrontGroupName = params.workfrontGroupName;
+        this.workfrontEventSubscriptions = params.workfrontEventSubscriptions;
     }
 
     /**
@@ -44,7 +56,13 @@ export class Brand implements Omit<IBrand, 'secret'> {
             imsOrgId: this.imsOrgId,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
-            enabledAt: this.enabledAt
+            enabledAt: this.enabledAt,
+            workfrontServerUrl: this.workfrontServerUrl,
+            workfrontCompanyId: this.workfrontCompanyId,
+            workfrontCompanyName: this.workfrontCompanyName,
+            workfrontGroupId: this.workfrontGroupId,
+            workfrontGroupName: this.workfrontGroupName,
+            workfrontEventSubscriptions: this.workfrontEventSubscriptions
         };
     }
 
@@ -64,7 +82,13 @@ export class Brand implements Omit<IBrand, 'secret'> {
                 imsOrgId: this.imsOrgId,
                 createdAt: this.createdAt,
                 updatedAt: this.updatedAt,
-                enabledAt: this.enabledAt
+                enabledAt: this.enabledAt,
+                workfrontServerUrl: this.workfrontServerUrl,
+                workfrontCompanyId: this.workfrontCompanyId,
+                workfrontCompanyName: this.workfrontCompanyName,
+                workfrontGroupId: this.workfrontGroupId,
+                workfrontGroupName: this.workfrontGroupName,
+                workfrontEventSubscriptions: this.workfrontEventSubscriptions
             };
         }
 }

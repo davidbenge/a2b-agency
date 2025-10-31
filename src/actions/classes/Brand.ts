@@ -14,6 +14,14 @@ export class Brand implements IBrand {
     readonly createdAt: Date;
     readonly updatedAt: Date;
     readonly enabledAt: Date | null;
+    
+    // Workfront Integration Fields
+    readonly workfrontServerUrl?: string;
+    readonly workfrontCompanyId?: string;
+    readonly workfrontCompanyName?: string;
+    readonly workfrontGroupId?: string;
+    readonly workfrontGroupName?: string;
+    readonly workfrontEventSubscriptions?: string[];
 
     constructor(params: Partial<IBrand> & { brandId: string; name: string; endPointUrl: string }) {
         // Validate required fields
@@ -32,6 +40,14 @@ export class Brand implements IBrand {
         this.imsOrgName = params.imsOrgName;
         this.imsOrgId = params.imsOrgId;
         this.routingRules = params.routingRules || {};
+        
+        // Workfront fields
+        this.workfrontServerUrl = params.workfrontServerUrl;
+        this.workfrontCompanyId = params.workfrontCompanyId;
+        this.workfrontCompanyName = params.workfrontCompanyName;
+        this.workfrontGroupId = params.workfrontGroupId;
+        this.workfrontGroupName = params.workfrontGroupName;
+        this.workfrontEventSubscriptions = params.workfrontEventSubscriptions || [];
         
         // Normalize Date | string to Date
         this.createdAt = params.createdAt 
@@ -63,7 +79,13 @@ export class Brand implements IBrand {
             routingRules: this.routingRules,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
-            enabledAt: this.enabledAt
+            enabledAt: this.enabledAt,
+            workfrontServerUrl: this.workfrontServerUrl,
+            workfrontCompanyId: this.workfrontCompanyId,
+            workfrontCompanyName: this.workfrontCompanyName,
+            workfrontGroupId: this.workfrontGroupId,
+            workfrontGroupName: this.workfrontGroupName,
+            workfrontEventSubscriptions: this.workfrontEventSubscriptions
         };
     }
 
@@ -84,7 +106,13 @@ export class Brand implements IBrand {
             routingRules: this.routingRules,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
-            enabledAt: this.enabledAt
+            enabledAt: this.enabledAt,
+            workfrontServerUrl: this.workfrontServerUrl,
+            workfrontCompanyId: this.workfrontCompanyId,
+            workfrontCompanyName: this.workfrontCompanyName,
+            workfrontGroupId: this.workfrontGroupId,
+            workfrontGroupName: this.workfrontGroupName,
+            workfrontEventSubscriptions: this.workfrontEventSubscriptions
         };
     }
 

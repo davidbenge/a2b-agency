@@ -29,9 +29,12 @@ import Edit from '@spectrum-icons/workflow/Edit';
 import ViewDetail from '@spectrum-icons/workflow/ViewDetail';
 import Delete from '@spectrum-icons/workflow/Delete';
 import Close from '@spectrum-icons/workflow/Close';
+import Settings from '@spectrum-icons/workflow/Settings';
 import { v4 as uuidv4 } from 'uuid';
 import { apiService } from '../../services/api';
 import { Brand } from '../../classes/Brand';
+import { WorkfrontConfigModal } from '../modals/WorkfrontConfigModal';
+import { DialogTrigger, ActionButton } from '@adobe/react-spectrum';
 
 type ViewMode = 'list' | 'add' | 'edit' | 'view';
 
@@ -69,6 +72,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
     const [formLoading, setFormLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const [selectedBrandForWF, setSelectedBrandForWF] = useState<Brand | null>(null);
     console.debug('BrandManagerView: viewProps.aioEnableDemoMode', viewProps.aioEnableDemoMode);
     console.debug('BrandManagerView: viewProps', viewProps);
 
@@ -271,6 +275,32 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
         setTimeout(() => {
             setSuccess(null);
             setError(null);
+        }, 3000);
+    };
+
+    const handleWorkfrontConfigSave = async () => {
+        if (!selectedBrandForWF) return;
+        
+        try {
+            setSuccess('Workfront configuration saved successfully');
+            
+            // Refresh the brands list to show updated Workfront info
+            const response = await apiService.getBrandList();
+            if (response.body.data) {
+                const items = response.body.data as any[];
+                const brandObjects = items.map(item => DemoBrandManager.getBrandFromJson(item));
+                setBrands(brandObjects);
+            }
+        } catch (error) {
+            console.error('Error refreshing brands after Workfront config:', error);
+        }
+        
+        // Close the modal
+        setSelectedBrandForWF(null);
+        
+        // Clear messages after 3 seconds
+        setTimeout(() => {
+            setSuccess(null);
         }, 3000);
     };
 
@@ -529,6 +559,37 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                             >
                                                 <Edit />
                                             </Button>
+                                            <DialogTrigger isDismissable>
+                                                <ActionButton
+                                                    onPress={() => setSelectedBrandForWF(brand)}
+                                                    aria-label="Configure Workfront"
+                                                >
+                                                    <Settings />
+                                                </ActionButton>
+                                                {(close) => (
+                                                    <WorkfrontConfigModal
+                                                        brandId={brand.brandId}
+                                                        imsToken={viewProps.imsToken}
+                                                        imsOrgId={viewProps.imsOrg}
+                                                        existingConfig={{
+                                                            workfrontServerUrl: brand.workfrontServerUrl,
+                                                            workfrontCompanyId: brand.workfrontCompanyId,
+                                                            workfrontCompanyName: brand.workfrontCompanyName,
+                                                            workfrontGroupId: brand.workfrontGroupId,
+                                                            workfrontGroupName: brand.workfrontGroupName
+                                                        }}
+                                                        onSave={async (config) => {
+                                                            // The modal will handle the actual save via API call
+                                                            // This is just the callback after successful save
+                                                            await handleWorkfrontConfigSave();
+                                                        }}
+                                                        onClose={() => {
+                                                            close();
+                                                            setSelectedBrandForWF(null);
+                                                        }}
+                                                    />
+                                                )}
+                                            </DialogTrigger>
                                             {/* Disable button only shown for enabled brands */}
                                             {brand.enabled && (
                                                 <Button
