@@ -29,12 +29,10 @@ import Edit from '@spectrum-icons/workflow/Edit';
 import ViewDetail from '@spectrum-icons/workflow/ViewDetail';
 import Delete from '@spectrum-icons/workflow/Delete';
 import Close from '@spectrum-icons/workflow/Close';
-import Settings from '@spectrum-icons/workflow/Settings';
 import { v4 as uuidv4 } from 'uuid';
 import { apiService } from '../../services/api';
 import { Brand } from '../../classes/Brand';
-import { WorkfrontConfigModal } from '../modals/WorkfrontConfigModal';
-import { DialogTrigger, ActionButton } from '@adobe/react-spectrum';
+import { ActionButton } from '@adobe/react-spectrum';
 
 type ViewMode = 'list' | 'add' | 'edit' | 'view';
 
@@ -72,7 +70,6 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
     const [formLoading, setFormLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-    const [selectedBrandForWF, setSelectedBrandForWF] = useState<Brand | null>(null);
     console.debug('BrandManagerView: viewProps.aioEnableDemoMode', viewProps.aioEnableDemoMode);
     console.debug('BrandManagerView: viewProps', viewProps);
 
@@ -278,32 +275,6 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
         }, 3000);
     };
 
-    const handleWorkfrontConfigSave = async () => {
-        if (!selectedBrandForWF) return;
-        
-        try {
-            setSuccess('Workfront configuration saved successfully');
-            
-            // Refresh the brands list to show updated Workfront info
-            const response = await apiService.getBrandList();
-            if (response.body.data) {
-                const items = response.body.data as any[];
-                const brandObjects = items.map(item => DemoBrandManager.getBrandFromJson(item));
-                setBrands(brandObjects);
-            }
-        } catch (error) {
-            console.error('Error refreshing brands after Workfront config:', error);
-        }
-        
-        // Close the modal
-        setSelectedBrandForWF(null);
-        
-        // Clear messages after 3 seconds
-        setTimeout(() => {
-            setSuccess(null);
-        }, 3000);
-    };
-
     const handleFormSubmit = async (brandData: Partial<Brand>) => {
         try {
             console.debug('BrandManagerView: handleFormSubmit called', {
@@ -344,6 +315,9 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                 }
             } else if (viewMode === 'edit' && selectedBrand) {
                 // Prepare update data (secret is excluded automatically by Brand.toJSON() on frontend)
+                console.log('BrandManagerView: brandData received from form:', brandData);
+                console.log('BrandManagerView: selectedBrand.toJSON():', selectedBrand.toJSON());
+                
                 const updatedBrand = new Brand({
                     ...selectedBrand.toJSON(),
                     ...brandData,
@@ -358,9 +332,19 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                     enabledAt: updatedBrand.enabledAt,
                     brandDataEnabled: brandData.enabled
                 });
+                
+                const brandJSON = updatedBrand.toJSON();
+                console.log('BrandManagerView: updatedBrand.toJSON():', brandJSON);
+                console.log('BrandManagerView: Workfront fields in JSON:', {
+                    workfrontServerUrl: brandJSON.workfrontServerUrl,
+                    workfrontCompanyId: brandJSON.workfrontCompanyId,
+                    workfrontCompanyName: brandJSON.workfrontCompanyName,
+                    workfrontGroupId: brandJSON.workfrontGroupId,
+                    workfrontGroupName: brandJSON.workfrontGroupName
+                });
 
                 // Convert to plain object for API call
-                const response = await apiService.updateBrand(updatedBrand.toJSON());
+                const response = await apiService.updateBrand(brandJSON);
 
                 if (response.statusCode === 200 && response.body.data) {
                     // Use the brand data from API response (which excludes secret for security)
@@ -475,6 +459,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                             <Column key="name" allowsSorting minWidth={150}>Name</Column>
                             <Column key="imsOrgName" allowsSorting minWidth={150}>IMS Org</Column>
                             <Column key="endPointUrl" allowsSorting minWidth={200}>Endpoint URL</Column>
+                            <Column key="workfrontCompany" allowsSorting minWidth={150}>Workfront Company</Column>
                             <Column key="enabled" allowsSorting width={120}>Status</Column>
                             <Column key="createdAt" allowsSorting width={120}>Created</Column>
                             <Column key="actions" align="center" width={200}>Actions</Column>
@@ -540,6 +525,33 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                         </TooltipTrigger>
                                     </Cell>
                                     <Cell>
+                                        {brand.workfrontCompanyName ? (
+                                            <TooltipTrigger>
+                                                <Text
+                                                    UNSAFE_style={{
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                        display: 'block',
+                                                        cursor: 'help'
+                                                    }}
+                                                >
+                                                    {brand.workfrontCompanyName}
+                                                </Text>
+                                                <Tooltip>
+                                                    <div>
+                                                        <strong>Company:</strong> {brand.workfrontCompanyName}<br/>
+                                                        {brand.workfrontGroupName && (
+                                                            <><strong>Group:</strong> {brand.workfrontGroupName}</>
+                                                        )}
+                                                    </div>
+                                                </Tooltip>
+                                            </TooltipTrigger>
+                                        ) : (
+                                            <Text>—</Text>
+                                        )}
+                                    </Cell>
+                                    <Cell>
                                         <StatusLight variant={brand.enabled ? 'positive' : 'negative'}>
                                             {brand.enabled ? 'Enabled' : 'Disabled'}
                                         </StatusLight>
@@ -559,37 +571,6 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                             >
                                                 <Edit />
                                             </Button>
-                                            <DialogTrigger isDismissable>
-                                                <ActionButton
-                                                    onPress={() => setSelectedBrandForWF(brand)}
-                                                    aria-label="Configure Workfront"
-                                                >
-                                                    <Settings />
-                                                </ActionButton>
-                                                {(close) => (
-                                                    <WorkfrontConfigModal
-                                                        brandId={brand.brandId}
-                                                        imsToken={viewProps.imsToken}
-                                                        imsOrgId={viewProps.imsOrg}
-                                                        existingConfig={{
-                                                            workfrontServerUrl: brand.workfrontServerUrl,
-                                                            workfrontCompanyId: brand.workfrontCompanyId,
-                                                            workfrontCompanyName: brand.workfrontCompanyName,
-                                                            workfrontGroupId: brand.workfrontGroupId,
-                                                            workfrontGroupName: brand.workfrontGroupName
-                                                        }}
-                                                        onSave={async (config) => {
-                                                            // The modal will handle the actual save via API call
-                                                            // This is just the callback after successful save
-                                                            await handleWorkfrontConfigSave();
-                                                        }}
-                                                        onClose={() => {
-                                                            close();
-                                                            setSelectedBrandForWF(null);
-                                                        }}
-                                                    />
-                                                )}
-                                            </DialogTrigger>
                                             {/* Disable button only shown for enabled brands */}
                                             {brand.enabled && (
                                                 <Button
@@ -626,6 +607,8 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             onSubmit={handleFormSubmit}
             onCancel={handleCancel}
             loading={formLoading}
+            imsToken={viewProps.imsToken}
+            imsOrgId={viewProps.imsOrg}
         />
     );
 

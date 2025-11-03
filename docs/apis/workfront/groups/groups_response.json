@@ -1,0 +1,245 @@
+{
+    "count": 48,
+    "groups": [{
+      "ID": "630921b60014f6eaf6de23520f6d74f1",
+      "description": null,
+      "name": "Benefits Management",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b60002ad0d6d1fe6879a349666",
+      "description": null,
+      "name": "Compensation",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b700035eae8d4364d5227d3690",
+      "description": null,
+      "name": "Corporate Culture",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b70002dd4dae91ff445e73854d",
+      "description": null,
+      "name": "Corporate IT",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b7002a19b8b5e7085a099399e8",
+      "description": "The Creative Services group organizes team members that perform creative functions into a subgroup of the Marketing group. Work performed by creative teams may or may not be associated with this group. Often the creative resources are tasks to support campaigns or other activities that would be associated with another group.",
+      "name": "Creative Services",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b30015ef75a36a6ab2cd8c50f3",
+      "description": "The Customer Success group organizes work performed by customer success representatives and other supporting functions.\n\nThis group is also used to identify organizational membership of people within this department.\n\nAdditionally, reports, dashboards, layout templates, custom forms, and other objects that support the functions of the Customer Success organization will be associated with this group.",
+      "name": "Customer Success",
+      "objCode": "GROUP"
+    }, {
+      "ID": "670d734600402ed41b0f61a3279fcb7b",
+      "description": "",
+      "name": "DDB Worldwide",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b30002dc0114e4f4b1772826e1",
+      "description": null,
+      "name": "Default Group",
+      "objCode": "GROUP"
+    }, {
+      "ID": "689cbd4c0007813d6fd86c75df5177f1",
+      "description": "Group used for the GenStudio Solution Tech Enablement in August 2025 in San Jose.",
+      "name": "DEP GenStudio August 2025",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b7006eec16cfc7d95df9beb81f",
+      "description": null,
+      "name": "DevOps",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b80014f8276af405ab8ac6721c",
+      "description": null,
+      "name": "Distribution",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b80002dda05ea6399ae7a96316",
+      "description": null,
+      "name": "Employee Development",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b801d4f77dc4a973f7c40bd773",
+      "description": "The Engineering group organizes people and projects into a subgroup of the Information Technology group.\n\nThis department is focused on development of new products that deliver customer value.",
+      "name": "Engineering",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b9006eeda6a00d05ac7689cd75",
+      "description": "The Events Management group organizes people and projects into a subgroup of the Marketing group.",
+      "name": "Events Management",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b3003a2ffeb2dceeb11048af33",
+      "description": "The Finance group organizes work performed by members of the Finance department and other supporting functions.\n\nThis group is also used to identify organizational membership of people within this department.\n\nAdditionally, reports, dashboards, layout templates, custom forms, and other objects that support the functions of the Finance organization will be associated with this group.",
+      "name": "Finance",
+      "objCode": "GROUP"
+    }, {
+      "ID": "685ad1e100022d3fe2471c032408a41b",
+      "description": "",
+      "name": "GenStudio DEP Bootcamp - Class 1",
+      "objCode": "GROUP"
+    }, {
+      "ID": "63091f560595b3b79cfc61628bf759b6",
+      "description": "Groupe par défaut",
+      "name": "Groupe par défaut",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921ba000d8cc04816e871718c4bad",
+      "description": null,
+      "name": "HR Data and Analytics",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b40015f08904b919e532c46139",
+      "description": "The Human Resources group organizes work performed by members of the HR department and other supporting functions.\n\nThis group is also used to identify organizational membership of people within this department.\n\nAdditionally, reports, dashboards, layout templates, custom forms, and other objects that support the functions of the HR organization will be associated with this group.\n\nThis group is typically made of several subgroups to better organize work and team members into specific HR functional groups.",
+      "name": "Human Resources",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921ba0037c6e623567880e71ef06d",
+      "description": null,
+      "name": "Human Resources Information Systems",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b4000830a2de65262cf9f18c61",
+      "description": "The IT group organizes work performed by members of the IT department and other supporting functions.\n\nThis group is also used to identify organizational membership of people within this department.\n\nAdditionally, reports, dashboards, layout templates, custom forms, and other objects that support the functions of the IT organization will be associated with this group.\n\nThis group is typically made of several subgroups to better organize work and team members into specific IT functional groups.",
+      "name": "Information Technology",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921ba01d4f9d61a8ad330ccb3e157",
+      "description": null,
+      "name": "IT Operations",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b400098664c0d0b27e5951e0d3",
+      "description": "The Legal group organizes work performed by members of a legal or risk department (where applicable).\n\nThis group is also used to identify organizational membership of people within this department.\n\nAdditionally, reports, dashboards, layout templates, custom forms, and other objects that support the functions of the Legal organization will be associated with this group.",
+      "name": "Legal",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b50002dc61daefc881533642f7",
+      "description": "The Marketing group organizes work executed by marketing teams into a common organizational structure.\n\nThis group is typically made up of several subgroups to better organize work and team members into specific marketing functional groups.",
+      "name": "Marketing",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921bc002a1bdfc3ad3f01494760d2",
+      "description": "The Marketing Operations group organizes people and projects into a subgroup of the Marketing group. To allow for specific identification of work ownership, it is common for this group to be further divided to have subgroups of its own.",
+      "name": "Marketing Operations",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921bc003a36c0bdb7dc10b264397d",
+      "description": "The Marketing Technology group organizes people and projects into a subgroup of the Marketing group. Projects executed by resources in this group often contribute to work that is associated with other groups, especially the Marketing Operations group.",
+      "name": "Marketing Technology",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921ba006ef27947c0e3ad0bb94474",
+      "description": null,
+      "name": "Market Research",
+      "objCode": "GROUP"
+    }, {
+      "ID": "67159da50011acc5a167e741810d10b5",
+      "description": "",
+      "name": "OMC -  Apple",
+      "objCode": "GROUP"
+    }, {
+      "ID": "67159db70011b366f4d38f31f47929a0",
+      "description": "",
+      "name": "OMC - Coke",
+      "objCode": "GROUP"
+    }, {
+      "ID": "67159dd10011c18f0508a68420e169e3",
+      "description": "",
+      "name": "OMC - GM",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921bc0037c82c5c88b01c713bc68f",
+      "description": null,
+      "name": "Performance Management",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921bc0039490b6006fc53d8ab126d",
+      "description": null,
+      "name": "Platform/Infrastructure Management",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b50002abb00f7aeda9a9e1f56c",
+      "description": "The Product Development group organizes work executed by product, design and engineering teams into a common organizational structure.\n\nThis group is typically made up of several subgroups to better organize work and team members into specific product development functional groups.",
+      "name": "Product Development",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921bd000d985049a075bd171f08ff",
+      "description": "The Product Management group is a subgroup of the Product Development organization.\n\nThis group focuses on identifying new customer requirements and preparing customer-validated initiatives, epics, and stories for engineering resources to execute.",
+      "name": "Product Management",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921bd0037c97d5cd86d6253801459",
+      "description": "The Product Marketing group is a subgroup of the Product Development organization.\n\nThis group focuses on identifying market demands and articulating how the products provided by the organization meet the market needs.\n\nMembers of this group work closely with Product Management and Marketing organizations to craft and deliver the message to the market.",
+      "name": "Product Marketing",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921bd003a3747146c16fb918acfa5",
+      "description": null,
+      "name": "Product Operations",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b50002ac2aeadc1715276a0502",
+      "description": "The Professional Services group organizes the work and people performing the work to deliver customer-facing projects.\n\nAdditionally, reports, dashboards, layout templates, custom forms, and other objects that support the functions of the services organization will be associated with this group.\n\nThis group is often made of several subgroups to better organize work and team members into regions, products, or other dimensions.",
+      "name": "Professional Services",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921be0026f23663e078fae7099cd7",
+      "description": null,
+      "name": "Program Management",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b500043c1ff90e252789a299fe",
+      "description": null,
+      "name": "Project Management Office",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921be003a37db0f5dcc3f385f64cc",
+      "description": null,
+      "name": "Prototype Development",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921be0014f96d7e3a3f2a3d8cb02d",
+      "description": null,
+      "name": "Quality Assurance",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921be0003618401ab82c03c9acaba",
+      "description": null,
+      "name": "Recruiting",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b600045d4fd3b69abbab819d2f",
+      "description": "The Sales group organizes the people performing sales functions. Other than the Sales Operations functions, most sales activities are tracked in a CRM or other sales force automation tool.\n\nSales team members are a critical stakeholder in  delivery of customer-facing projects performed by the Professional Services organization. It is important account executives and other stakeholders have access to these projects.",
+      "name": "Sales",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921bf000834c06996606188b6e442",
+      "description": null,
+      "name": "Security",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921bf0026f333f06d22ea6a68635b",
+      "description": null,
+      "name": "Supply Chain Management",
+      "objCode": "GROUP"
+    }, {
+      "ID": "670d735500403ced42ac655c3f07b344",
+      "description": "",
+      "name": "TBWA",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921bf000d9a5518adc558a32ff18d",
+      "description": null,
+      "name": "User Experience",
+      "objCode": "GROUP"
+    }, {
+      "ID": "630921b6006eea855b72d8b096b5cc1a",
+      "description": "This group contains Adobe employees as well as client core team members that are working together on Adobe Workfront implementation.",
+      "name": "Workfront Implementation Group",
+      "objCode": "GROUP"
+    }],
+    "success": true
+  }
