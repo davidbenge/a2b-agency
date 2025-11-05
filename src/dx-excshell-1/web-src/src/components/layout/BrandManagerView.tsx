@@ -28,6 +28,10 @@ import ViewDetail from '@spectrum-icons/workflow/ViewDetail';
 import Delete from '@spectrum-icons/workflow/Delete';
 import { v4 as uuidv4 } from 'uuid';
 import { apiService } from '../../services/api';
+import { useBrandsList, useIsBrandListFetched } from '../../store/BrandSlice/selectores';
+import { useDispatch } from 'react-redux';
+import { fetchBrandList } from '../../store/BrandSlice/asyncThunks/fetchBrandList';
+import { updateBrandList } from '../../store/BrandSlice/BrandSlice';
 
 type ViewMode = 'list' | 'add' | 'edit' | 'view';
 
@@ -58,15 +62,32 @@ const mockBrands: Brand[] = [
 ];
 
 const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps }) => {
-    const [brands, setBrands] = useState<Brand[]>(viewProps.aioEnableDemoMode ? mockBrands : []);
-    const [loading, setLoading] = useState(!viewProps.aioEnableDemoMode);
     const [viewMode, setViewMode] = useState<ViewMode>('list');
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
     const [formLoading, setFormLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+
+    const dispatch = useDispatch();
+    const brands = useBrandsList();
+
+    const isBrandListFetched = useIsBrandListFetched();
+    const loading = !isBrandListFetched;
+
     console.debug('BrandManagerView: viewProps.aioEnableDemoMode', viewProps.aioEnableDemoMode);
     console.debug('BrandManagerView: viewProps', viewProps);
+
+    useEffect(() => {
+        if (viewProps.aioEnableDemoMode) {
+             dispatch(updateBrandList(mockBrands));
+             return;
+        }
+
+        if (!isBrandListFetched) {
+            dispatch(fetchBrandList() as any);
+        }
+
+    }, [isBrandListFetched, dispatch,]);
 
     // Sorting and filtering state
     const [sortDescriptor, setSortDescriptor] = useState<any>(undefined);
@@ -76,36 +97,6 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
     // Safe access to viewProps and imsProfile with fallbacks
     const safeViewProps = viewProps || {} as any;
     const userEmail = safeViewProps.imsProfile?.email || 'Demo User';
-
-
-    // Load brands from API when not in demo mode
-    useEffect(() => {
-        if (!viewProps.aioEnableDemoMode) {
-            const fetchBrands = async () => {
-                try {
-                    console.debug('BrandManagerView getting brands');
-                    const response = await apiService.getBrandList();
-                    console.debug('BrandManager View getting brands response', response);
-                    console.debug('BrandManager View getting brands response json', JSON.stringify(response, null, 2));
-
-                    console.debug('response statusCode', response.statusCode);
-                    console.debug('response body', response.body);
-                    console.debug('response body.data', response.body.data);
-                    if (response.body.data) {
-                        const items = response.body.data as any[];
-                        const mapped = items.map(item => new Brand(item).toJSON()).map(item => DemoBrandManager.getBrandFromJson(item));
-                        setBrands(mapped);
-                    }
-                } catch (error) {
-                    console.error('Error fetching brands:', error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            fetchBrands();
-        }
-    }, [viewProps.aioEnableDemoMode, viewProps.imsToken, viewProps.baseUrl]);
 
 
     // Filter and sort brands
@@ -195,7 +186,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
 
         if (viewProps.aioEnableDemoMode) {
             // Demo mode: local state management
-            setBrands(brands.filter(brand => brand.brandId !== brandId));
+            dispatch(updateBrandList(brands.filter(brand => brand.brandId !== brandId)));
             setSuccess('Brand deleted successfully');
         } else {
             // TODO: Implement real API call here
@@ -223,7 +214,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         enabledAt: brandData.enabled ? new Date() : null
                     });
 
-                    setBrands([...brands, newBrand]);
+                    dispatch(updateBrandList([...brands, newBrand]));
                     setSuccess('Brand created successfully');
                 } else if (viewMode === 'edit' && selectedBrand) {
                     const updatedBrand = DemoBrandManager.createBrand({
@@ -234,9 +225,9 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                         enabledAt: brandData.enabled ? (selectedBrand.enabledAt || new Date()) : null
                     });
 
-                    setBrands(brands.map(brand =>
+                    dispatch(updateBrandList(brands.map(brand =>
                         brand.brandId === selectedBrand.brandId ? updatedBrand : brand
-                    ));
+                    )));
                     setSuccess('Brand updated successfully');
                 }
             } else if (viewMode === 'edit' && selectedBrand) {
@@ -252,9 +243,9 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                 const response = await apiService.updateBrand(updatedBrand);
 
                 if (response.statusCode === 200) {
-                    setBrands(brands.map(brand =>
+                    dispatch(updateBrandList(brands.map(brand =>
                         brand.brandId === selectedBrand.brandId ? updatedBrand : brand
-                    ));
+                    )));
                     setSuccess('Brand updated successfully');
                 }
 
@@ -396,13 +387,13 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                         <Flex gap="size-100">
                                             <Button
                                                 variant="primary"
-                                                onPress={() => handleViewBrand(brand)}
+                                                onPress={() => handleViewBrand(brand as Brand)}
                                             >
                                                 <ViewDetail />
                                             </Button>
                                             <Button
                                                 variant="primary"
-                                                onPress={() => handleEditBrand(brand)}
+                                                onPress={() => handleEditBrand(brand as Brand)}
                                             >
                                                 <Edit />
                                             </Button>

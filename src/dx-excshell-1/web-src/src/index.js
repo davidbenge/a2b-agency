@@ -4,7 +4,7 @@
 
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 
 import Runtime, { init } from '@adobe/exc-app'
 
@@ -12,6 +12,9 @@ import App from './components/App'
 import './assets/styles/index.css'
 
 window.React = require('react')
+
+const root = createRoot(document.getElementById('root'));
+
 /* Here you can bootstrap your application and configure the integration with the Adobe Experience Cloud Shell */
 try {
   // attempt to load the Experience Cloud Runtime
@@ -30,9 +33,8 @@ function bootstrapRaw () {
   const mockIms = {}
 
   // render the actual react application and pass along the runtime object to make it available to the App
-  ReactDOM.render(
-    <App runtime={mockRuntime} ims={mockIms} />,
-    document.getElementById('root')
+  root.render(
+    <App runtime={mockRuntime} ims={mockIms} viewProps={{   aioEnableDemoMode: true}} />
   )
 }
 
@@ -70,13 +72,11 @@ function bootstrapInExcShell () {
       aioRuntimeNamespace: process.env.AIO_runtime_namespace,
       aioAppName: 'agency',
       aioActionPackageName: process.env.AIO_ACTION_PACKAGE_NAME,
-      aioEnableDemoMode: (process.env.AIO_ENABLE_DEMO_MODE === 'true')
     }
     
     // render the actual react application and pass along the runtime and ims objects to make it available to the App
-    ReactDOM.render(
-      <App runtime={runtime} viewProps={viewProps} />,
-      document.getElementById('root')
+    root.render(
+      <App runtime={runtime} viewProps={viewProps} />
     )
   })
 
