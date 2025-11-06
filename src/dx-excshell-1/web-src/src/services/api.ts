@@ -1,5 +1,9 @@
-import { Brand } from "../../../../actions/classes/Brand";
-import { EventDefinition } from "../../../../shared/event-registry";
+import {
+  IBrand,
+  IAppEventDefinition,
+  IProductEventDefinition,
+} from "../../../../shared/types";
+
 /**
  * API configuration and endpoints
  */
@@ -8,7 +12,8 @@ const API_CONFIG = {
     BRAND_GET_LIST: "/get-brands",
     BRAND_DELETE: "/delete-brand",
     BRAND_UPDATE: "/update-brand",
-    EVENTS_GET_LIST: "/list-events",
+    APP_EVENTS_GET_LIST: "/list-app-events",
+    PRODUCT_EVENTS_GET_LIST: "/list-product-events",
   },
 };
 
@@ -133,8 +138,8 @@ export class ApiService {
   /**
    * Get brand list
    */
-  async getBrandList(): Promise<ApiResponse<Brand[]>> {
-    return this.callApi<Brand[]>(
+  async getBrandList(): Promise<ApiResponse<IBrand[]>> {
+    return this.callApi<IBrand[]>(
       `${API_CONFIG.ENDPOINTS.BRAND_GET_LIST}`,
       "GET"
     );
@@ -152,8 +157,8 @@ export class ApiService {
   /**
    * Update brand
    */
-  async updateBrand(brand: Brand): Promise<ApiResponse<Brand>> {
-    return this.callApi<Brand>(
+  async updateBrand(brand: IBrand): Promise<ApiResponse<IBrand>> {
+    return this.callApi<IBrand>(
       `${API_CONFIG.ENDPOINTS.BRAND_UPDATE}`,
       "POST",
       brand
@@ -161,15 +166,30 @@ export class ApiService {
   }
 
   /**
-   * Get events list
+   * Get App events list
    */
-  async getEventsList(): Promise<
-    ApiResponse<{ events: Record<string, EventDefinition>; summary: any }> // TODO: add type
+  async getAppEventsList(): Promise<
+    ApiResponse<{ events: Record<string, IAppEventDefinition>; summary: any }>
   > {
     return this.callApi<{
-      events: Record<string, EventDefinition>;
+      events: Record<string, IAppEventDefinition>;
       summary: any; // TODO: add type
-    }>(`${API_CONFIG.ENDPOINTS.EVENTS_GET_LIST}`, "GET");
+    }>(`${API_CONFIG.ENDPOINTS.APP_EVENTS_GET_LIST}`, "GET");
+  }
+
+  /**
+   * Get Product events list
+   */
+  async getProductEventsList(): Promise<
+    ApiResponse<{
+      events: Record<string, IProductEventDefinition>;
+      summary: any;
+    }>
+  > {
+    return this.callApi<{
+      events: Record<string, IProductEventDefinition>;
+      summary: any; // TODO: add type
+    }>(`${API_CONFIG.ENDPOINTS.PRODUCT_EVENTS_GET_LIST}`, "GET");
   }
 }
 

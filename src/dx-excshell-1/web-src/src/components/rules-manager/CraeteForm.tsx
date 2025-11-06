@@ -17,6 +17,7 @@ import {
   Image,
   ActionButton,
   Form,
+  Section,
 } from "@adobe/react-spectrum";
 import { CreateRuleBuilder } from "./create-rule/CreateRuleBuilder";
 import {
@@ -26,11 +27,10 @@ import {
 import { fetchBrandList } from "../../store/BrandSlice/asyncThunks/fetchBrandList";
 import { useDispatch } from "react-redux";
 import {
-  useEventsList,
   useIsEventsListFetched,
+  useEventsListMap,
 } from "../../store/EventsSlice/selectores";
 import { fetchEventsList } from "../../store/EventsSlice/asyncThunks/fetchEventsList";
-import { EventDefinition } from "../../../../../shared/event-registry";
 import { RuleGroupType } from "react-querybuilder";
 import {
   RuleDirection,
@@ -38,6 +38,10 @@ import {
 } from "../../../../../actions/classes/RulesManger/types";
 import { Brand } from "../../../../../actions/classes/Brand";
 import { validationOfFormData } from "./helpers/validationOfFormData";
+import {
+  IAppEventDefinition,
+  IProductEventDefinition,
+} from "../../../../../shared/types";
 
 const initialFormData = {
   name: "",
@@ -67,7 +71,7 @@ export const CreateForm = () => {
 
   const dispatch = useDispatch();
   const brands = useBrandsList();
-  const eventList = useEventsList();
+  const eventsListMap = useEventsListMap();
   const isBrandListFetched = useIsBrandListFetched();
   const isEventsListFetched = useIsEventsListFetched();
 
@@ -99,7 +103,7 @@ export const CreateForm = () => {
         }, 1000);
       }).then((message) => {
         alert(message);
-      })
+      });
     },
     [formData]
   );
@@ -139,7 +143,6 @@ export const CreateForm = () => {
       </Text>
 
       <Form onSubmit={onSubmit} validationBehavior="native">
-        {/* <Flex direction="column" gap="size-200" marginTop="size-200"> */}
         <TextField
           label="Rule Name"
           value={formData.name}
@@ -173,10 +176,22 @@ export const CreateForm = () => {
           errorMessage={"The Event Type is required"}
           width="size-4000"
           placeholder="Select the event type this rule will handle"
+          items={eventsListMap}
         >
-          {eventList.map((e: EventDefinition) => (
-            <Item key={e.code}>{e.name}</Item>
-          ))}
+          {(item) => (
+            // TO DO : Find a better way to fix this type error
+            // This is a workaround to fix the type error because the items is an array of IAppEventDefinition | IProductEventDefinition
+            // @ts-ignore 
+            <Section key={item.category} items={item.list} title={item.category}>
+             {(e)=>(
+              <Item key={e.code} textValue={e.name}>
+                <Text>
+                  {e.name}
+                </Text>
+              </Item>
+             )}
+            </Section>
+          )}
         </ComboBox>
         <ComboBox
           label="Direction"
@@ -273,14 +288,16 @@ export const CreateForm = () => {
         >
           Enabled
         </Switch>
-        {/* </Flex> */}
         <Flex gap="size-300" marginTop="size-300">
           <ActionButton type="submit" onPress={() => {}}>
             Save Rule
           </ActionButton>
         </Flex>
         {errorMessage && (
-          <Text marginTop="size-300" UNSAFE_style={{ color: "var(--spectrum-red-800)" }}>
+          <Text
+            marginTop="size-300"
+            UNSAFE_style={{ color: "var(--spectrum-red-800)" }}
+          >
             {errorMessage}
           </Text>
         )}

@@ -676,7 +676,7 @@ AIO_AGENCY_EVENTS_REGISTRATION_PROVIDER_ID=5c3431a2-bd91-4eff-a356-26b747d0aad4
 
 AssetSync is a comprehensive system that handles synchronization of AEM assets between Adobe Experience Manager (AEM) and brand systems. It processes asset events, validates metadata, and distributes asset data to registered brands.
 
-> 📖 **For detailed AssetSync implementation, configuration, and troubleshooting, see the [AssetSync Detailed Guide](./docs/events/aem/AssetSync.md)**
+> 📖 **For detailed AssetSync implementation, configuration, and troubleshooting, see the [AssetSync Detailed Guide](./docs/events/product/AssetSync.md)**
 
 ### Event Provider Setup
 

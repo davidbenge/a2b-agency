@@ -2,8 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 import { fetchEventsList } from "./asyncThunks/fetchEventsList";
 
 const initialState = {
-  eventsDefinitions: {},
-  summary: {},
+  appEvents: {},
+  productEvents: {},
   isEventsListFetched: false,
 };
 
@@ -13,8 +13,8 @@ export const eventSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchEventsList.fulfilled, (state, action) => {
-      state.eventsDefinitions = action.payload?.events || {};
-      state.summary = action.payload?.summary || {};
+      state.appEvents = action.payload?.appEvents || {};
+      state.productEvents = action.payload?.productEvents || {};
       state.isEventsListFetched = true;
     });
 

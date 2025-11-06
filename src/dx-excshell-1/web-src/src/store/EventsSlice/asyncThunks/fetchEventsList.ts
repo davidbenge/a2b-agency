@@ -5,10 +5,20 @@ export const fetchEventsList = createAsyncThunk(
   "event/fetchEventsList",
   async () => {
     try {
-      const response = await apiService.getEventsList();
-      return response.body.data;
+      const [appEventsResponse, productEventsResponse] = await Promise.all([
+        apiService.getAppEventsList(),
+        apiService.getProductEventsList(),
+      ]);
+      return {
+        appEvents: appEventsResponse.body.data.events,
+        productEvents: productEventsResponse.body.data.events,
+      };
     } catch (error) {
-      throw new Error("Failed to get events list");
+      console.log("Error fetching app events list:", error);
+      return {
+        appEvents: null,
+        productEvents: null,
+      };
     }
   }
 );
