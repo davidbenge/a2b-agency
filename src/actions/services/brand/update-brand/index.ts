@@ -71,14 +71,15 @@ export async function main(params: any): Promise<any> {
       try {
         const eventManager = new EventManager(params);
         
-        // Prepare event data
+        // Prepare event data (agencyEndPointUrl will be derived from app_runtime_info in EventManager)
         const eventData = {
           brandId: savedBrand.brandId,
           secret: savedBrand.secret,
           enabled: true,
           name: savedBrand.name,
           endPointUrl: savedBrand.endPointUrl,
-          enabledAt: savedBrand.enabledAt || now
+          enabledAt: savedBrand.enabledAt || now,
+          agencyName: params.AGENCY_NAME // Include agency name for brand to store
         };
         
         // Process event - handles validation, injection, brand send, and IO Events publish
