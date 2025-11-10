@@ -1,159 +1,197 @@
-import { IBrand } from '../../../../shared/types';
+import {
+  IBrand,
+  IAppEventDefinition,
+  IProductEventDefinition,
+} from "../../../../shared/types";
 
 /**
  * API configuration and endpoints
  */
 const API_CONFIG = {
-    ENDPOINTS: {
-        BRAND_GET_LIST: '/get-brands',
-        BRAND_DELETE: '/delete-brand',
-        BRAND_UPDATE: '/update-brand'
-    }
+  ENDPOINTS: {
+    BRAND_GET_LIST: "/get-brands",
+    BRAND_DELETE: "/delete-brand",
+    BRAND_UPDATE: "/update-brand",
+    APP_EVENTS_GET_LIST: "/list-app-events",
+    PRODUCT_EVENTS_GET_LIST: "/list-product-events",
+  },
 };
 
 /**
  * API response interface
  */
 interface ApiResponse<T> {
-    statusCode: number;
-    body: {
-        message: string;
-        data?: T;
-        error?: string;
-    };
+  statusCode: number;
+  body: {
+    message: string;
+    data?: T;
+    error?: string;
+  };
 }
 
 /**
  * API service class for handling serverless function calls
  */
 export class ApiService {
-    private static instance: ApiService;
-    private baseUrl: string;
-    private imsToken: string | null = null;
-    private imsOrgId: string | null = null;
+  private static instance: ApiService;
+  private baseUrl: string;
+  private imsToken: string | null = null;
+  private imsOrgId: string | null = null;
 
-    private constructor() {
-        this.baseUrl = '';
+  private constructor() {
+    this.baseUrl = "";
+  }
+
+  public static getInstance(): ApiService {
+    if (!ApiService.instance) {
+      ApiService.instance = new ApiService();
+    }
+    return ApiService.instance;
+  }
+
+  /**
+   * Initialize the API service with base URL and IMS token
+   * @param baseUrl - The base URL from ViewPropsBase
+   * @param imsToken - The IMS token from ViewPropsBase
+   */
+  public initialize(baseUrl: string, imsToken: string, imsOrgId: string): void {
+    this.baseUrl = baseUrl;
+    this.imsToken = imsToken;
+    this.imsOrgId = imsOrgId;
+  }
+
+  /**
+   * Clear the IMS token and base URL
+   */
+  public clear(): void {
+    this.imsToken = null;
+    this.baseUrl = "";
+    this.imsOrgId = null;
+  }
+
+  /**
+   * Generic method to call serverless functions
+   */
+  private async callApi<T>(
+    endpoint: string,
+    method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
+    body?: any
+  ): Promise<ApiResponse<T>> {
+    if (!this.baseUrl) {
+      return {
+        statusCode: 500,
+        body: {
+          message: "API not initialized",
+          error: "Base URL not set",
+        },
+      };
     }
 
-    public static getInstance(): ApiService {
-        if (!ApiService.instance) {
-            ApiService.instance = new ApiService();
-        }
-        return ApiService.instance;
+    if (!this.imsToken) {
+      return {
+        statusCode: 401,
+        body: {
+          message: "Authentication required",
+          error: "IMS token not set",
+        },
+      };
     }
 
-    /**
-     * Initialize the API service with base URL and IMS token
-     * @param baseUrl - The base URL from ViewPropsBase
-     * @param imsToken - The IMS token from ViewPropsBase
-     */
-    public initialize(baseUrl: string, imsToken: string, imsOrgId: string): void {
-        this.baseUrl = baseUrl;
-        this.imsToken = imsToken;
-        this.imsOrgId = imsOrgId;
+    try {
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "x-gw-ims-org-id": `${this.imsOrgId}`,
+          Authorization: `Bearer ${this.imsToken}`,
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+
+      console.debug(
+        `API calling ${this.baseUrl}${endpoint} with method ${method}`
+      );
+      const data = await response.json();
+      console.debug("API call response", data);
+      console.debug("API call response json", JSON.stringify(data, null, 2));
+
+      // Transform the response to match our interface
+      return {
+        statusCode: response.status,
+        body: {
+          message: data.message || "",
+          data: data.data,
+          error: data.error,
+        },
+      };
+    } catch (error) {
+      return {
+        statusCode: 500,
+        body: {
+          message: "API call failed",
+          error: error instanceof Error ? error.message : "Unknown error",
+        },
+      };
     }
+  }
 
-    /**
-     * Clear the IMS token and base URL
-     */
-    public clear(): void {
-        this.imsToken = null;
-        this.baseUrl = '';
-        this.imsOrgId = null;
-    }
+  /**
+   * Get brand list
+   */
+  async getBrandList(): Promise<ApiResponse<IBrand[]>> {
+    return this.callApi<IBrand[]>(
+      `${API_CONFIG.ENDPOINTS.BRAND_GET_LIST}`,
+      "GET"
+    );
+  }
 
-    /**
-     * Generic method to call serverless functions
-     */
-    private async callApi<T>(
-        endpoint: string,
-        method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-        body?: any
-    ): Promise<ApiResponse<T>> {
-        if (!this.baseUrl) {
-            return {
-                statusCode: 500,
-                body: {
-                    message: 'API not initialized',
-                    error: 'Base URL not set'
-                }
-            };
-        }
+  /**
+   * delete brand
+   */
+  async deleteBrand(brandId: string): Promise<ApiResponse<any>> {
+    return this.callApi<any>(`${API_CONFIG.ENDPOINTS.BRAND_DELETE}`, "POST", {
+      brandId: brandId,
+    });
+  }
 
-        if (!this.imsToken) {
-            return {
-                statusCode: 401,
-                body: {
-                    message: 'Authentication required',
-                    error: 'IMS token not set'
-                }
-            };
-        }
+  /**
+   * Update brand
+   */
+  async updateBrand(brand: IBrand): Promise<ApiResponse<IBrand>> {
+    return this.callApi<IBrand>(
+      `${API_CONFIG.ENDPOINTS.BRAND_UPDATE}`,
+      "POST",
+      brand
+    );
+  }
 
-        try {
-            const response = await fetch(`${this.baseUrl}${endpoint}`, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-gw-ims-org-id': `${this.imsOrgId}`,
-                    'Authorization': `Bearer ${this.imsToken}`
-                },
-                body: body ? JSON.stringify(body) : undefined
-            });
+  /**
+   * Get App events list
+   */
+  async getAppEventsList(): Promise<
+    ApiResponse<{ events: Record<string, IAppEventDefinition>; summary: any }>
+  > {
+    return this.callApi<{
+      events: Record<string, IAppEventDefinition>;
+      summary: any; // TODO: add type
+    }>(`${API_CONFIG.ENDPOINTS.APP_EVENTS_GET_LIST}`, "GET");
+  }
 
-            console.debug(`API calling ${this.baseUrl}${endpoint} with method ${method}`);
-            const data = await response.json();
-            console.debug('API call response', data);
-            console.debug('API call response json', JSON.stringify(data, null, 2));
-
-            // Transform the response to match our interface
-            return {
-                statusCode: response.status,
-                body: {
-                    message: data.message || '',
-                    data: data.data,
-                    error: data.error
-                }
-            };
-        } catch (error) {
-            return {
-                statusCode: 500,
-                body: {
-                    message: 'API call failed',
-                    error: error instanceof Error ? error.message : 'Unknown error'
-                }
-            };
-        }
-    }
-
-    /**
-     * Get brand list
-     */
-    async getBrandList(): Promise<ApiResponse<IBrand[]>> {
-        return this.callApi<IBrand[]>(
-            `${API_CONFIG.ENDPOINTS.BRAND_GET_LIST}`, 'GET'
-        );
-    }
-
-    /**
-     * delete brand
-     */
-    async deleteBrand(brandId: string): Promise<ApiResponse<any>> {
-        return this.callApi<any>(
-            `${API_CONFIG.ENDPOINTS.BRAND_DELETE}`, 'POST', { "brandId": brandId }
-        );
-    }
-
-    /**
-     * Update brand
-     */
-    async updateBrand(brand: IBrand): Promise<ApiResponse<IBrand>> {
-        return this.callApi<IBrand>(
-            `${API_CONFIG.ENDPOINTS.BRAND_UPDATE}`, 'POST', brand
-        );
-    }
+  /**
+   * Get Product events list
+   */
+  async getProductEventsList(): Promise<
+    ApiResponse<{
+      events: Record<string, IProductEventDefinition>;
+      summary: any;
+    }>
+  > {
+    return this.callApi<{
+      events: Record<string, IProductEventDefinition>;
+      summary: any; // TODO: add type
+    }>(`${API_CONFIG.ENDPOINTS.PRODUCT_EVENTS_GET_LIST}`, "GET");
+  }
 }
 
 // Export a singleton instance
-export const apiService = ApiService.getInstance(); 
+export const apiService = ApiService.getInstance();
