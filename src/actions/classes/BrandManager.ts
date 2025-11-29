@@ -40,9 +40,18 @@ export class BrandManager {
             endPointUrl: json.endPointUrl,
             enabled: json.enabled,
             logo: json.logo,
+            imsOrgName: json.imsOrgName,
+            imsOrgId: json.imsOrgId,
+            routingRules: json.routingRules,
             createdAt: json.createdAt ? new Date(json.createdAt) : new Date(),
             updatedAt: json.updatedAt ? new Date(json.updatedAt) : new Date(),
-            enabledAt: json.enabledAt ? new Date(json.enabledAt) : null
+            enabledAt: json.enabledAt ? new Date(json.enabledAt) : null,
+            workfrontServerUrl: json.workfrontServerUrl,
+            workfrontCompanyId: json.workfrontCompanyId,
+            workfrontCompanyName: json.workfrontCompanyName,
+            workfrontGroupId: json.workfrontGroupId,
+            workfrontGroupName: json.workfrontGroupName,
+            workfrontEventSubscriptions: json.workfrontEventSubscriptions
         });
     }
 
@@ -60,9 +69,18 @@ export class BrandManager {
             endPointUrl: data.endPointUrl || '',
             enabled: data.enabled ?? false,
             logo: data.logo,
+            imsOrgName: data.imsOrgName,
+            imsOrgId: data.imsOrgId,
+            routingRules: data.routingRules,
             createdAt: data.createdAt ?? now,
             updatedAt: data.updatedAt ?? now,
-            enabledAt: data.enabledAt ?? null
+            enabledAt: data.enabledAt ?? null,
+            workfrontServerUrl: data.workfrontServerUrl,
+            workfrontCompanyId: data.workfrontCompanyId,
+            workfrontCompanyName: data.workfrontCompanyName,
+            workfrontGroupId: data.workfrontGroupId,
+            workfrontGroupName: data.workfrontGroupName,
+            workfrontEventSubscriptions: data.workfrontEventSubscriptions
         });
     }
 

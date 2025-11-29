@@ -46,7 +46,13 @@ export class DemoBrandManager {
             imsOrgId: json.imsOrgId,
             createdAt: json.createdAt ? new Date(json.createdAt) : new Date(),
             updatedAt: json.updatedAt ? new Date(json.updatedAt) : new Date(),
-            enabledAt: json.enabledAt ? new Date(json.enabledAt) : null
+            enabledAt: json.enabledAt ? new Date(json.enabledAt) : null,
+            workfrontServerUrl: json.workfrontServerUrl,
+            workfrontCompanyId: json.workfrontCompanyId,
+            workfrontCompanyName: json.workfrontCompanyName,
+            workfrontGroupId: json.workfrontGroupId,
+            workfrontGroupName: json.workfrontGroupName,
+            workfrontEventSubscriptions: json.workfrontEventSubscriptions
         });
     }
 
@@ -67,7 +73,13 @@ export class DemoBrandManager {
             imsOrgId: data.imsOrgId,
             createdAt: data.createdAt ?? now,
             updatedAt: data.updatedAt ?? now,
-            enabledAt: data.enabledAt ?? null
+            enabledAt: data.enabledAt ?? null,
+            workfrontServerUrl: data.workfrontServerUrl,
+            workfrontCompanyId: data.workfrontCompanyId,
+            workfrontCompanyName: data.workfrontCompanyName,
+            workfrontGroupId: data.workfrontGroupId,
+            workfrontGroupName: data.workfrontGroupName,
+            workfrontEventSubscriptions: data.workfrontEventSubscriptions
         });
     }
 

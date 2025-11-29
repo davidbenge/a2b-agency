@@ -32,6 +32,7 @@ import Close from '@spectrum-icons/workflow/Close';
 import { v4 as uuidv4 } from 'uuid';
 import { apiService } from '../../services/api';
 import { Brand } from '../../classes/Brand';
+import { ActionButton } from '@adobe/react-spectrum';
 
 type ViewMode = 'list' | 'add' | 'edit' | 'view';
 
@@ -314,6 +315,9 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                 }
             } else if (viewMode === 'edit' && selectedBrand) {
                 // Prepare update data (secret is excluded automatically by Brand.toJSON() on frontend)
+                console.log('BrandManagerView: brandData received from form:', brandData);
+                console.log('BrandManagerView: selectedBrand.toJSON():', selectedBrand.toJSON());
+                
                 const updatedBrand = new Brand({
                     ...selectedBrand.toJSON(),
                     ...brandData,
@@ -328,9 +332,19 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                     enabledAt: updatedBrand.enabledAt,
                     brandDataEnabled: brandData.enabled
                 });
+                
+                const brandJSON = updatedBrand.toJSON();
+                console.log('BrandManagerView: updatedBrand.toJSON():', brandJSON);
+                console.log('BrandManagerView: Workfront fields in JSON:', {
+                    workfrontServerUrl: brandJSON.workfrontServerUrl,
+                    workfrontCompanyId: brandJSON.workfrontCompanyId,
+                    workfrontCompanyName: brandJSON.workfrontCompanyName,
+                    workfrontGroupId: brandJSON.workfrontGroupId,
+                    workfrontGroupName: brandJSON.workfrontGroupName
+                });
 
                 // Convert to plain object for API call
-                const response = await apiService.updateBrand(updatedBrand.toJSON());
+                const response = await apiService.updateBrand(brandJSON);
 
                 if (response.statusCode === 200 && response.body.data) {
                     // Use the brand data from API response (which excludes secret for security)
@@ -445,6 +459,7 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                             <Column key="name" allowsSorting minWidth={150}>Name</Column>
                             <Column key="imsOrgName" allowsSorting minWidth={150}>IMS Org</Column>
                             <Column key="endPointUrl" allowsSorting minWidth={200}>Endpoint URL</Column>
+                            <Column key="workfrontCompany" allowsSorting minWidth={150}>Workfront Company</Column>
                             <Column key="enabled" allowsSorting width={120}>Status</Column>
                             <Column key="createdAt" allowsSorting width={120}>Created</Column>
                             <Column key="actions" align="center" width={200}>Actions</Column>
@@ -510,6 +525,33 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
                                         </TooltipTrigger>
                                     </Cell>
                                     <Cell>
+                                        {brand.workfrontCompanyName ? (
+                                            <TooltipTrigger>
+                                                <Text
+                                                    UNSAFE_style={{
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                        display: 'block',
+                                                        cursor: 'help'
+                                                    }}
+                                                >
+                                                    {brand.workfrontCompanyName}
+                                                </Text>
+                                                <Tooltip>
+                                                    <div>
+                                                        <strong>Company:</strong> {brand.workfrontCompanyName}<br/>
+                                                        {brand.workfrontGroupName && (
+                                                            <><strong>Group:</strong> {brand.workfrontGroupName}</>
+                                                        )}
+                                                    </div>
+                                                </Tooltip>
+                                            </TooltipTrigger>
+                                        ) : (
+                                            <Text>—</Text>
+                                        )}
+                                    </Cell>
+                                    <Cell>
                                         <StatusLight variant={brand.enabled ? 'positive' : 'negative'}>
                                             {brand.enabled ? 'Enabled' : 'Disabled'}
                                         </StatusLight>
@@ -565,6 +607,8 @@ const BrandManagerView: React.FC<{ viewProps: ViewPropsBase }> = ({ viewProps })
             onSubmit={handleFormSubmit}
             onCancel={handleCancel}
             loading={formLoading}
+            imsToken={viewProps.imsToken}
+            imsOrgId={viewProps.imsOrg}
         />
     );
 
